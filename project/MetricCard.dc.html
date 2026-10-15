@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<div style="display:flex;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px">
+    <div style="font:500 11px 'IBM Plex Mono';letter-spacing:0.04em;color:#9096a0">{{ label }}</div>
+    <span onMouseEnter="{{ openTip }}" onMouseLeave="{{ closeTip }}" onClick="{{ toggleTip }}" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:0 0 14px;cursor:help">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="#b6bcc0" stroke-width="1.6"/><rect x="11.1" y="10.3" width="1.8" height="6.4" rx="0.9" fill="#b6bcc0"/><rect x="11.1" y="6.9" width="1.8" height="1.9" rx="0.9" fill="#b6bcc0"/></svg>
+      <sc-if value="{{ tooltipOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ stop }}" style="position:absolute;top:19px;right:0;z-index:30;width:236px;background:#fff;border:1px solid #eceded;border-radius:8px;padding:13px 14px;box-shadow:0 10px 30px rgba(20,23,26,0.14);text-align:left;cursor:default">
+        <sc-if value="{{ hasBenchmark }}" hint-placeholder-val="{{ true }}">
+        <div style="font:600 11.5px 'IBM Plex Sans';color:#14171a;margin-bottom:7px">Benchmark provenance</div>
+        <div style="font:400 11.5px/1.5 'IBM Plex Sans';color:#5b6167;margin-bottom:6px"><span style="color:#8b9196">Source: </span>{{ source }}</div>
+        <div style="font:400 10.5px 'IBM Plex Mono';color:#a2a8ac;margin-bottom:9px">Set {{ setDate }} · reviewed {{ reviewedDate }}</div>
+        <div style="font:400 11.5px/1.5 'IBM Plex Sans';color:#5b6167;padding-top:9px;border-top:1px solid #f2f3f3">{{ definition }}</div>
+        </sc-if>
+        <sc-if value="{{ noBenchmark }}" hint-placeholder-val="{{ false }}">
+        <div style="font:600 11.5px 'IBM Plex Sans';color:#14171a;margin-bottom:7px">No benchmark set</div>
+        <div style="font:400 11.5px/1.5 'IBM Plex Sans';color:#5b6167;margin-bottom:11px">{{ definition }}</div>
+        <button style="width:100%;background:#0f1417;border:none;border-radius:7px;padding:7px;font:600 11.5px 'IBM Plex Sans';color:#fff;cursor:pointer">Set benchmark</button>
+        </sc-if>
+      </div>
+      </sc-if>
+    </span>
+  </div>
+  <div style="display:flex;align-items:baseline;gap:6px">
+    <span style="font:500 27px 'IBM Plex Mono';color:{{ valueColor }};letter-spacing:-0.02em">{{ valueText }}</span>
+    <sc-if value="{{ hasSuffix }}" hint-placeholder-val="{{ false }}">
+    <span style="font:400 13px 'IBM Plex Mono';color:#b6bcc0">{{ valueSuffix }}</span>
+    </sc-if>
+  </div>
+  <div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <sc-if value="{{ hasBenchmark }}" hint-placeholder-val="{{ true }}">
+    <span style="font:400 11.5px 'IBM Plex Mono';color:#8b9196">vs {{ benchmarkText }}</span>
+    <sc-if value="{{ showPill }}" hint-placeholder-val="{{ false }}">
+    <span style="font:600 11px 'IBM Plex Sans';color:{{ pillFg }};background:{{ pillBg }};border-radius:6px;padding:2px 8px;white-space:nowrap">{{ deltaText }}</span>
+    </sc-if>
+    </sc-if>
+    <sc-if value="{{ noBenchmark }}" hint-placeholder-val="{{ false }}">
+    <span style="font:500 11.5px 'IBM Plex Sans';color:#b0730a">no benchmark set</span>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:260,&quot;height&quot;:150},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;METRIC&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;valueText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;42&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;valueColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14171a&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;valueSuffix&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hasBenchmark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;benchmarkText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;50 target&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;deltaText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;+8 over&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;deltaTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;good&quot;,&quot;warn&quot;,&quot;bad&quot;,&quot;neutral&quot;],&quot;default&quot;:&quot;warn&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;source&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Protocol assumption v3.2&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;setDate&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Jan 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;reviewedDate&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Jun 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;definition&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tooltipOpen: false };
+  renderVals() {
+    const p = this.props || {};
+    const hasBenchmark = p.hasBenchmark !== false;
+    const noBenchmark = !hasBenchmark;
+    const toneMap = {
+      good: { fg:'#197a48', bg:'#e7f6ee' },
+      warn: { fg:'#b0730a', bg:'#fdf3e0' },
+      bad:  { fg:'#bd3226', bg:'#fcecea' },
+      neutral: { fg:'#5b6167', bg:'#eef0f0' }
+    };
+    const tone = toneMap[p.deltaTone] || toneMap.neutral;
+    return {
+      label: p.label || '',
+      valueText: p.valueText != null ? String(p.valueText) : '',
+      valueColor: p.valueColor || '#14171a',
+      hasSuffix: !!p.valueSuffix,
+      valueSuffix: p.valueSuffix || '',
+      hasBenchmark, noBenchmark,
+      benchmarkText: p.benchmarkText || '',
+      showPill: hasBenchmark && !!p.deltaText,
+      deltaText: p.deltaText || '',
+      pillFg: tone.fg, pillBg: tone.bg,
+      source: p.source || '',
+      setDate: p.setDate || '',
+      reviewedDate: p.reviewedDate || '',
+      definition: p.definition || (noBenchmark ? 'No agreed benchmark exists for this metric yet — it is tracked but not yet judged against a target.' : ''),
+      tooltipOpen: this.state.tooltipOpen,
+      openTip: () => this.setState({ tooltipOpen: true }),
+      closeTip: () => this.setState({ tooltipOpen: false }),
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      toggleTip: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState(s => ({ tooltipOpen: !s.tooltipOpen })); }
+    };
+  }
+}
+</script>
+</body>
+</html>
