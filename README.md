@@ -1,25 +1,46 @@
-# CODING AGENTS: READ THIS FIRST
+# Recruitment Control Tower
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+A Next.js app built from the Claude Design prototype `project/Recruitment Control Tower v3.dc.html`.
+It covers Prime (agent tasks + archive), Enrollment (daily brief, studies, sites, agent),
+Budget (invoice reconciliation, upload, agent), Actions, AI Studio (beta), Audit Trail and
+Connect systems.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+## Run locally
 
-## What you should do — IMPORTANT
+```bash
+npm install
+cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for Prime's live AI features
+npm run dev                  # http://localhost:3000
+```
 
-**Read the chat transcripts first.** There are 16 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+## Deploy to Vercel
 
-**Read `project/Recruitment Control Tower v3.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+1. Push this repository to GitHub and import it in Vercel. The framework is detected as Next.js automatically.
+2. Optional: under **Settings → Environment Variables**, add `ANTHROPIC_API_KEY` (and `ANTHROPIC_MODEL`
+   to override the default `claude-opus-5-5`).
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+Or from the CLI: `npx vercel` (preview) / `npx vercel --prod`.
 
-## About the design files
+Without `ANTHROPIC_API_KEY`, everything still works. The features that call Prime (the Ask bar,
+custom Prime tasks and follow-ups, New action drafting, revising an action with added context,
+AI Studio generation) use the design's offline fallbacks instead.
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+## How it is built
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+| Path | What it is |
+| --- | --- |
+| `components/control-tower/views/*.tsx` | One component per screen or panel, generated from the design's template |
+| `components/control-tower/logic.ts` | The prototype's state and behaviour (sample data, handlers, `renderVals()`), ported unchanged |
+| `components/control-tower/ControlTower.tsx` | Client component that holds the logic's state and renders the views |
+| `components/control-tower/dc.ts` | Binding helpers and the `DCLogic` base class |
+| `app/api/complete/route.ts` | Server route that calls the Claude API. It replaces the design tool's `window.claude.complete` |
+| `app/design-pseudo.css` | `:hover` / `:focus` styles from the design |
+| `scripts/convert-design.mjs` | Regenerates the views, logic and pseudo CSS from the design export |
+| `project/`, `chats/`, `DESIGN_HANDOFF.md` | The original Claude Design handoff bundle |
 
-## Bundle contents
+To pick up a new export of the design, replace `project/Recruitment Control Tower v3.dc.html`
+and run `npm run convert-design`. That overwrites the generated files.
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `Primary` project files (HTML prototypes, assets, components)
+All study, site, invoice and action data is sample data from the prototype. Connecting systems,
+sign-in, invoice reading and approvals are simulated in the browser, and changes are lost
+on reload.

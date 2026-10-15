@@ -1,0 +1,13 @@
+/* Global styles from the design's <helmet> block. */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #f6f6f8;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #0a0a0a;
+}
+a { color: #003358; }
+a:hover { color: #004677; }
+::selection { background: #c2d2e1; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
