@@ -1,4 +1,4 @@
-// InvoiceUploadModal — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// InvoiceUploadModal — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { L, T, type Vals } from "../dc";
@@ -6,8 +6,8 @@ import { L, T, type Vals } from "../dc";
 export function InvoiceUploadModal({ v }: { v: Vals }) {
   return (
     <>
-      <div onClick={v.bu?.close} style={{ position: "fixed", inset: "0", zIndex: "60", background: "rgba(10,10,10,0.32)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-        <div onClick={v.bu?.stop} style={{ width: "100%", maxWidth: "560px", maxHeight: "min(740px, calc(100vh - 48px))", background: "#fff", borderRadius: "14px", boxShadow: "0 24px 64px rgba(10,10,10,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ position: "fixed", inset: "0", zIndex: "60", background: "rgba(10,10,10,0.32)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={v.bu?.close}>
+        <div style={{ width: "100%", maxWidth: "560px", maxHeight: "min(740px, calc(100vh - 48px))", background: "#fff", borderRadius: "14px", boxShadow: "0 24px 64px rgba(10,10,10,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }} onClick={v.bu?.stop}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px 18px", borderBottom: "1px solid #eeeff0", flex: "0 0 auto" }}>
             <span style={{ width: "26px", height: "26px", flex: "0 0 26px", borderRadius: "7px", background: "#004677", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -22,7 +22,7 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
                 Prime checks every line against the site contract and the EDC.
               </div>
             </div>
-            <button onClick={v.bu?.close} style={{ marginLeft: "auto", border: "none", background: "transparent", color: "#85888c", font: "500 15px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px", borderRadius: "6px" }} className="dc-hover-4">
+            <button style={{ marginLeft: "auto", border: "none", background: "transparent", color: "#85888c", font: "500 15px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px", borderRadius: "6px" }} onClick={v.bu?.close} className="dc-hover-7">
               ✕
             </button>
           </div>
@@ -31,8 +31,8 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
               <>
                 {v.bu?.noFile ? (
                   <>
-                    <label onDragOver={v.bu?.onDragOver} onDragLeave={v.bu?.onDragLeave} onDrop={v.bu?.onDrop} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", padding: "30px 20px", border: `1.5px dashed ${v.bu?.dropBd ?? ""}`, background: v.bu?.dropBg, borderRadius: "12px", cursor: "pointer", textAlign: "center" }}>
-                      <input type="file" accept=".pdf,.csv,.xls,.xlsx,.png,.jpg,.jpeg" onChange={v.bu?.onFile} style={{ display: "none" }} />
+                    <label style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", padding: "30px 20px", border: `1.5px dashed ${v.bu?.dropBd ?? ""}`, background: v.bu?.dropBg, borderRadius: "12px", cursor: "pointer", textAlign: "center" }} onDragOver={v.bu?.onDragOver} onDragLeave={v.bu?.onDragLeave} onDrop={v.bu?.onDrop}>
+                      <input style={{ display: "none" }} type="file" accept=".pdf,.csv,.xls,.xlsx,.png,.jpg,.jpeg" onChange={v.bu?.onFile} />
                       <span style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#e5ecf2", color: "#004677", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "4px" }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                           <path d="M12 16V4M7 9l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -47,7 +47,7 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
                         PDF, Excel, CSV or a scan | one invoice per file
                       </span>
                     </label>
-                    <button onClick={v.bu?.useSample} style={{ alignSelf: "flex-start", border: "none", background: "transparent", color: "#003358", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", padding: "0", textDecoration: "underline" }}>
+                    <button style={{ alignSelf: "flex-start", border: "none", background: "transparent", color: "#003358", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", padding: "0", textDecoration: "underline" }} onClick={v.bu?.useSample}>
                       Or try a sample invoice from Hamburg Liver Institute
                     </button>
                   </>
@@ -68,7 +68,7 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
                         {" "}
                         <div style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c" }}>{T(v.bu?.fileSize)}</div>
                       </div>
-                      <button onClick={v.bu?.removeFile} style={{ border: "none", background: "transparent", color: "#85888c", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px" }}>
+                      <button style={{ border: "none", background: "transparent", color: "#85888c", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px" }} onClick={v.bu?.removeFile}>
                         Remove
                       </button>
                     </div>
@@ -77,7 +77,7 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
                 <div>
                   <div style={{ font: "500 12.5px 'IBM Plex Sans'", color: "#3a3c40", marginBottom: "6px" }}>Site</div>
                   {" "}
-                  <select value={v.bu?.site ?? ""} onChange={v.bu?.onSite} style={{ width: "100%", border: "1px solid #e2e3e5", borderRadius: "8px", padding: "8px 10px", font: "400 13px 'IBM Plex Sans'", color: "#0a0a0a", background: "#fff", outline: "none" }}>
+                  <select style={{ width: "100%", border: "1px solid #e2e3e5", borderRadius: "8px", padding: "8px 10px", font: "400 13px 'IBM Plex Sans'", color: "#0a0a0a", background: "#fff", outline: "none" }} value={v.bu?.site ?? ""} onChange={v.bu?.onSite}>
                     {L(v.bu?.siteOpts).map((o, $index) => (
                       <option key={$index} value={o?.v ?? ""}>{T(o?.l)}</option>
                     ))}
@@ -168,10 +168,10 @@ export function InvoiceUploadModal({ v }: { v: Vals }) {
           </div>
           <div style={{ flex: "0 0 auto", borderTop: "1px solid #eeeff0", padding: "12px 18px 14px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <span style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c" }}>{T(v.bu?.footHint)}</span>
-            <button onClick={v.bu?.close} style={{ marginLeft: "auto", border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+            <button style={{ marginLeft: "auto", border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.bu?.close}>
               Cancel
             </button>
-            <button onClick={v.bu?.primary} style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "7px 14px", font: "600 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", opacity: v.bu?.btnOpacity }}>
+            <button style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "7px 14px", font: "600 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", opacity: v.bu?.btnOpacity }} onClick={v.bu?.primary}>
               {T(v.bu?.primaryLabel)}
             </button>
           </div>

@@ -1,4 +1,4 @@
-// BudgetView — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// BudgetView — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { L, T, type Vals } from "../dc";
@@ -8,11 +8,9 @@ export function BudgetView({ v }: { v: Vals }) {
     <>
       <div style={{ flex: "1", overflowY: "auto", padding: "26px 28px 40px" }}>
         <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
-          <h1 style={{ margin: "0", font: "600 21px 'IBM Plex Sans'", letterSpacing: "-0.02em", color: "#0a0a0a" }}>Budget</h1>
-          {" "}
-          <div style={{ display: "flex", gap: "3px", background: "#eeeff0", borderRadius: "9px", padding: "3px", marginTop: "14px", width: "fit-content" }}>
+          <div style={{ display: "flex", gap: "3px", background: "#eeeff0", borderRadius: "9px", padding: "3px", width: "fit-content" }}>
             {L(v.bud?.tabs).map((t, $index) => (
-              <button key={$index} onClick={t?.onClick} style={{ display: "flex", alignItems: "center", gap: "7px", border: "none", borderRadius: "7px", padding: "6px 14px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12.5px 'IBM Plex Sans'", background: t?.bg, color: t?.fg, boxShadow: t?.shadow }}>
+              <button key={$index} style={{ display: "flex", alignItems: "center", gap: "7px", border: "none", borderRadius: "7px", padding: "6px 14px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12.5px 'IBM Plex Sans'", background: t?.bg, color: t?.fg, boxShadow: t?.shadow }} onClick={t?.onClick}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: t?.dot }} />
                 {T(t?.label)}
               </button>
@@ -22,7 +20,7 @@ export function BudgetView({ v }: { v: Vals }) {
           {v.bud?.isInvoices ? (
             <>
               <div style={{ background: "#fff", border: "1px solid #ecedee", borderRadius: "12px", marginTop: "16px", overflow: "hidden" }}>
-                <div onClick={v.bud?.toggleBrief} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", cursor: "pointer", flexWrap: "wrap" }} className="dc-hover-8">
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", cursor: "pointer", flexWrap: "wrap" }} onClick={v.bud?.toggleBrief} className="dc-hover-14">
                   <span style={{ width: "28px", height: "28px", flex: "0 0 28px", borderRadius: "8px", background: "#004677", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                       <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
@@ -41,7 +39,7 @@ export function BudgetView({ v }: { v: Vals }) {
                       {T(v.bud?.headline)}
                     </div>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ transform: v.bud?.chev, transition: "transform 0.15s" }}>
+                  <svg style={{ transform: v.bud?.chev, transition: "transform 0.15s" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path d="m9 6 6 6-6 6" stroke="#95989c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
@@ -80,14 +78,14 @@ export function BudgetView({ v }: { v: Vals }) {
                             </div>
                             {a?.isOpen ? (
                               <>
-                                <button onClick={a?.open} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "5px 10px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }}>
+                                <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "5px 10px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }} onClick={a?.open}>
                                   Review →
                                 </button>
                               </>
                             ) : null}
                             {a?.isDone ? (
                               <>
-                                <button onClick={a?.open} style={{ border: "none", background: "transparent", color: a?.doneFg, padding: "5px 2px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }}>
+                                <button style={{ border: "none", background: "transparent", color: a?.doneFg, padding: "5px 2px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }} onClick={a?.open}>
                                   {T(a?.doneLabel)}
                                 </button>
                               </>
@@ -113,10 +111,10 @@ export function BudgetView({ v }: { v: Vals }) {
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignSelf: "center" }}>
-                        <button onClick={v.bud?.viewRiskSites} style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                        <button style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.bud?.viewRiskSites}>
                           View RA-2209 sites
                         </button>
-                        <button onClick={v.bud?.openRelease} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                        <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.bud?.openRelease}>
                           {T(v.bud?.releaseLabel)}
                         </button>
                       </div>
@@ -147,21 +145,17 @@ export function BudgetView({ v }: { v: Vals }) {
               <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "10px 16px", flexWrap: "wrap", marginTop: "24px" }}>
                 <div style={{ minWidth: "0" }}>
                   <div style={{ font: "600 15px 'IBM Plex Sans'", color: "#0a0a0a" }}>Invoice status by site</div>
-                  {" "}
-                  <div style={{ font: "400 12.5px 'IBM Plex Sans'", color: "#66696e", marginTop: "2px", textWrap: "pretty" }}>
-                    {T(v.bud?.listSub)}
-                  </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                   <div style={{ display: "flex", gap: "3px", background: "#eeeff0", borderRadius: "9px", padding: "3px" }}>
                     {L(v.bud?.filters).map((fl, $index) => (
-                      <button key={$index} onClick={fl?.onClick} style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", borderRadius: "7px", padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12px 'IBM Plex Sans'", background: fl?.bg, color: fl?.fg, boxShadow: fl?.shadow }}>
+                      <button key={$index} style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", borderRadius: "7px", padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12px 'IBM Plex Sans'", background: fl?.bg, color: fl?.fg, boxShadow: fl?.shadow }} onClick={fl?.onClick}>
                         {T(fl?.label)}
                         <span style={{ font: "500 11px 'IBM Plex Mono'", color: "#85888c" }}>{T(fl?.count)}</span>
                       </button>
                     ))}
                   </div>
-                  <button onClick={v.bu?.openUp} style={{ display: "flex", alignItems: "center", gap: "6px", border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} className="dc-hover-7">
+                  <button style={{ display: "flex", alignItems: "center", gap: "6px", border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.bu?.openUp} className="dc-hover-3">
                     + Upload invoice
                   </button>
                 </div>
@@ -182,14 +176,14 @@ export function BudgetView({ v }: { v: Vals }) {
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
                 {L(v.bud?.sites).map((s, $index) => (
                   <div key={$index} style={{ background: "#fff", border: `1px solid ${s?.cardBorder ?? ""}`, borderRadius: "12px", overflow: "hidden" }}>
-                    <div onClick={s?.toggle} style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(0,1.6fr) 112px 14px", gap: "18px", alignItems: "center", cursor: "pointer" }} className="dc-hover-8">
+                    <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(0,1.6fr) 112px 14px", gap: "18px", alignItems: "center", cursor: "pointer" }} onClick={s?.toggle} className="dc-hover-14">
                       <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "0" }}>
                         <span style={{ width: "9px", height: "9px", borderRadius: "50%", flex: "0 0 9px", background: s?.dot }} />
                         <div style={{ minWidth: "0" }}>
                           <div style={{ font: "600 13.5px/1.35 'IBM Plex Sans'", color: "#0a0a0a", textWrap: "pretty" }}>{T(s?.name)}</div>
                           {" "}
                           <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "2px 6px", marginTop: "1px" }}>
-                            <span style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c" }}>{T(s?.study)}{" | "}{T(s?.loc)}</span>
+                            <span style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c" }}>{T(s?.loc)}</span>
                             {s?.hasNew ? (
                               <>
                                 <span style={{ font: "500 10.5px 'IBM Plex Sans'", color: "#003358", background: "#e5ecf2", borderRadius: "20px", padding: "1px 7px", whiteSpace: "nowrap" }}>
@@ -212,12 +206,12 @@ export function BudgetView({ v }: { v: Vals }) {
                         <div style={{ position: "relative", height: "6px", background: "#eeeff0", borderRadius: "4px" }}>
                           <div style={{ height: "100%", borderRadius: "4px", background: s?.barC, width: s?.barPct }} />
                           {" "}
-                          <span title="90-day limit" style={{ position: "absolute", left: "75%", top: "-3px", width: "2px", height: "12px", borderRadius: "1px", background: "#a7a9ac" }} />
+                          <span style={{ position: "absolute", left: "75%", top: "-3px", width: "2px", height: "12px", borderRadius: "1px", background: "#a7a9ac" }} title="90-day limit" />
                         </div>
                       </div>
                       {s?.hasReview ? (
                         <>
-                          <button onClick={s?.review} style={{ justifySelf: "end", border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          <button style={{ justifySelf: "end", border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={s?.review}>
                             {T(s?.reviewLabel)}
                           </button>
                         </>
@@ -229,7 +223,7 @@ export function BudgetView({ v }: { v: Vals }) {
                           </span>
                         </>
                       ) : null}
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ transform: s?.chev, transition: "transform 0.15s" }}>
+                      <svg style={{ transform: s?.chev, transition: "transform 0.15s" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <path d="m9 6 6 6-6 6" stroke="#95989c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
@@ -293,7 +287,7 @@ export function BudgetView({ v }: { v: Vals }) {
                                 {T(s?.linkText)}
                               </div>
                               {" "}
-                              <button onClick={s?.viewEnroll} style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "6px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }}>
+                              <button style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "6px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }} onClick={s?.viewEnroll}>
                                 View in Enrollment
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                   <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -315,7 +309,7 @@ export function BudgetView({ v }: { v: Vals }) {
                                   </div>
                                   {" "}
                                   {L(s?.props).map((p, $index) => (
-                                    <div key={$index} onClick={p?.open} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: "2px 14px", alignItems: "center", padding: "8px 0", borderTop: p?.border, cursor: "pointer" }}>
+                                    <div key={$index} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: "2px 14px", alignItems: "center", padding: "8px 0", borderTop: p?.border, cursor: "pointer" }} onClick={p?.open}>
                                       <div style={{ minWidth: "0", display: "flex", flexDirection: "column", gap: "2px" }}>
                                         <span style={{ font: "500 12.5px/1.35 'IBM Plex Sans'", color: "#0a0a0a", textWrap: "pretty" }}>
                                           {T(p?.title)}
@@ -375,7 +369,7 @@ export function BudgetView({ v }: { v: Vals }) {
                   <span style={{ font: "500 13px 'IBM Plex Sans'", color: "#0a0a0a" }}>6:00 AM daily</span>
                   <span style={{ font: "500 13px 'IBM Plex Sans'", color: "#0a0a0a" }}>{T(v.bud?.openProps)}</span>
                 </div>
-                <button onClick={v.bud?.scan} style={{ display: "flex", alignItems: "center", gap: "7px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "9px", padding: "8px 14px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                <button style={{ display: "flex", alignItems: "center", gap: "7px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "9px", padding: "8px 14px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.bud?.scan}>
                   {T(v.bud?.scanSpin)}{T(v.bud?.scanLabel)}
                 </button>
                 {v.bud?.hasScanNote ? (
@@ -391,7 +385,7 @@ export function BudgetView({ v }: { v: Vals }) {
                 <div style={{ background: "#fff", border: "1px solid #ecedee", borderRadius: "12px", padding: "16px 18px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
                     <span style={{ font: "600 10.5px 'IBM Plex Mono'", letterSpacing: "0.07em", color: "#85888c" }}>INSTRUCTIONS</span>
-                    <button onClick={v.bud?.toggleEdit} style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#003358", padding: "2px 4px" }}>
+                    <button style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#003358", padding: "2px 4px" }} onClick={v.bud?.toggleEdit}>
                       {T(v.bud?.editLabel)}
                     </button>
                   </div>
@@ -406,13 +400,13 @@ export function BudgetView({ v }: { v: Vals }) {
                   {" "}
                   {v.bud?.editing ? (
                     <>
-                      <textarea value={v.bud?.draft ?? ""} onChange={v.bud?.onDraft} rows={8} style={{ display: "block", width: "100%", border: "1px solid #dfe0e2", borderRadius: "9px", outline: "none", resize: "vertical", padding: "10px 12px", font: "400 13px/1.6 'IBM Plex Sans'", color: "#1c1d1f", background: "#fcfcfd" }} />
+                      <textarea style={{ display: "block", width: "100%", border: "1px solid #dfe0e2", borderRadius: "9px", outline: "none", resize: "vertical", padding: "10px 12px", font: "400 13px/1.6 'IBM Plex Sans'", color: "#1c1d1f", background: "#fcfcfd" }} value={v.bud?.draft ?? ""} onChange={v.bud?.onDraft} rows={8} />
                       {" "}
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
-                        <button onClick={v.bud?.cancelEdit} style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }}>
+                        <button style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }} onClick={v.bud?.cancelEdit}>
                           Cancel
                         </button>
-                        <button onClick={v.bud?.saveEdit} style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "6px 14px", font: "600 12px 'IBM Plex Sans'", cursor: "pointer" }}>
+                        <button style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "6px 14px", font: "600 12px 'IBM Plex Sans'", cursor: "pointer" }} onClick={v.bud?.saveEdit}>
                           Save
                         </button>
                       </div>
@@ -459,7 +453,7 @@ export function BudgetView({ v }: { v: Vals }) {
                       ) : null}
                       {d?.off ? (
                         <>
-                          <button onClick={v.goSystems} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "7px", padding: "4px 10px", font: "500 11.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "7px", padding: "4px 10px", font: "500 11.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.goSystems}>
                             Connect
                           </button>
                         </>
@@ -480,7 +474,7 @@ export function BudgetView({ v }: { v: Vals }) {
                         {" "}
                         <div style={{ font: "400 11.5px/1.4 'IBM Plex Sans'", color: "#85888c" }}>{"→ "}{T(r?.then)}</div>
                       </div>
-                      <button onClick={r?.toggle} style={{ width: "34px", height: "20px", flex: "0 0 34px", borderRadius: "20px", border: "none", padding: "2px", cursor: "pointer", display: "flex", justifyContent: r?.justify, background: r?.track }}>
+                      <button style={{ width: "34px", height: "20px", flex: "0 0 34px", borderRadius: "20px", border: "none", padding: "2px", cursor: "pointer", display: "flex", justifyContent: r?.justify, background: r?.track }} onClick={r?.toggle}>
                         <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.2)" }} />
                       </button>
                     </div>
@@ -521,7 +515,7 @@ export function BudgetView({ v }: { v: Vals }) {
                         {" "}
                         <div style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c", marginTop: "1px" }}>{T(m?.source)}</div>
                       </div>
-                      <button onClick={m?.forget} style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#85888c", padding: "4px 6px" }}>
+                      <button style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#85888c", padding: "4px 6px" }} onClick={m?.forget}>
                         Forget
                       </button>
                     </div>

@@ -1,4 +1,4 @@
-// AuditTrailView — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// AuditTrailView — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { L, T, type Vals } from "../dc";
@@ -8,8 +8,6 @@ export function AuditTrailView({ v }: { v: Vals }) {
     <>
       <div style={{ flex: "1", overflowY: "auto", padding: "26px 28px 40px" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto" }}>
-          <h1 style={{ margin: "0", font: "600 21px 'IBM Plex Sans'", letterSpacing: "-0.02em", color: "#0a0a0a" }}>Audit Trail</h1>
-          {" "}
           <div style={{ font: "400 12.5px 'IBM Plex Sans'", color: "#66696e", marginTop: "4px" }}>
             Every action taken, here and on other systems
           </div>

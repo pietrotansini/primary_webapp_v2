@@ -1,4 +1,4 @@
-// EnrollmentView — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// EnrollmentView — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { L, T, type Vals } from "../dc";
@@ -8,11 +8,9 @@ export function EnrollmentView({ v }: { v: Vals }) {
     <>
       <div style={{ flex: "1", overflowY: "auto", padding: "26px 28px 40px" }}>
         <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
-          <h1 style={{ margin: "0", font: "600 21px 'IBM Plex Sans'", letterSpacing: "-0.02em", color: "#0a0a0a" }}>Enrollment</h1>
-          {" "}
-          <div style={{ display: "flex", gap: "3px", background: "#eeeff0", borderRadius: "9px", padding: "3px", marginTop: "14px", width: "fit-content" }}>
+          <div style={{ display: "flex", gap: "3px", background: "#eeeff0", borderRadius: "9px", padding: "3px", width: "fit-content" }}>
             {L(v.enr?.tabs).map((t, $index) => (
-              <button key={$index} onClick={t?.onClick} style={{ display: "flex", alignItems: "center", gap: "7px", border: "none", borderRadius: "7px", padding: "6px 14px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12.5px 'IBM Plex Sans'", background: t?.bg, color: t?.fg, boxShadow: t?.shadow }}>
+              <button key={$index} style={{ display: "flex", alignItems: "center", gap: "7px", border: "none", borderRadius: "7px", padding: "6px 14px", cursor: "pointer", whiteSpace: "nowrap", font: "500 12.5px 'IBM Plex Sans'", background: t?.bg, color: t?.fg, boxShadow: t?.shadow }} onClick={t?.onClick}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: t?.dot }} />
                 {T(t?.label)}
               </button>
@@ -22,7 +20,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
           {v.enr?.isStudies ? (
             <>
               <div style={{ background: "#fff", border: "1px solid #ecedee", borderRadius: "12px", marginTop: "16px", overflow: "hidden" }}>
-                <div onClick={v.brief?.toggle} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", cursor: "pointer", flexWrap: "wrap" }} className="dc-hover-8">
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", cursor: "pointer", flexWrap: "wrap" }} onClick={v.brief?.toggle} className="dc-hover-14">
                   <span style={{ width: "28px", height: "28px", flex: "0 0 28px", borderRadius: "8px", background: "#004677", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                       <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M6.3 17.7l2.5-2.5M15.2 8.8l2.5-2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -38,7 +36,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                       {T(v.brief?.headline)}
                     </div>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ transform: v.brief?.chev, transition: "transform 0.15s" }}>
+                  <svg style={{ transform: v.brief?.chev, transition: "transform 0.15s" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path d="m9 6 6 6-6 6" stroke="#95989c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
@@ -74,14 +72,14 @@ export function EnrollmentView({ v }: { v: Vals }) {
                             </div>
                             {a?.isOpen ? (
                               <>
-                                <button onClick={a?.open} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "5px 10px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }}>
+                                <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "5px 10px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }} onClick={a?.open}>
                                   Review →
                                 </button>
                               </>
                             ) : null}
                             {a?.isDone ? (
                               <>
-                                <button onClick={a?.open} style={{ border: "none", background: "transparent", color: a?.doneFg, padding: "5px 2px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }}>
+                                <button style={{ border: "none", background: "transparent", color: a?.doneFg, padding: "5px 2px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", flex: "0 0 auto" }} onClick={a?.open}>
                                   {T(a?.doneLabel)}
                                 </button>
                               </>
@@ -94,23 +92,39 @@ export function EnrollmentView({ v }: { v: Vals }) {
                 ) : null}
               </div>
               {" "}
-              <div style={{ font: "400 12.5px 'IBM Plex Sans'", color: "#66696e", marginTop: "18px" }}>
-                5 active studies | sorted by enrollment risk | open a study for its summary
-              </div>
+              <div style={{ font: "600 14px 'IBM Plex Sans'", color: "#0a0a0a", marginTop: "18px" }}>Active Clinical Trials</div>
               {" "}
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "14px" }}>
                 {L(v.studies).map((s, $index) => (
                   <div key={$index} style={{ background: "#fff", border: `1px solid ${s?.border ?? ""}`, borderRadius: "12px", overflow: "hidden" }}>
-                    <div onClick={s?.toggle} style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "minmax(150px,1fr) minmax(0,2fr) auto 14px", gap: "20px", alignItems: "center", cursor: "pointer" }} className="dc-hover-8">
+                    <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "minmax(76px,0.6fr) auto auto minmax(120px,2fr) auto 14px", gap: "12px", alignItems: "center", cursor: "pointer" }} onClick={s?.toggle} className="dc-hover-14">
                       <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "0" }}>
                         <span style={{ width: "9px", height: "9px", borderRadius: "50%", flex: "0 0 9px", background: s?.dot }} />
                         <div style={{ minWidth: "0" }}>
-                          <div style={{ font: "600 13.5px 'IBM Plex Sans'", color: "#0a0a0a" }}>{T(s?.id)}</div>
-                          {" "}
-                          <div style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {T(s?.name)}{" | "}{T(s?.phase)}
-                          </div>
+                          <div style={{ font: "600 13.5px 'IBM Plex Sans'", color: "#0a0a0a" }}>{T(s?.trialLabel)}</div>
                         </div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "1px", padding: "2px 0 2px 12px", borderLeft: "1px solid #ecedee" }}>
+                        <div style={{ font: "600 9.5px 'IBM Plex Mono'", letterSpacing: "0.05em", color: "#85888c", whiteSpace: "nowrap" }}>
+                          ESTIMATED DURATION
+                        </div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+                          <span style={{ font: "600 19px 'IBM Plex Mono'", color: "#0a0a0a", letterSpacing: "-0.02em" }}>{T(s?.dur)}</span>
+                          <span style={{ font: "500 11.5px 'IBM Plex Sans'", color: "#3a3c40" }}>months</span>
+                        </div>
+                        <div style={{ font: "400 10.5px 'IBM Plex Sans'", color: "#85888c", whiteSpace: "nowrap" }}>{T(s?.durStart)}</div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "1px", padding: "2px 0 2px 12px", borderLeft: "1px solid #ecedee" }}>
+                        <div style={{ font: "600 9.5px 'IBM Plex Mono'", letterSpacing: "0.05em", color: "#85888c", whiteSpace: "nowrap" }}>
+                          VS PLAN
+                        </div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+                          <span style={{ font: "600 19px 'IBM Plex Mono'", color: s?.delayColor, letterSpacing: "-0.02em" }}>
+                            {T(s?.delay)}
+                          </span>
+                          <span style={{ font: "500 11.5px 'IBM Plex Sans'", color: "#3a3c40" }}>{T(s?.delayUnit)}</span>
+                        </div>
+                        <div style={{ font: "400 10.5px 'IBM Plex Sans'", color: "#85888c", whiteSpace: "nowrap" }}>{T(s?.delayNote)}</div>
                       </div>
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "2px 12px", font: "400 11.5px 'IBM Plex Sans'", color: "#66696e", marginBottom: "5px" }}>
@@ -127,7 +141,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                       </div>
                       {s?.hasWaiting ? (
                         <>
-                          <button onClick={s?.open} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "8px", padding: "6px 11px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={s?.open}>
                             {T(s?.waitingLabel)}
                           </button>
                         </>
@@ -137,7 +151,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                           <span style={{ font: "400 12px 'IBM Plex Sans'", color: "#a7a9ac", whiteSpace: "nowrap" }}>Nothing to review</span>
                         </>
                       ) : null}
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ transform: s?.chev, transition: "transform 0.15s" }}>
+                      <svg style={{ transform: s?.chev, transition: "transform 0.15s" }} width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <path d="m9 6 6 6-6 6" stroke="#95989c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
@@ -159,7 +173,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                                 <span style={{ font: "500 12px 'IBM Plex Mono'", color: s?.vsColor }}>{T(s?.vsText)}</span>
                               </div>
                               {" "}
-                              <svg viewBox="0 0 400 110" style={{ width: "100%", height: "96px", display: "block", marginTop: "6px" }}>
+                              <svg style={{ width: "100%", height: "96px", display: "block", marginTop: "6px" }} viewBox="0 0 400 110">
                                 <polyline points={s?.planPts} fill="none" stroke="#c4c6c9" strokeWidth="2" strokeDasharray="5 4" strokeLinecap="round" />
                                 <polyline points={s?.actualPts} fill="none" stroke="#004677" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
@@ -208,7 +222,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                               <span style={{ font: "400 11px 'IBM Plex Sans'", color: "#85888c" }}>{T(s?.actCount)}</span>
                             </div>
                             {L(s?.actions).map((a, $index) => (
-                              <div key={$index} onClick={a?.open} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: "4px 16px", alignItems: "center", padding: "10px 0", borderTop: a?.border, cursor: "pointer" }}>
+                              <div key={$index} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: "4px 16px", alignItems: "center", padding: "10px 0", borderTop: a?.border, cursor: "pointer" }} onClick={a?.open}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: "0" }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                     <span style={{ font: "600 9.5px 'IBM Plex Mono'", color: a?.priFg, background: a?.priBg, borderRadius: "4px", padding: "1px 5px" }}>
@@ -236,7 +250,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                           </div>
                           {" "}
                           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
-                            <button onClick={s?.viewSites} style={{ display: "flex", alignItems: "center", gap: "6px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer" }}>
+                            <button style={{ display: "flex", alignItems: "center", gap: "6px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer" }} onClick={s?.viewSites}>
                               {"View "}{T(s?.siteCount)}{" sites"}
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                 <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -281,7 +295,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                   <span style={{ font: "500 13px 'IBM Plex Sans'", color: "#0a0a0a" }}>7:00 AM daily</span>
                   <span style={{ font: "500 13px 'IBM Plex Sans'", color: "#0a0a0a" }}>{T(v.openCount)}</span>
                 </div>
-                <button onClick={v.enr?.scan} style={{ display: "flex", alignItems: "center", gap: "7px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "9px", padding: "8px 14px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                <button style={{ display: "flex", alignItems: "center", gap: "7px", border: "1px solid #e2e3e5", background: "#fff", color: "#0a0a0a", borderRadius: "9px", padding: "8px 14px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.enr?.scan}>
                   {T(v.enr?.scanSpin)}{T(v.enr?.scanLabel)}
                 </button>
                 {v.enr?.hasScanNote ? (
@@ -297,7 +311,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                 <div style={{ background: "#fff", border: "1px solid #ecedee", borderRadius: "12px", padding: "16px 18px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
                     <span style={{ font: "600 10.5px 'IBM Plex Mono'", letterSpacing: "0.07em", color: "#85888c" }}>INSTRUCTIONS</span>
-                    <button onClick={v.enr?.toggleEdit} style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#003358", padding: "2px 4px" }}>
+                    <button style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#003358", padding: "2px 4px" }} onClick={v.enr?.toggleEdit}>
                       {T(v.enr?.editLabel)}
                     </button>
                   </div>
@@ -312,13 +326,13 @@ export function EnrollmentView({ v }: { v: Vals }) {
                   {" "}
                   {v.enr?.editing ? (
                     <>
-                      <textarea value={v.enr?.draft ?? ""} onChange={v.enr?.onDraft} rows={8} style={{ display: "block", width: "100%", border: "1px solid #dfe0e2", borderRadius: "9px", outline: "none", resize: "vertical", padding: "10px 12px", font: "400 13px/1.6 'IBM Plex Sans'", color: "#1c1d1f", background: "#fcfcfd" }} />
+                      <textarea style={{ display: "block", width: "100%", border: "1px solid #dfe0e2", borderRadius: "9px", outline: "none", resize: "vertical", padding: "10px 12px", font: "400 13px/1.6 'IBM Plex Sans'", color: "#1c1d1f", background: "#fcfcfd" }} value={v.enr?.draft ?? ""} onChange={v.enr?.onDraft} rows={8} />
                       {" "}
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
-                        <button onClick={v.enr?.cancelEdit} style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }}>
+                        <button style={{ border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "6px 12px", font: "500 12px 'IBM Plex Sans'", cursor: "pointer" }} onClick={v.enr?.cancelEdit}>
                           Cancel
                         </button>
-                        <button onClick={v.enr?.saveEdit} style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "6px 14px", font: "600 12px 'IBM Plex Sans'", cursor: "pointer" }}>
+                        <button style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "6px 14px", font: "600 12px 'IBM Plex Sans'", cursor: "pointer" }} onClick={v.enr?.saveEdit}>
                           Save
                         </button>
                       </div>
@@ -363,7 +377,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                       ) : null}
                       {d?.off ? (
                         <>
-                          <button onClick={v.goSystems} style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "7px", padding: "4px 10px", font: "500 11.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          <button style={{ border: "1px solid #cddae5", background: "#e5ecf2", color: "#003358", borderRadius: "7px", padding: "4px 10px", font: "500 11.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.goSystems}>
                             Connect
                           </button>
                         </>
@@ -384,7 +398,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                         {" "}
                         <div style={{ font: "400 11.5px/1.4 'IBM Plex Sans'", color: "#85888c" }}>{"→ "}{T(r?.then)}</div>
                       </div>
-                      <button onClick={r?.toggle} style={{ width: "34px", height: "20px", flex: "0 0 34px", borderRadius: "20px", border: "none", padding: "2px", cursor: "pointer", display: "flex", justifyContent: r?.justify, background: r?.track }}>
+                      <button style={{ width: "34px", height: "20px", flex: "0 0 34px", borderRadius: "20px", border: "none", padding: "2px", cursor: "pointer", display: "flex", justifyContent: r?.justify, background: r?.track }} onClick={r?.toggle}>
                         <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.2)" }} />
                       </button>
                     </div>
@@ -425,7 +439,7 @@ export function EnrollmentView({ v }: { v: Vals }) {
                         {" "}
                         <div style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c", marginTop: "1px" }}>{T(m?.source)}</div>
                       </div>
-                      <button onClick={m?.forget} style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#85888c", padding: "4px 6px" }}>
+                      <button style={{ border: "none", background: "transparent", cursor: "pointer", font: "500 12px 'IBM Plex Sans'", color: "#85888c", padding: "4px 6px" }} onClick={m?.forget}>
                         Forget
                       </button>
                     </div>

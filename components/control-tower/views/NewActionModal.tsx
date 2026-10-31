@@ -1,4 +1,4 @@
-// NewActionModal — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// NewActionModal — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { L, T, type Vals } from "../dc";
@@ -6,8 +6,8 @@ import { L, T, type Vals } from "../dc";
 export function NewActionModal({ v }: { v: Vals }) {
   return (
     <>
-      <div onClick={v.na?.close} style={{ position: "fixed", inset: "0", zIndex: "60", background: "rgba(10,10,10,0.32)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-        <div onClick={v.na?.stop} style={{ width: "100%", maxWidth: "580px", maxHeight: "min(720px, calc(100vh - 48px))", background: "#fff", borderRadius: "14px", boxShadow: "0 24px 64px rgba(10,10,10,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ position: "fixed", inset: "0", zIndex: "60", background: "rgba(10,10,10,0.32)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={v.na?.close}>
+        <div style={{ width: "100%", maxWidth: "580px", maxHeight: "min(720px, calc(100vh - 48px))", background: "#fff", borderRadius: "14px", boxShadow: "0 24px 64px rgba(10,10,10,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }} onClick={v.na?.stop}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px 18px", borderBottom: "1px solid #eeeff0", flex: "0 0 auto" }}>
             <span style={{ width: "26px", height: "26px", flex: "0 0 26px", borderRadius: "7px", background: "#004677", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -21,11 +21,11 @@ export function NewActionModal({ v }: { v: Vals }) {
                 Prime drafts it for your approval. Nothing is sent until you approve.
               </div>
             </div>
-            <button onClick={v.na?.close} style={{ marginLeft: "auto", border: "none", background: "transparent", color: "#85888c", font: "500 15px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px", borderRadius: "6px" }} className="dc-hover-4">
+            <button style={{ marginLeft: "auto", border: "none", background: "transparent", color: "#85888c", font: "500 15px 'IBM Plex Sans'", cursor: "pointer", padding: "4px 6px", borderRadius: "6px" }} onClick={v.na?.close} className="dc-hover-7">
               ✕
             </button>
           </div>
-          <div ref={v.na?.threadRef} style={{ flex: "1 1 auto", minHeight: "120px", overflowY: "auto", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px", background: "#fcfcfd" }}>
+          <div style={{ flex: "1 1 auto", minHeight: "120px", overflowY: "auto", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px", background: "#fcfcfd" }} ref={v.na?.threadRef}>
             {v.na?.empty ? (
               <>
                 <div style={{ font: "400 13px/1.5 'IBM Plex Sans'", color: "#55585d", textWrap: "pretty" }}>
@@ -47,7 +47,7 @@ export function NewActionModal({ v }: { v: Vals }) {
               <>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                   {L(v.na?.options).map((o, $index) => (
-                    <button key={$index} onClick={o?.pick} style={{ border: "1px solid #cddae5", background: "#fff", color: "#003358", borderRadius: "20px", padding: "5px 11px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer" }} className="dc-hover-5">
+                    <button key={$index} style={{ border: "1px solid #cddae5", background: "#fff", color: "#003358", borderRadius: "20px", padding: "5px 11px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer" }} onClick={o?.pick} className="dc-hover-8">
                       {T(o?.label)}
                     </button>
                   ))}
@@ -63,13 +63,13 @@ export function NewActionModal({ v }: { v: Vals }) {
             ) : null}
           </div>
           <div style={{ flex: "0 0 auto", borderTop: "1px solid #eeeff0", padding: "12px 18px 14px", display: "flex", flexDirection: "column", gap: "10px" }}>
-            <textarea value={v.na?.text ?? ""} onChange={v.na?.onText} onKeyDown={v.na?.onKey} placeholder={v.na?.placeholder} rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", border: "1px solid #e2e3e5", borderRadius: "8px", padding: "9px 11px", font: "400 13px/1.45 'IBM Plex Sans'", color: "#0a0a0a", background: "#fff", outline: "none" }} className="dc-focus-6" />
+            <textarea style={{ width: "100%", boxSizing: "border-box", resize: "vertical", border: "1px solid #e2e3e5", borderRadius: "8px", padding: "9px 11px", font: "400 13px/1.45 'IBM Plex Sans'", color: "#0a0a0a", background: "#fff", outline: "none" }} value={v.na?.text ?? ""} onChange={v.na?.onText} onKeyDown={v.na?.onKey} placeholder={v.na?.placeholder} rows={3} className="dc-focus-9" />
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ font: "400 11.5px 'IBM Plex Sans'", color: "#85888c" }}>Enter to send | Shift+Enter for a new line</span>
-              <button onClick={v.na?.close} style={{ marginLeft: "auto", border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }}>
+              <button style={{ marginLeft: "auto", border: "1px solid #e2e3e5", background: "#fff", color: "#3a3c40", borderRadius: "8px", padding: "7px 13px", font: "500 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap" }} onClick={v.na?.close}>
                 Cancel
               </button>
-              <button onClick={v.na?.submit} style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "7px 14px", font: "600 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", opacity: v.na?.btnOpacity }}>
+              <button style={{ border: "none", background: "#004677", color: "#fff", borderRadius: "8px", padding: "7px 14px", font: "600 12.5px 'IBM Plex Sans'", cursor: "pointer", whiteSpace: "nowrap", opacity: v.na?.btnOpacity }} onClick={v.na?.submit}>
                 {T(v.na?.submitLabel)}
               </button>
             </div>

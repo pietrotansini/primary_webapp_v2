@@ -1,4 +1,4 @@
-// AskPanel — generated from "project/Recruitment Control Tower v3.dc.html" by scripts/convert-design.mjs.
+// AskPanel — generated from "project/Primary v3.dc.html" by scripts/convert-design.mjs.
 // Edit the design export and re-run `npm run convert-design`, or edit this file directly.
 
 import { T, type Vals } from "../dc";
@@ -27,7 +27,7 @@ export function AskPanel({ v }: { v: Vals }) {
             {T(v.askAnswer)}
           </div>
         </div>
-        <button onClick={v.closeAsk} style={{ border: "none", background: "transparent", cursor: "pointer", padding: "4px", color: "#85888c", font: "500 12px 'IBM Plex Sans'" }}>
+        <button style={{ border: "none", background: "transparent", cursor: "pointer", padding: "4px", color: "#85888c", font: "500 12px 'IBM Plex Sans'" }} onClick={v.closeAsk}>
           Close
         </button>
       </div>

@@ -1,9 +1,9 @@
 # Recruitment Control Tower
 
-A Next.js app built from the Claude Design prototype `project/Recruitment Control Tower v3.dc.html`.
-It covers Prime (agent tasks + archive), Enrollment (daily brief, studies, sites, agent),
-Budget (invoice reconciliation, upload, agent), Actions, AI Studio (beta), Audit Trail and
-Connect systems.
+A Next.js app built from the Claude Design prototype `project/Primary v3.dc.html`.
+It covers Ask Prime, the Homepage, Sites, Engagements, Actions, the Enrollment, Budget and
+Regulatory agents, Analytics (Patients, Engagements, Actions), the Prime chat panel, AI Studio (beta),
+Audit Trail and Connectors.
 
 ## Run locally
 
@@ -38,8 +38,9 @@ AI Studio generation) use the design's offline fallbacks instead.
 | `scripts/convert-design.mjs` | Regenerates the views, logic and pseudo CSS from the design export |
 | `project/`, `chats/`, `DESIGN_HANDOFF.md` | The original Claude Design handoff bundle |
 
-To pick up a new export of the design, replace `project/Recruitment Control Tower v3.dc.html`
-and run `npm run convert-design`. That overwrites the generated files.
+To pick up a new export of the design, replace `project/Primary v3.dc.html` and run
+`npm run convert-design`. That overwrites the generated files. If the export adds a new top-level
+screen, the script stops and asks for a component name in `SECTION_NAMES`.
 
 All study, site, invoice and action data is sample data from the prototype. Connecting systems,
 sign-in, invoice reading and approvals are simulated in the browser, and changes are lost
