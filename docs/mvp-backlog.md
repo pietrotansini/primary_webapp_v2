@@ -86,6 +86,14 @@ see `docs/adr/0002-rules-flag-agents-diagnose.md`.
 - **Crystallization:** a principle; in the MVP developers turn recurring diagnoses and rejection reasons into
   rules or metrics by hand.
 
+## Scenarios drive the order
+
+The backlog is ordered by the Scenarios it serves: `docs/scenarios.md` lists every Scenario from the demos (In, Won't,
+Out) with the data, analysis and features each needs, and the
+[Control Tower MVP Backlog](https://claude.ai/artifact/72GRvezZz11h4AF5hBQ4vH) page ranks them with a pilot cut line.
+A feature's priority follows the highest-ranked Scenario that needs it. Rows marked *candidate* were added because a
+Scenario needs them; they have no priority or size yet.
+
 ## Priorities and sizes (v0, provisional)
 
 | # | Feature | MoSCoW | FE | BE | Milestone | Most likely moved by |
@@ -115,6 +123,16 @@ see `docs/adr/0002-rules-flag-agents-diagnose.md`.
 | D5 | Competing trials | Could | S | M | later | |
 | C2 | Budget agent | Won't | | |  | |
 | C3 | Regulatory agent | Won't | | |  | |
+| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | *candidate* | | | | Needed by EG4, EG7 in `docs/scenarios.md` |
+| B5 | Referral and pre-screening data (funnel top) | *candidate* | | | | EN1, EN2.3, EN3, EN4.2, EN4.5, EN4.6 |
+| B6 | eConsent status | *candidate* | | | | EN2.3, EN4.4, EG3 |
+| B7 | Action outcome tracking (metric before and after) | *candidate* | | | | EN9 |
+| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | *candidate* | | | | OP4, OP5.1 to OP5.3 |
+| B9 | Site benchmarks (study median, peer Sites) | *candidate* | | | | EN1, EN2.3, EN3, EN4.3, EN4.5, EN4.6, EN5 |
+| B10 | Visit load and Site resources | *candidate* | | | | OP7 |
+| B11 | Enrollment forecast and cost of delay | *candidate* | | | | EN10; enrollment forecasting fog |
+| C8 | Campaign attribution to randomizations | *candidate* | | | | EG13 |
+| C9 | Leadership updates | *candidate* | | | | OP2 |
 
 Assumptions the sizes rest on:
 

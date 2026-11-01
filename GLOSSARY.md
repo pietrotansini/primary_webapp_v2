@@ -66,6 +66,10 @@ _Avoid_: assistant, copilot, bot
 One use case Prime can handle, such as enrollment monitoring, triage of Site Messages or invoice reconciliation. Each Capability is carried out by one Agent today.
 _Avoid_: feature, skill, module, workflow
 
+**Scenario**:
+A need some user has that the product can meet, such as generating a Report for a Site, checking enrollment or scheduling an engagement plan for a Study. The user may ask Prime for it or an Agent may raise it unprompted. One or more Capabilities serve each Scenario.
+_Avoid_: use case, feature, user story
+
 **Agent**:
 A named worker behind Prime that carries out one Capability, such as the Enrollment agent. People see it in the app, with its instructions, its memory and its runs. Agents run in parallel, and an Agent may work mostly by fixed rules rather than by AI.
 _Avoid_: bot, assistant, worker
