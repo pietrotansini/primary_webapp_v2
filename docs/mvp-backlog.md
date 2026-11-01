@@ -7,6 +7,8 @@ Every ticket resolution on that map updates this file.
 **Status: v0 (provisional).** Priorities and sizes from "Draft MVP backlog v0"
 ([#10](https://github.com/pietrotansini/primary_webapp_v2/issues/10)), on top of the candidate list from
 [Inventory the prototype's features and their backend needs](https://github.com/pietrotansini/primary_webapp_v2/issues/3).
+MoSCoW values were then re-cut by the pilot Scenario rank from "Pick the pilot's first Scenarios"
+([#18](https://github.com/pietrotansini/primary_webapp_v2/issues/18)).
 Everything below is provisional until "Finalize MVP feature backlog". Terms follow `GLOSSARY.md`.
 
 ## Product framing (v0)
@@ -23,6 +25,10 @@ The pilot user is the Sponsor's clinical operations team. Prime is the **front a
 multi-agent system, built on the existing `primary_teams` agent and reached from Ask Prime, the chat panel, Teams and
 Slack. Behind it, one Agent per Capability (see "How Prime produces insights" below). TMF / eTMF filing
 (also in `primary_teams`) is a separate product, not part of this backlog.
+
+The pilot Scenario rank (see "Scenarios drive the order") puts enrollment insight first: the first four Scenarios
+are enrollment ones, then one-off communications, Newsletter Campaigns and Site meeting briefs. So the engagement
+score (C7) and Campaign performance (C5) are now Should; the three proof points above stay the product's shape.
 
 ## Milestones
 
@@ -94,45 +100,77 @@ Out) with the data, analysis and features each needs, and the
 A feature's priority follows the highest-ranked Scenario that needs it. Rows marked *candidate* were added because a
 Scenario needs them; they have no priority or size yet.
 
-## Priorities and sizes (v0, provisional)
+### Pilot Scenarios (decided)
 
-| # | Feature | MoSCoW | FE | BE | Milestone | Most likely moved by |
-|---|---|---|---|---|---|---|
-| C4 | Campaigns and Newsletters | Must | L | L | M1 | Pilot form of the prototype's write-back flows; data model |
-| C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | |
-| C7 | Site engagement score (Engagement agent) | Must | S | M | M1 | Engagement score fog |
-| C5 | Campaign performance | Must | M | M | M1 | |
-| C1 | Actions workspace | Must | M | M | M1 | Pilot form of the write-back flows |
-| A6 | Outbound and inbound email | Must | S | L | M1 | Backend architecture and stack (provider choice) |
-| A3 | Agentic connectors and data sync | Must | S | XL | M1 | Agentic platform connectors prototype; ingestion approach |
-| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | Agentic platform connectors prototype |
-| A4 | Prime (front and orchestrator) | Must | S | L | M1 | Backend architecture and stack |
-| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | Backend architecture and stack |
-| A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | Roles and permissions fog |
-| A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) |  |
-| A7 | Retention and purge | Must | S | S | M2 | |
-| A8 | M2 compliance pack (DPA, subprocessors, review pack) | Must | | | M2 | Non-feature gate: documents, no code |
-| B1 | Homepage | Must | M | S | M1 | |
-| B2 | Enrollment per Site | Must | M | M | M1 | Ingestion approach; enrollment forecasting fog |
-| B3 | Site page (lite) | Must | M | M | M1 | Data model |
-| B4 | Enrollment agent | Must | M | M | M1 | Enrollment forecasting fog |
-| D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | Backend architecture and stack |
-| D2 | Prime chat panel | Must | M | S | M1 | |
-| D4 | Teams (Must), Slack (Should) | Must / Should | S | M / S | M1 | Backend architecture and stack |
-| D3 | AI Studio | Could | M | S | later | |
-| D5 | Competing trials | Could | S | M | later | |
-| C2 | Budget agent | Won't | | |  | |
-| C3 | Regulatory agent | Won't | | |  | |
-| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | *candidate* | | | | Needed by EG4, EG7 in `docs/scenarios.md` |
-| B5 | Referral and pre-screening data (funnel top) | *candidate* | | | | EN1, EN2.3, EN3, EN4.2, EN4.5, EN4.6 |
-| B6 | eConsent status | *candidate* | | | | EN2.3, EN4.4, EG3 |
-| B7 | Action outcome tracking (metric before and after) | *candidate* | | | | EN9 |
-| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | *candidate* | | | | OP4, OP5.1 to OP5.3 |
-| B9 | Site benchmarks (study median, peer Sites) | *candidate* | | | | EN1, EN2.3, EN3, EN4.3, EN4.5, EN4.6, EN5 |
-| B10 | Visit load and Site resources | *candidate* | | | | OP7 |
-| B11 | Enrollment forecast and cost of delay | *candidate* | | | | EN10; enrollment forecasting fog |
-| C8 | Campaign attribution to randomizations | *candidate* | | | | EG13 |
-| C9 | Leadership updates | *candidate* | | | | OP2 |
+Ranked on the page and reviewed by the CEO on 2026-11-01 in "Pick the pilot's first Scenarios"
+([#18](https://github.com/pietrotansini/primary_webapp_v2/issues/18)). The full rank is in `docs/scenario-rank.md`,
+exported from the page; "Import rank" on the page loads it back. Above the pilot cut line, in order:
+
+| Rank | Scenario | Features |
+|---|---|---|
+| 1 | EN0 Enrollment by Site report | B2, D1 |
+| 2 | EN3 Recruitment blockers at one Site, from referral to randomization | B5, B9, C6, D1 |
+| 3 | EN10 Forecast last-patient-in and the cost of delay | B11 |
+| 4 | EN6 Competing trials near a Site, with talking points for the PIs | D5 |
+| 5 | EG7 Draft a one-off communication to a Site | C1, A6, A10 |
+| 6 | EG8 Plan the monthly Newsletter Campaign with per-Site Reports | C4 |
+| 7 | EG9 Bulk-approve a Campaign, preview it as a Site | C4, A6 |
+| 8 | EN2.1 Sites at risk against plan, across Studies | B2, B4, A9 |
+| 9 | EG5 Brief for the next Site meeting | B3, D1 |
+
+Below the cut only the order matters for now: the CEO ranked the top nine and left the rest in catalogue order.
+Value, Size and Avail. in `docs/scenarios.md` are unchanged.
+
+Applying the rule:
+
+- **Promoted to Must:** A10, B5, B9, B11 (were candidates; sizes still open) and D5 (was Could).
+- **Moved to Should:** C7, C5, B1, D2 and D4, needed only by Scenarios below the cut (first: EG1, EG12, OP1, none, none).
+- **Must as prerequisites:** A1, A2, A3, A4, A5, A7 and A8 serve every Scenario (sign-in, data, Prime, audit, going live)
+  and stay Must whatever the rank.
+- **EN10 and EN6 pull in open fog:** B11 waits on "Enrollment forecasting" and D5 on "External signals", so both
+  need a decision before they can be sized.
+
+## Priorities and sizes (provisional)
+
+Ordered by the first Scenario each feature serves in the pilot rank; prerequisites next, then everything below the cut.
+
+| # | Feature | MoSCoW | FE | BE | Milestone | First Scenario | Most likely moved by |
+|---|---|---|---|---|---|---|---|
+| B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Ingestion approach; enrollment forecasting fog |
+| D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | Backend architecture and stack |
+| C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | 2 EN3 | |
+| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Ingestion approach (referral tool is a per-study file) |
+| B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
+| B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog |
+| D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
+| C1 | Actions workspace | Must | M | M | M1 | 5 EG7 | Pilot form of the write-back flows |
+| A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | Backend architecture and stack (provider choice) |
+| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
+| C4 | Campaigns and Newsletters | Must | L | L | M1 | 6 EG8 | Pilot form of the prototype's write-back flows; data model |
+| B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
+| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
+| B3 | Site page (lite) | Must | M | M | M1 | 9 EG5 | Data model |
+| A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
+| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Agentic platform connectors prototype |
+| A3 | Agentic connectors and data sync | Must | S | XL | M1 | prerequisite | Agentic platform connectors prototype; ingestion approach |
+| A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
+| A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
+| A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
+| A8 | M2 compliance pack (DPA, subprocessors, review pack) | Must | | | M2 | prerequisite | Non-feature gate: documents, no code |
+| C7 | Site engagement score (Engagement agent) | Should (was Must) | S | M | M1 | 26 EG1 | Engagement score fog |
+| C5 | Campaign performance | Should (was Must) | M | M | M1 | 33 EG12 | |
+| B1 | Homepage | Should (was Must) | M | S | M1 | 36 OP1 | |
+| D2 | Prime chat panel | Should (was Must) | M | S | M1 | none | |
+| D4 | Teams and Slack | Should (was Teams Must, Slack Should) | S | M / S | M1 | none | Backend architecture and stack |
+| D3 | AI Studio | Could | M | S | later | 35 EG14 | |
+| B6 | eConsent status | *candidate* | | | | 12 EN2.3 | Also EN4.4, EG3 |
+| B7 | Action outcome tracking (metric before and after) | *candidate* | | | | 25 EN9 | |
+| C8 | Campaign attribution to randomizations | *candidate* | | | | 34 EG13 | |
+| C9 | Leadership updates | *candidate* | | | | 37 OP2 | |
+| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | *candidate* | | | | 42 OP4 | Also OP5.1 to OP5.3 |
+| B10 | Visit load and Site resources | *candidate* | | | | 47 OP7 | |
+| C2 | Budget agent | Won't | | | | | |
+| C3 | Regulatory agent | Won't | | | | | |
 
 Assumptions the sizes rest on:
 
@@ -277,6 +315,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### B1. Homepage
 
 - **v0:** Must · FE M · BE S. Actions waiting, next Campaigns, enrollment by Study.
+- **Pilot rank:** Should. First needed by OP1 (rank 36), below the cut.
 - **Frontend:** "Clinical Operations Agent" landing: Actions waiting for you (with cost impact if approved),
   Enrollment by study, Next site engagements, What Prime did in the last 7 days, suggested tasks
   ("Summarize what needs my attention", "Find sites at risk across all studies", "Draft my weekly update for
@@ -403,6 +442,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### C5. Engagement performance
 
 - **v0:** Must · FE M · BE M.
+- **Pilot rank:** Should. First needed by EG12 (rank 33), below the cut.
 - **Frontend:** per campaign (Analytics → Engagements): delivered, read and confirmed, responses, questions raised,
   actions requested and their status per site, site metric changes after the campaign, "what we learned", and
   "New patients at 30 days". Campaign list with filters.
@@ -426,6 +466,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### C7. Site engagement score (new in v0)
 
 - **v0:** Must · FE S · BE M.
+- **Pilot rank:** Should. First needed by EG1 (rank 26), below the cut.
 - **Frontend:** a score per Site on the Sites list and Site page, trend over time, ranked with enrollment.
 - **Backend:** computed from Site Responses, Site Messages and Action outcomes (formula still open).
   Writes score snapshots. No external system.
@@ -453,6 +494,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### D2. Prime chat panel (per page)
 
 - **v0:** Must · FE M · BE S.
+- **Pilot rank:** Should. No Scenario needs it; Ask Prime (D1) and Site page briefs cover the pilot Scenarios.
 - **Frontend:** a side panel on every page with page-specific suggested tasks (`PAGE_CHAT`: Homepage, Actions,
   Enrollment, Budget, Regulatory, Patients Recruitment, Sites List, Engagements Performance, AI Studio,
   Audit Trail, Connectors), a free-text box, a structured answer card with a follow-up refinement, and a
@@ -473,6 +515,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### D4. Prime in Slack / Teams
 
 - **v0:** Teams Must, Slack Should · FE S · BE M / S. Same agent as Ask Prime; already runs on both in `primary_teams`.
+- **Pilot rank:** Should, Teams and Slack alike. No Scenario needs it; cheap to add since `primary_teams` already runs on both.
 - **Frontend:** "Add to Teams / Slack" in the sidebar; once added, "Prime in Teams & Slack". Nothing else is designed.
 - **Backend:** a Slack app / Teams bot that relays questions to Prime and posts approvals or alerts.
   External: Slack and Microsoft Teams APIs. Simulated: a flag.
@@ -481,6 +524,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### D5. External signals: competing trials
 
 - **v0:** Could · FE S · BE M.
+- **Pilot rank:** Must, M1. Needed by EN6 (rank 4); waits on the "External signals" fog for sources and matching.
 - **Frontend:** appears inside other features, not as its own page: the NASH-3301 study note and action about
   "2 new NASH studies recruiting the same F2–F3 patients" (ClinicalTrials.gov), and competing trials per site in
   Site detail (`BS_COMP`).
