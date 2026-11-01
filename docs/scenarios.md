@@ -6,8 +6,10 @@ in "Catalogue the Scenarios from the demos". The ranked, sortable view is the
 [Control Tower MVP Backlog](https://claude.ai/artifact/72GRvezZz11h4AF5hBQ4vH) page; this file is the source it
 mirrors. Terms follow `GLOSSARY.md`.
 
-**Status: v0 (provisional).** Value, Size and Data availability are first drafts, to be corrected in
-"Pick the pilot's first Scenarios". The rank and the pilot cut line live on the page, not here.
+**Status: v0 (provisional), ranked.** Value, Size and Data availability are first drafts; "Pick the pilot's first
+Scenarios" ([#18](https://github.com/pietrotansini/primary_webapp_v2/issues/18)) ranked the rows and kept them as they
+are. The rank and the pilot cut line are set on the page; once reviewed, they are exported from it ("Export rank")
+and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 
 ## Where they come from
 
