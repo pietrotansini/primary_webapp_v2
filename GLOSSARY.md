@@ -22,6 +22,10 @@ _Avoid_: center, account, investigator site
 A person at a Site the platform writes to, such as the PI or the study coordinator. Site Contacts come from the Sponsor's CTMS.
 _Avoid_: contact, recipient, site user
 
+**Subject**:
+A patient taking part in a Study, known to the platform only by the pseudonymized subject ID the EDC assigns, never by name.
+_Avoid_: patient record, participant, enrollee
+
 ### Engagement
 
 **Action**:
