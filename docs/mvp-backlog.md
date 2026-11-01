@@ -19,8 +19,9 @@ The MVP is a **site-engagement CRM for biotech Sponsors**. The pilot proves, in 
    asks become Actions, and each Site gets an engagement score; Campaign performance rolls it up.
 3. **Enrollment per Site:** measured from connector data only, with the Enrollment agent proposing Actions.
 
-The pilot user is the Sponsor's clinical operations team. Prime is **one agent**, the existing
-`primary_teams` agent, reached from Ask Prime, the chat panel, Teams and Slack. TMF / eTMF filing
+The pilot user is the Sponsor's clinical operations team. Prime is the **front and orchestrator** of a
+multi-agent system, built on the existing `primary_teams` agent and reached from Ask Prime, the chat panel, Teams and
+Slack. Behind it, one Agent per Capability (see "How Prime produces insights" below). TMF / eTMF filing
 (also in `primary_teams`) is a separate product, not part of this backlog.
 
 ## Milestones
@@ -55,19 +56,58 @@ The Milestone column is provisional until "Finalize MVP feature backlog".
 - **Security review pack:** filled standard questionnaire (CAIQ-lite / SIG Lite), data-flow and architecture
   note, DPA, subprocessor list; encryption in transit and at rest. SOC 2 / ISO 27001 and a pen test are deferred.
 
+## How Prime produces insights (decided)
+
+Decided in [How Prime generates insights and recommended actions](https://github.com/pietrotansini/primary_webapp_v2/issues/6);
+see `docs/adr/0002-rules-flag-agents-diagnose.md`.
+
+- **Shape:** Prime is the front and orchestrator; behind it, **Agents** run in parallel, one per **Capability**,
+  shown in the UI with their instructions, memory, runs and proposals. An Agent can be mostly deterministic.
+- **MVP Agents:** Enrollment agent (Sites behind expected pace, B4), Triage agent (classify Site Messages and
+  Site Responses, extract asks, C6), Newsletter agent (per-Site Reports and asks in a Campaign, C4; makes no
+  proposals), Engagement agent (Sites going quiet, C7).
+- **Hybrid pipeline:** deterministic metrics, then fixed rules (our config) raise flags with a severity, then the
+  Agent diagnoses with read tools on our DB and drafts the Action and email. The LLM never decides alone
+  which Sites are at risk.
+- **When:** Enrollment and Engagement agents run after each successful sync; the Triage agent on each incoming
+  Site Message or Site Response; the Newsletter agent when a Campaign is drafted and again at send time.
+  Chat reads stored results and uses read tools; it does not trigger scans.
+- **Proposed Action fields:** priority P1–P3 from the rule's severity; one-line expected impact; owner chosen by
+  the Agent from the Study team, with a reason, and changeable by anyone; Evidence. No confidence score, days
+  saved or cost impact.
+- **Evidence:** references to the records and metric snapshots the Agent fetched in that run (source system,
+  as-of sync time); the server rejects citations it did not fetch; the UI links each claim to its record.
+- **Repeat flags:** one open proposal per Site and rule; later runs refresh its Evidence; after a rejection the
+  flag is held back until the Site is a severity step worse or 14 days pass.
+- **Memory:** rejection reasons stored per Study and Agent, fed into later runs, visible and deletable on the
+  Agent's page. Users edit free-text instructions; rules and thresholds are our config.
+- **Stored outputs:** each run stores a short run summary (feeds Homepage "What Prime did") and per-Site diagnosis
+  lines (the Sites list shows the stored line, not a live call).
+- **Crystallization:** a principle; in the MVP developers turn recurring diagnoses and rejection reasons into
+  rules or metrics by hand.
+
+## Scenarios drive the order
+
+The backlog is ordered by the Scenarios it serves: `docs/scenarios.md` lists every Scenario from the demos (In, Won't,
+Out) with the data, analysis and features each needs, and the
+[Control Tower MVP Backlog](https://claude.ai/artifact/72GRvezZz11h4AF5hBQ4vH) page ranks them with a pilot cut line.
+A feature's priority follows the highest-ranked Scenario that needs it. Rows marked *candidate* were added because a
+Scenario needs them; they have no priority or size yet.
+
 ## Priorities and sizes (v0, provisional)
 
 | # | Feature | MoSCoW | FE | BE | Milestone | Most likely moved by |
 |---|---|---|---|---|---|---|
 | C4 | Campaigns and Newsletters | Must | L | L | M1 | Pilot form of the prototype's write-back flows; data model |
-| C6 | Site Responses and Site Messages | Must | M | L | M1 | How Prime generates insights |
-| C7 | Site engagement score | Must | S | M | M1 | How Prime generates insights |
-| C5 | Campaign performance | Must | M | M | M1 | How Prime generates insights |
+| C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | |
+| C7 | Site engagement score (Engagement agent) | Must | S | M | M1 | Engagement score fog |
+| C5 | Campaign performance | Must | M | M | M1 | |
 | C1 | Actions workspace | Must | M | M | M1 | Pilot form of the write-back flows |
 | A6 | Outbound and inbound email | Must | S | L | M1 | Backend architecture and stack (provider choice) |
 | A3 | Agentic connectors and data sync | Must | S | XL | M1 | Agentic platform connectors prototype; ingestion approach |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | Agentic platform connectors prototype |
-| A4 | Prime (the shared agent) | Must | S | L | M1 | Backend architecture and stack |
+| A4 | Prime (front and orchestrator) | Must | S | L | M1 | Backend architecture and stack |
+| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | Backend architecture and stack |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | Roles and permissions fog |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) |  |
 | A7 | Retention and purge | Must | S | S | M2 | |
@@ -75,7 +115,7 @@ The Milestone column is provisional until "Finalize MVP feature backlog".
 | B1 | Homepage | Must | M | S | M1 | |
 | B2 | Enrollment per Site | Must | M | M | M1 | Ingestion approach; enrollment forecasting fog |
 | B3 | Site page (lite) | Must | M | M | M1 | Data model |
-| B4 | Enrollment agent | Must | M | L | M1 | How Prime generates insights |
+| B4 | Enrollment agent | Must | M | M | M1 | Enrollment forecasting fog |
 | D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | Backend architecture and stack |
 | D2 | Prime chat panel | Must | M | S | M1 | |
 | D4 | Teams (Must), Slack (Should) | Must / Should | S | M / S | M1 | Backend architecture and stack |
@@ -83,6 +123,16 @@ The Milestone column is provisional until "Finalize MVP feature backlog".
 | D5 | Competing trials | Could | S | M | later | |
 | C2 | Budget agent | Won't | | |  | |
 | C3 | Regulatory agent | Won't | | |  | |
+| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | *candidate* | | | | Needed by EG4, EG7 in `docs/scenarios.md` |
+| B5 | Referral and pre-screening data (funnel top) | *candidate* | | | | EN1, EN2.3, EN3, EN4.2, EN4.5, EN4.6 |
+| B6 | eConsent status | *candidate* | | | | EN2.3, EN4.4, EG3 |
+| B7 | Action outcome tracking (metric before and after) | *candidate* | | | | EN9 |
+| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | *candidate* | | | | OP4, OP5.1 to OP5.3 |
+| B9 | Site benchmarks (study median, peer Sites) | *candidate* | | | | EN1, EN2.3, EN3, EN4.3, EN4.5, EN4.6, EN5 |
+| B10 | Visit load and Site resources | *candidate* | | | | OP7 |
+| B11 | Enrollment forecast and cost of delay | *candidate* | | | | EN10; enrollment forecasting fog |
+| C8 | Campaign attribution to randomizations | *candidate* | | | | EG13 |
+| C9 | Leadership updates | *candidate* | | | | OP2 |
 
 Assumptions the sizes rest on:
 
@@ -93,6 +143,9 @@ Assumptions the sizes rest on:
   already working); the web app becomes one more Surface. The work is grounding it on our DB instead of mock
   Study Data, plus new tools. Where it is deployed and how many agents run (not limited to Vercel, Supabase or
   Next.js) is open in "Backend architecture and stack".
+- **A9** is the shared machinery every Agent uses (rules over metrics, run scheduling on sync and events, Agent
+  pages, memory, Evidence validation, dedupe); building it once is what lets **B4** drop from BE L to M and keeps
+  C4, C6 and C7's Agents small.
 - **A6** sends from a platform domain through an email provider and receives Site Messages at an inbound
   address; no mailbox access. Requests (acknowledge, short form) are links to pages we host.
 - **B2** uses connector data only: site-reported form figures never count as enrollment data.
@@ -205,6 +258,18 @@ one sponsor with several studies, the platform **sends the approved email itself
   security questionnaire (CAIQ-lite / SIG Lite), data-flow and architecture note. EU regions chosen by default
   where they cost nothing extra. SOC 2 / ISO 27001 and a pen test are deferred.
 
+### A9. Agent runtime (new, from "How Prime generates insights")
+
+- **v0:** Must · FE M · BE L · M1.
+- **Frontend:** one page per Agent (instructions, memory with delete, last/next run, run summaries, open
+  proposals), replacing the prototype's bespoke Enrollment/Budget/Regulatory pages; "proposed by <Agent>" and
+  Evidence links on every Action.
+- **Backend:** per-Site metric computation and rule evaluation after each sync; event triggers (Site Message,
+  Campaign drafted/sent); runs an Agent per flag with read tools on our DB; validates Evidence against the run's
+  tool reads; dedupes one open proposal per Site and rule with a rejection cool-down; stores run summaries,
+  diagnosis lines and memory. Every run and AI call is audited (A5). Deployment and orchestration: "Backend
+  architecture and stack".
+
 ---
 
 ## B. Recruitment monitoring
@@ -256,7 +321,9 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B4. Enrollment agent
 
-- **v0:** Must · FE M · BE L. Measures enrollment per Site and proposes Actions.
+- **v0:** Must · FE M · BE M (was L; the shared parts moved to A9). After each sync, rules over B2 metrics flag
+  Sites behind expected pace; the Agent diagnoses with read tools and proposes Actions with Evidence, a rule-set
+  priority and an owner it picks. Instructions editable, memory from rejections, rules are our config.
 - **Frontend:** agent page with instructions (free text), triggers (when → then rules, e.g. "Site below 60% of
   expected enrollment → flag at risk and diagnose"), data sources it reads, memory ("learned" items, from
   dismissals or added context), last/next scan, Daily Brief, Key insights, Action items / open proposals.
@@ -274,7 +341,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C1. Actions workspace
 
-- **v0:** Must · FE M · BE M. An Action is a task for one Sponsor-side person with a deadline; started by Prime or by a Site Message; overdue is only flagged; the assignee approving an email Action sends and completes it.
+- **v0:** Must · FE M · BE M. An Action is a task for one Sponsor-side person with a deadline; started by an Agent or by a Site Message; the proposing Agent picks the owner, anyone can change it; fields are priority (from the rule), one-line impact and Evidence, no cost impact, confidence or days saved; overdue is only flagged; the assignee approving an email Action sends and completes it.
 - **Frontend:** inbox of proposed actions with priority (P1–P3), study, sites, kind, confidence, filters and
   status groups (open / approved / closed / rejected). Each action shows what was observed, why, sources,
   expected impact, days saved and **cost impact** (days × study daily cost), then either an email draft
@@ -439,5 +506,5 @@ Facts the later tickets will need to decide on; not decisions.
 - **Derived numbers.** Funnel top (referred, pre-screened), expected per-site pace, forecast completion and
   cost-of-delay are computed from fixed ratios or constants today; real values need source data or a model.
 - **Agents share one pattern.** Enrollment, Budget and Regulatory agents all have instructions, triggers,
-  data sources, memory, last/next run and proposals into Actions. A shared "agent" capability may be cheaper
-  than three bespoke ones.
+  data sources, memory, last/next run and proposals into Actions. *Decided: one shared Agent runtime (A9),
+  one Agent per Capability.*

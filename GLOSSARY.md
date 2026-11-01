@@ -29,7 +29,7 @@ _Avoid_: patient record, participant, enrollee
 ### Engagement
 
 **Action**:
-A task assigned to one person on the Sponsor side, with a deadline and an escalation path, such as sending a Site a Newsletter or answering a Site's question. Prime proposes some Actions, and a Site's mail starts others.
+A task assigned to one person on the Sponsor side, with a deadline and an escalation path, such as sending a Site a Newsletter or answering a Site's question. Agents propose some Actions, choosing an owner that anyone can change, and a Site's mail starts others.
 _Avoid_: task, recommendation, to-do, engagement email
 
 **Report**:
@@ -59,5 +59,21 @@ _Avoid_: reply, inbound mail, site email
 ### Platform
 
 **Prime**:
-The single AI agent behind the web app's Ask Prime and chat panel and the Teams and Slack bots, the same one wherever it is reached.
+The system as people meet it: one name and one voice in the web app's Ask Prime and chat panel and in the Teams and Slack bots. It answers people itself and hands work to the Agents behind it.
 _Avoid_: assistant, copilot, bot
+
+**Capability**:
+One use case Prime can handle, such as enrollment monitoring, triage of Site Messages or invoice reconciliation. Each Capability is carried out by one Agent today.
+_Avoid_: feature, skill, module, workflow
+
+**Scenario**:
+A need some user has that the product can meet, such as generating a Report for a Site, checking enrollment or scheduling an engagement plan for a Study. The user may ask Prime for it or an Agent may raise it unprompted. One or more Capabilities serve each Scenario.
+_Avoid_: use case, feature, user story
+
+**Agent**:
+A named worker behind Prime that carries out one Capability, such as the Enrollment agent. People see it in the app, with its instructions, its memory and its runs. Agents run in parallel, and an Agent may work mostly by fixed rules rather than by AI.
+_Avoid_: bot, assistant, worker
+
+**Evidence**:
+The records and figures an Agent read to support a proposed Action, each with the system it came from and when it was last synced.
+_Avoid_: sources, proof, rationale
