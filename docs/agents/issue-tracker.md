@@ -44,3 +44,11 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
 - **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
 - **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+
+## Merge and clean up
+
+Run `/merge`. It runs `python3 scripts/merge_tool.py` (`--dry-run` prints the plan and changes nothing; `--clean-only` merges nothing). Done when the PR is `MERGED`, its worktree, local branch and remote branch are gone, and the main checkout's `main` includes the merge.
+
+The tool squash-merges every open PR that is ready: base `main`, not a draft, `MERGEABLE`, every check passed. This repo has no `.github/workflows`, so PRs get no checks and none are waited for; once workflows exist, a PR with no checks yet counts as pending. Draft, conflicting, failing and stacked PRs are skipped, each with its reason on its line. It merges without `--delete-branch`.
+
+Then, for every local branch whose PR is `MERGED`, it removes the worktree, the local branch and the remote branch, and fast-forwards `main` when the main checkout is on `main` and clean. It skips a branch whose local or remote tip isn't the merged head, or whose worktree has uncommitted or untracked changes. A branch with no PR is cleaned when its tip is already in `main` or in a merged PR's head. A `research/*` or `prototype/*` branch with no PR and no commit for 3 days loses its worktree and local branch, but keeps its remote branch. Every other branch is left alone. When the tool reports the caller's own worktree, `/merge` removes it with `ExitWorktree` (`discard_changes: true`, since the squash left its commits off `main`).
