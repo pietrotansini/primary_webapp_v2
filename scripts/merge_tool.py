@@ -7,7 +7,8 @@ repo with no .github/workflows gets no checks, so none are waited for. The tool 
 skipped with the reason.
 
 Then, for every local branch whose PR is MERGED it removes the branch's worktree, its local branch and its remote branch,
-then fast-forwards the main checkout's `main`. A branch with no PR is cleaned the same way when every commit on it has
+then fast-forwards the main checkout's `main`. When the branch is the one checked out in the main checkout and that
+checkout is clean, it switches the main checkout to `main` first. A branch with no PR is cleaned the same way when every commit on it has
 landed: its tip is in main (an empty branch) or in a MERGED PR's head (one step of a stack merged as a single PR). It
 A research/ or prototype/ branch with no PR whose last commit is over 3 days old loses its worktree and local branch, but
 its remote branch stays, since that is where its commits live on. It prints one line per branch that has a PR, has
@@ -209,7 +210,13 @@ def clean(main: Path, here: Path, branch: str, checkouts: dict[str, Path], lande
     if remote is not None and remote != head:
         return f"skipped (remote tip is not {expected})"
     if checkout == main:
-        return "skipped (checked out in the main checkout)"
+        # The branch has landed, so the main checkout can go back to main, unless that would carry or lose changes.
+        if git(main, "status", "--porcelain"):
+            return "skipped (checked out in the main checkout, which has uncommitted or untracked changes)"
+        if dry_run:
+            return "would switch the main checkout to main, then clean"
+        git(main, "switch", "main")
+        checkout = None
     gone = checkout is not None and not checkout.exists()
     if checkout is not None and not gone:
         if here == checkout:
