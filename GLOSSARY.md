@@ -86,6 +86,10 @@ _Avoid_: use case, feature, user story
 A named worker behind Prime that carries out one Capability, such as the Enrollment agent. People see it in the app, with its instructions, its memory and its runs. Agents run in parallel, and an Agent may work mostly by fixed rules rather than by AI.
 _Avoid_: bot, assistant, worker
 
+**Recipe**:
+The crystallized form of a connector for one platform, tenant and Study: how to fetch the data (API calls, an export file or UI steps), which source fields map to which of our items (everything else is dropped), and the checks a sync must pass. It is versioned and replayed on a schedule without AI; an agent only proposes new versions, which Primary approves and the Sponsor admin can review.
+_Avoid_: script, pipeline, recording, integration
+
 **Evidence**:
 The records and figures an Agent read to support a proposed Action, each with the system it came from and when it was last synced.
 _Avoid_: sources, proof, rationale

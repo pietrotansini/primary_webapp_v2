@@ -202,8 +202,8 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
-| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Agentic platform connectors prototype; data model (versioned synced records) |
-| A3 | Agentic connectors and data sync | Must | S | XL | M1 | prerequisite | Agentic platform connectors prototype; ingestion approach |
+| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
+| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; least-privilege access; Jev and Obscura research; ingestion approach |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
@@ -226,8 +226,10 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 Assumptions the sizes rest on:
 
 - **A3** is XL because connectors are agent-driven (an agent learns to work a platform's UI or API) and then
-  crystallized into replayable pipelines; no pilot Sponsor, EDC or CTMS is picked yet, so it stays generic.
-  Builds on `clinical-platform-connector` (Playwright recordings) and `castor_api_connector`.
+  crystallized into Recipes replayed with no LLM, plus the repair loop, checks, quarantine and review history;
+  no pilot Sponsor, EDC or CTMS is picked yet, so it stays generic. Builds on `clinical-platform-connector`
+  (Playwright recordings), `clinical-platform-connector-pietro` (assisted and automatic Castor export, immutable
+  snapshots with receipts) and `castor_api_connector` (Castor API export).
 - **A4 / D1 / D2 / D4** reuse the `primary_teams` agent (LangGraph, Knowledge Base, Teams and Slack Surfaces
   already working); the web app becomes one more Surface. The work is grounding it on our DB instead of mock
   Study Data, plus new tools. Where it is deployed and how many agents run (not limited to Vercel, Supabase or
@@ -284,15 +286,27 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A3. Connectors and data sync
 
-- **v0:** Must · FE S · BE XL. Agentic connectors crystallized into ingestion pipelines (to prototype); EDC and CTMS first.
+- **v0:** Must · FE S · BE XL. Agentic connectors crystallized into ingestion pipelines; EDC and CTMS first.
   Every connector is read-only; eTMF and Payments tiles are shown as "Not in pilot".
+- **Decided ("Agentic platform connectors that crystallize into ingestion pipelines", #14):** each connector is a
+  versioned **Recipe** per platform, tenant and Study (fetch steps, a field-mapping allowlist per feed, checks),
+  replayed on a schedule with no LLM. An agent learns the first Recipe and repairs a broken one; it only ever
+  proposes a new Recipe version, never data. Fetch order: vendor API, then scheduled export file, then the UI.
+  Failures are classified: UI step failed → agent repairs the step (may go live without a person behind gates,
+  #29); mapped field gone → agent proposes, a person decides; contract broken → quarantined, store marked stale;
+  sign-in or MFA → a person. Primary approves Recipes; the Sponsor admin can review them. Every run, repair,
+  dry-run and promotion is an audit event. See `docs/adr/0003-connectors-replay-recipes-agents-propose-versions.md`.
+- **Frontend (pilot):** Connectors page lists each Recipe with source (API, export, UI), version, approver, last
+  good sync, status (ok, stale, quarantined, needs a person, awaiting approval) and its change history, so the
+  Sponsor admin can review it. Sign-in hand-off for MFA on UI Recipes.
 - **Frontend:** Connectors page lists connected systems (EDC, CTMS, eTMF, eIRB, Site payments, CRM,
   Reimbursements) with vendor, last sync, access mode ("Read" / "Read | write with your approval") and
   connect/disconnect. "Add a system" opens a catalog of ~14 categories × ~70 vendors; picking one opens a
   username/password modal. TopBar shows "Last scan 6:04 AM". Once real: only the connectors we actually build
   are listed; the rest become "request this connector"; sync status and errors are real.
 - **Backend:** reads from each source system on a schedule (or ingests files/exports); writes raw and normalized
-  records, sync runs, sync health. Stores credentials securely. No AI. External: whichever vendors the pilot
+  records, sync runs, sync health. Stores credentials securely. No AI in replay; the agent runs only to learn or
+  repair a Recipe. External: whichever vendors the pilot
   sponsor uses (see "Vendor data access options for the pilot"). Simulated: `INTEGRATIONS`, `SYS_CATALOG`,
   `connectSys()` / `disconnectSys()` just flip a flag.
 - **Source:** `views/ConnectorsView.tsx`, `views/ConnectSystemModal.tsx`, `views/TopBar.tsx`.
