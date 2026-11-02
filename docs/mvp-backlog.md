@@ -203,7 +203,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
-| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; least-privilege access; ingestion approach |
+| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; ingestion approach |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
@@ -301,6 +301,12 @@ one sponsor with several studies, the platform **sends the approved email itself
   learns Recipes. Repair runs in tiers: fallback locators, then a fast decision model (Jev) choosing among the
   page's controls with Subject IDs redacted, then Claude, then a person; the step's post-condition judges every
   tier. Pilot starts Claude-only; Jev is added once its US data terms are agreed and failures are recorded.
+- **Decided ("Least-privilege access a Sponsor admin can set up per platform", #28):** for each Recipe and
+  platform we send the Sponsor's admin one access request generated from the Recipe's approved mapping: a
+  dedicated non-human account, read-only role, named Studies and Sites, no blinded or hidden data. Field hiding
+  at the source is required where it is cheap (Vault CTMS field-level security) and optional where it needs a
+  study-build change (Rave, Clinical One, Castor; Vault EDC has none, so we read Retrieve Subjects only). The
+  parse-time drop (ADR 0001) stays on every platform, with an alert on an unexpected field.
 - **Frontend (pilot):** Connectors page lists each Recipe with source (API, export, UI), version, approver, last
   good sync, status (ok, stale, quarantined, needs a person, awaiting approval) and its change history, so the
   Sponsor admin can review it. Sign-in hand-off for MFA on UI Recipes.
