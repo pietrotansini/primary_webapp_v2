@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view:*)", "Bash(gh issue list:*)", "Bash(gh issue create:*)",
+      "Bash(gh issue comment:*)", "Bash(gh issue close:*)", "Bash(gh issue edit:*)",
+      "Bash(gh pr view:*)", "Bash(gh pr list:*)", "Bash(gh pr create:*)",
+      "Bash(gh api --method PATCH repos/pietrotansini/primary_webapp_v2/issues/:*)",
+      "Bash(gh api --method PATCH repos/pietrotansini/primary_webapp_v2/pulls/:*)",
+      "Bash(gh api --method POST repos/pietrotansini/primary_webapp_v2/issues/:*)",
+      "Bash(python3 scripts/build_backlog_page.py:*)"
+    ]
+  }
+}
