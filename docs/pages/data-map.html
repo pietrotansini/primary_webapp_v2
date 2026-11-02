@@ -741,7 +741,9 @@ function renderGraph(){
 function goToRow(id){
   let tr=document.querySelector(`tr.item[data-id="${CSS.escape(id)}"]`);
   if(!tr){SENS_ORDER.forEach(s=>sensOn[s]=true);nodeF=null;edgeF=null;renderTable();tr=document.querySelector(`tr.item[data-id="${CSS.escape(id)}"]`)}
-  if(!tr) return;
+  if(!tr){const r=BYID[id];const t=document.getElementById('trace');
+    t.innerHTML=`<b><code>${esc(id)}</code></b><span>${esc(r.nm)} is ${r.sc==='P'?'pilot data: its row is on the Pilot tab.':'added beyond the pilot: its row is on the Beyond tab.'}</span>`;
+    t.scrollIntoView({behavior:'smooth',block:'center'});return}
   sel=id; document.querySelectorAll('tr.item').forEach(x=>x.classList.toggle('sel',x.dataset.id===sel)); paint();
   tr.scrollIntoView({behavior:'smooth',block:'center'});
   tr.classList.remove('flash'); void tr.offsetWidth; tr.classList.add('flash');
@@ -750,10 +752,9 @@ function goToRow(id){
 function edgeLabel(id){const e=GE.find(x=>x.id===id);return `${GNBY[e.from].nm} → ${GNBY[e.to].nm}`}
 
 function renderTable(){
-  const its=items(), U=its;
+  const its=scopeItems(), U=items();
   const f=document.getElementById('filters');
   f.innerHTML=`<span class="lbl">Sensitivity</span>`+SENS_ORDER.filter(s=>its.some(r=>r.s.includes(s))).map(s=>`<button class="chip c-${s}" data-s="${s}" aria-pressed="${sensOn[s]}">${SENS_LABEL[s]} <span class="ct">${its.filter(r=>r.s.includes(s)).length}</span></button>`).join('')
-    +(scen?` <span class="nodefilter">Scenario <b>${scen}</b>&nbsp;${esc(SCBY[scen].name)}<button aria-label="Clear Scenario" data-clr="scen">×</button></span>`:'')
     +(nodeF?` <span class="nodefilter">Only items touching <b>${esc(LBL[nodeF])}</b><button aria-label="Clear box filter" data-clr="node">×</button></span>`:'')
     +(edgeF?` <span class="nodefilter">Only items on <b>${esc(edgeLabel(edgeF))}</b><button aria-label="Clear line filter" data-clr="edge">×</button></span>`:'');
   f.querySelectorAll('button.chip').forEach(b=>b.addEventListener('click',()=>{sensOn[b.dataset.s]=!sensOn[b.dataset.s];renderTable();paint()}));
