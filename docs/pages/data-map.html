@@ -1,0 +1,522 @@
+<title>Control Tower Data Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a regulatory dossier. Ground rules up top, then one tab per conversation (Pilot / Beyond),
+   each with a left-to-right data flow (collect → ingest → store → process → deliver) and the item register below it. */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --sunk:#E9EEF0; --ink:#13202A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6478; --accent-ink:#FFFFFF; --hl:#FFF3C4; --hl-line:#C9A227;
+  --s-public:#66737F; --s-conf:#2B58A6; --s-pii:#A35F00; --s-health:#B0233F; --s-free:#6B3DB0; --s-secret:#2A2F33; --s-mixed:#3F7A55;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1418; --surface:#151E24; --sunk:#1B262D; --ink:#E2E9ED; --muted:#91A3AE; --line:#2A3740;
+  --accent:#4DB2C9; --accent-ink:#0B1316; --hl:#3A3214; --hl-line:#D8B33E;
+  --s-public:#9AA6B0; --s-conf:#7FA6EE; --s-pii:#E5A24A; --s-health:#F07A90; --s-free:#B394EE; --s-secret:#C9D1D6; --s-mixed:#7CC596;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1418; --surface:#151E24; --sunk:#1B262D; --ink:#E2E9ED; --muted:#91A3AE; --line:#2A3740;
+  --accent:#4DB2C9; --accent-ink:#0B1316; --hl:#3A3214; --hl-line:#D8B33E;
+  --s-public:#9AA6B0; --s-conf:#7FA6EE; --s-pii:#E5A24A; --s-health:#F07A90; --s-free:#B394EE; --s-secret:#C9D1D6; --s-mixed:#7CC596;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--f-display);font-stretch:85%;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(28px,4.4vw,42px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:15px;font-weight:700;font-stretch:90%}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Header */
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 32px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:20px}
+header .lede{max-width:68ch;color:var(--muted);margin-top:10px}
+.status{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);background:var(--surface);padding:10px 12px;display:grid;grid-template-columns:auto auto;gap:2px 14px;white-space:nowrap}
+.status b{font-weight:500;color:var(--ink)}
+.status span{color:var(--muted)}
+@media (max-width:720px){header{grid-template-columns:1fr}.status{white-space:normal}}
+
+/* Ground rules */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.rule{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rule h3{font-size:13.5px}
+.rule p{font-size:13.5px;color:var(--muted)}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 20px;margin-bottom:12px}
+.sec-head p{color:var(--muted);font-size:13.5px;max-width:70ch}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tab{border:1px solid transparent;border-bottom:none;background:none;padding:10px 18px 11px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-bottom:-1px;text-align:left}
+.tab .t{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:17px}
+.tab .s{font-size:12px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);border-top:3px solid var(--accent);padding-top:8px}
+.tab:not([aria-selected="true"]):hover .t{color:var(--accent)}
+
+.view{display:flex;flex-direction:column;gap:32px;margin-top:24px}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px}
+@media (max-width:860px){.intro{grid-template-columns:1fr}}
+.intro .what{display:flex;flex-direction:column;gap:10px}
+.intro .what p{max-width:70ch}
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);align-self:start}
+.tally div{background:var(--surface);padding:10px 12px}
+.tally b{display:block;font-family:var(--f-display);font-stretch:80%;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tally span{font-size:12px;color:var(--muted)}
+.scen{display:flex;flex-wrap:wrap;gap:6px}
+.scen span{font-size:12.5px;border:1px solid var(--line);background:var(--surface);padding:2px 8px}
+.scen span code{color:var(--accent);font-weight:500}
+
+/* Flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;position:relative}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.col:not(:last-child):not(:nth-last-child(2))::after{content:"→";position:absolute;right:-17px;top:2px;color:var(--muted);font-size:16px}
+.col-h{display:flex;flex-direction:column;gap:0;padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:2px}
+.col-h .q{font-size:12px;color:var(--muted)}
+.node{background:var(--surface);border:1px solid var(--line);padding:9px 10px 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background .15s,border-color .15s,opacity .15s;position:relative}
+.node:hover{border-color:var(--accent)}
+.node .n{font-weight:600;font-size:13.5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.node .d{font-size:12px;color:var(--muted);line-height:1.4}
+.node .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.node.off{opacity:.38}
+.node.on{background:var(--hl);border-color:var(--hl-line)}
+.node.pick{outline:2px solid var(--accent);outline-offset:-2px}
+.node.sink{border-style:dashed}
+.badge{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border:1px solid currentColor;color:var(--accent);font-weight:500}
+.badge.warn{color:var(--s-pii)}
+.audit-rail{margin-top:10px;border:1px dashed var(--line);padding:8px 12px;font-size:12.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.audit-rail b{color:var(--ink);font-weight:600}
+@media (max-width:980px){
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .col:not(:last-child):not(:nth-last-child(2))::after{display:none}
+}
+@media (max-width:560px){.flow{grid-template-columns:1fr}}
+
+/* Trace bar */
+.trace{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 14px;font-size:13.5px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline}
+.trace .path{font-family:var(--f-mono);font-size:12.5px}
+.trace .path i{font-style:normal;color:var(--muted)}
+.trace button{margin-left:auto;background:none;border:1px solid var(--line);padding:2px 10px;cursor:pointer;font-size:12.5px}
+
+/* Filters */
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters .lbl{font-size:12.5px;color:var(--muted);margin-right:4px}
+.chip{--c:var(--muted);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:1px 7px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 11%,transparent);color:var(--c);white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;background:var(--c);display:inline-block}
+button.chip{cursor:pointer;padding:4px 10px;font-size:12.5px}
+button.chip[aria-pressed="false"]{background:none;opacity:.6}
+button.chip .ct{font-family:var(--f-mono);font-size:11px;opacity:.8}
+.c-Public{--c:var(--s-public)} .c-Confidential{--c:var(--s-conf)} .c-PII{--c:var(--s-pii)} .c-Health{--c:var(--s-health)} .c-Free{--c:var(--s-free)} .c-Secret{--c:var(--s-secret)} .c-Mixed{--c:var(--s-mixed)}
+.nodefilter{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;background:var(--hl);border:1px solid var(--hl-line);padding:3px 4px 3px 10px}
+.nodefilter button{border:none;background:none;cursor:pointer;padding:0 6px;font-size:14px;line-height:1}
+
+/* Register table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--ink);background:var(--surface);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.grp td{background:var(--sunk);font-family:var(--f-display);font-stretch:90%;font-weight:700;font-size:13px;padding:6px 10px}
+tr.item{cursor:pointer}
+tr.item:hover td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+tr.item.sel td{background:var(--hl)}
+td.id code{font-weight:500;color:var(--ink)}
+td.id .nm{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+td.fields{max-width:300px;color:var(--ink)}
+td .note{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+td.tags{display:flex;flex-wrap:wrap;gap:4px}
+.src,.out{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);padding:0 5px;white-space:nowrap;display:inline-block;margin:0 3px 3px 0}
+.st{font-size:12.5px;white-space:nowrap}
+.st small{display:block;color:var(--muted);font-size:11.5px}
+.flagtxt{color:var(--s-health);font-weight:600}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+
+/* Lists */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.qlist li{padding:11px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px}
+.qlist .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);padding-top:3px;min-width:84px}
+.qlist p{font-size:13.5px}
+.qlist p b{font-weight:600}
+.sub{width:100%;border-collapse:collapse;font-size:13px;min-width:0}
+.sub th,.sub td{padding:8px 10px 8px 0}
+.never{display:flex;flex-wrap:wrap;gap:6px}
+.never span{font-size:12.5px;border:1px solid var(--line);padding:3px 8px;text-decoration:line-through;text-decoration-color:var(--s-health);text-decoration-thickness:1.5px;background:var(--surface)}
+footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Recruitment Control Tower · data protection review</div>
+      <h1>Control Tower Data Map</h1>
+      <p class="lede">What data we need, where we collect it, how we process it, where we store it and where it goes. Split in two: the <b>pilot</b> (the 9 Scenarios above the cut, first real Sponsor data) and <b>beyond the pilot</b> (what later Scenarios would add). Click any box in the flow to filter the register, or any row to trace its path.</p>
+    </div>
+    <div class="status">
+      <span>Status</span><b>Tentative</b>
+      <span>As of</span><b>2 Nov 2026</b>
+      <span>Source</span><b>docs/data-model.md</b>
+      <span>Decided</span><b>ADR 0001, 0002, M2 bar</b>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <h2>Ground rules for both conversations</h2>
+      <p>Decided in the M2 compliance bar and the ADRs. These apply to every dataset below.</p>
+    </div>
+    <div class="rules">
+      <div class="rule"><h3>Roles</h3><p>The Sponsor is controller, we are processor. A DPA and a subprocessor list with regions are signed before real data arrives.</p></div>
+      <div class="rule"><h3>Read-only sources</h3><p>We never write back into the EDC, CTMS or any other Sponsor system. Only data born on our platform is ours to change.</p></div>
+      <div class="rule"><h3>Pseudonymized Subjects only</h3><p>EDC subject ID, Site, status and status dates, screen-fail reason category, next visit date. Every other field is dropped while parsing, before anything is written (ADR 0001).</p></div>
+      <div class="rule"><h3>Residency</h3><p>EU by default where it costs nothing extra: Supabase EU, Vercel fra1, an EU email provider. Not a go-live gate. Anthropic is a disclosed subprocessor under SCCs with zero data retention.</p></div>
+      <div class="rule"><h3>Audit trail</h3><p>Append-only, timestamped, attributable, before/after values. Covers sign-ins, approvals, sends, AI drafts and classifications, syncs, settings, exports, and every read of Subject data by a user or by Prime.</p></div>
+      <div class="rule"><h3>Part 11-ready, not validated</h3><p>Approvals record approver, time and signature meaning. No re-authentication at approval, no validation package, no CSV/CSA.</p></div>
+      <div class="rule"><h3>Retention</h3><p>Rolling periods set by the Sponsor per data class at onboarding, no defaults. Nothing is purged until a period is set. At contract end: export to the Sponsor, then delete.</p></div>
+      <div class="rule"><h3>Security</h3><p>Encryption in transit and at rest. Email magic-link sign-in, SSO optional. Review pack: CAIQ-lite / SIG Lite, data-flow note, DPA, subprocessors. SOC 2, ISO 27001 and pen test deferred.</p></div>
+    </div>
+  </section>
+
+  <div>
+    <div class="tabs" role="tablist" aria-label="Conversation">
+      <button class="tab" role="tab" id="tab-pilot" aria-controls="view" data-view="pilot"><span class="t">Pilot</span><span class="s">9 Scenarios, first real data (M2)</span></button>
+      <button class="tab" role="tab" id="tab-beyond" aria-controls="view" data-view="beyond"><span class="t">Beyond the pilot</span><span class="s">What later Scenarios add</span></button>
+    </div>
+    <div id="view" class="view" role="tabpanel"></div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Never ingested</h2>
+      <p>In either conversation. Fields outside the allowlist are dropped while parsing, before anything is written.</p>
+    </div>
+    <div class="never">
+      <span>Patient names</span><span>Initials</span><span>Dates of birth</span><span>Patient contact details</span><span>Medical record numbers</span><span>Treatment arm</span><span>Kit numbers and anything that could unblind</span><span>CRF data beyond the listed Subject fields</span><span>RTSM supply data</span><span>Per-candidate referral rows</span><span>EDC query text</span><span>Invoices and contracts</span><span>Payment runs</span><span>eIRB approvals</span><span>eTMF documents</span>
+    </div>
+  </section>
+
+  <footer>Generated from <code>docs/data-model.md</code>, <code>docs/mvp-backlog.md</code> (Compliance bar for M2) and <code>docs/adr/</code>. Everything marked tentative waits on "Data ingestion approach for the pilot" (#7) and "High-level data model" (#9).</footer>
+</div>
+
+<script>
+(function(){
+// ---------- Flow nodes ----------
+const SOURCES=[
+  {id:'EDC',n:'EDC',k:'Connected · API or export',d:'Rave Web Services, Vault EDC or Clinical One; else the Sponsor’s export. Subjects and milestone dates.'},
+  {id:'CTMS',n:'CTMS',k:'Connected · API or export',d:'Study, plans, Sites, Site Contacts, CRA assignments, monitoring visits, Site issues.'},
+  {id:'File',n:'Per-study files',k:'File transfer',d:'Referral tool counts; Site plan spreadsheet if the CTMS lacks it.'},
+  {id:'CTgov',n:'ClinicalTrials.gov',k:'Public API v2',d:'Competing recruiting trials and their locations.'},
+  {id:'Sponsor',n:'Sponsor settings',k:'Entered in the app',d:'NCT number if missing, daily cost of delay, retention periods.'},
+  {id:'Upload',n:'Study documents',k:'Uploaded by the Sponsor',d:'Protocol, Site reference manual, approved FAQs.'},
+  {id:'MailIn',n:'Inbound mail',k:'Email provider',d:'Site Messages sent to our inbound address. Free text.'},
+  {id:'Pages',n:'Hosted Request pages',k:'Our web pages',d:'Site Responses: acknowledgements and short forms.'},
+  {id:'Webhooks',n:'Mail delivery webhooks',k:'Email provider',d:'Delivered, bounced, opened, clicked, per message.',only:'beyond'},
+  {id:'Ours',n:'Our platform',k:'Born here',d:'Users, Actions, Campaigns, Agent runs, conversations, audit events.'},
+];
+const STORES=[
+  {id:'Landing',n:'Landing',k:'Transient',d:'Files and API payloads as received. Deleted after parsing; only a manifest and checksum stay.'},
+  {id:'Synced',n:'Synced records',k:'Versioned copy',d:'Our copy of EDC, CTMS, CT.gov and file data. One row per version, so Evidence points to what an Agent read.'},
+  {id:'Derived',n:'Derived',k:'Recomputed per sync',d:'Metrics, benchmarks, forecast, flags, trial matches, Reports. Snapshots kept for trends.'},
+  {id:'Born',n:'Born on the platform',k:'System of record',d:'Engagement, Agents, users, audit. We are the source.'},
+  {id:'Secret',n:'Secret store',k:'Credentials',d:'Connector users, API keys, file-drop keys. Never reach the LLM or any output.'},
+];
+const PROCS=[
+  {id:'Parse',n:'Parse and allowlist',k:'Deterministic',d:'Keep listed fields, drop the rest before writing. Referral data taken as counts only.'},
+  {id:'Metrics',n:'Metrics and rules',k:'Deterministic',d:'Per-Site metrics after each sync; fixed rules raise flags with a severity (ADR 0002).'},
+  {id:'Agents',n:'Prime and Agents',k:'LLM · Claude API',d:'Diagnose flags with read tools on our DB, draft Actions, classify Site Messages and flag possible patient information.'},
+  {id:'Approve',n:'Human approval',k:'Signature meaning',d:'A Sponsor user approves every mail before it leaves. Approver, time and meaning recorded.'},
+  {id:'Purge',n:'Retention purge',k:'Scheduled job',d:'Applies the Sponsor’s rolling period per data class. Each purge is audited.'},
+];
+const OUTS=[
+  {id:'App',n:'Web app',k:'Study team only',d:'Screens behind sign-in.'},
+  {id:'LLM',n:'Claude API',k:'Subprocessor · ZDR',d:'Prime and Agents read data through tools. Zero data retention, SCCs.'},
+  {id:'Mail',n:'Mail to Site Contacts',k:'Leaves our control',d:'Only what that Site may see. Subject data only as counts.'},
+  {id:'Pages',n:'Request pages',k:'Seen by Site Contacts',d:'The Request a Site answers, reached by a link token.'},
+  {id:'Export',n:'Exports',k:'Audited',d:'CSV/PDF downloads, inspection export, end-of-contract export.'},
+  {id:'Chat',n:'Teams and Slack',k:'Outside our UI',d:'Prime answers, Actions and weekly checks in chat (D4, Should).',only:'beyond'},
+];
+
+// ---------- Register ----------
+// [id, name, fields, inputs[], storage, retention, sens[], outs[], scope P|B, note, cat]
+const SENS_ORDER=['Health','Free','PII','Secret','Mixed','Confidential','Public'];
+const SENS_LABEL={Health:'Health (pseud.)',Free:'Free text',PII:'PII',Secret:'Secret',Mixed:'Mixed',Confidential:'Confidential',Public:'Public'};
+const R=[];
+function g(cat,rows){rows.forEach(r=>R.push({id:r[0],nm:r[1],f:r[2],in:r[3],st:r[4],ret:r[5],s:r[6],out:r[7],sc:r[8],note:r[9]||'',cat}))}
+g('Study',[
+ ['study','Study record','study code, title, phase, condition, countries, status, NCT number',['CTMS','Sponsor'],'Synced','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P','NCT number entered by the Sponsor when the CTMS lacks it.'],
+ ['study.plan','Study plan','target randomizations, planned and baseline FPI/LPI, planned Site count',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Export'],'P'],
+ ['study.protocol_version','Protocol versions','version, approval date, re-consent required',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P'],
+ ['study.eligibility','Key eligibility','key inclusion and exclusion criteria (text)',['CTgov','Upload'],'Synced','Study ops',['Public','Confidential'],['App','LLM','Mail'],'P','From the Study’s own CT.gov record, else from the protocol.'],
+ ['study.document','Study documents','protocol, Site reference manual, approved FAQs: file, version, text chunks',['Upload'],'Born','Study ops',['Confidential'],['App','LLM','Mail'],'P','Passages may be quoted in mail.'],
+ ['study.delay_cost','Daily cost of delay','amount, currency',['Sponsor'],'Born','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['study.team','Study team','Sponsor users on the Study and their role',['Ours'],'Born','People',['PII'],['App','LLM'],'P'],
+ ['study.visit_schedule','Visit schedule','visits, windows, procedures',['EDC'],'Synced','Study ops',['Confidential'],['App','LLM'],'B','From the EDC’s ODM study design. For OP7.'],
+ ['study.external_contact','CRO and vendor contacts','CRO or vendor contacts we may write to',['CTMS','Sponsor'],'Synced','People',['PII'],['App','LLM','Mail'],'B','For EN4.2.'],
+]);
+g('Sites and people',[
+ ['site','Site record','CTMS site ID, site number, institution, address, country, time zone, status, activation and close dates',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P'],
+ ['site.geo','Site coordinates','coordinates',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P','Site address sent to a geocoding provider. Provider not chosen.'],
+ ['site.plan','Site plan','Site target, expected randomizations per month',['CTMS','File'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P','CTMS if held, else a Sponsor spreadsheet.'],
+ ['site.contact','Site Contacts','name, role (PI, coordinator…), email, phone, start and end dates',['CTMS'],'Synced','People',['PII'],['App','LLM','Mail'],'P'],
+ ['site.assignment','CRA per Site','Sponsor-side CRA or monitor per Site',['CTMS'],'Synced','People',['PII'],['App','LLM'],'P'],
+ ['site.visit','Monitoring visits','visit type, planned and actual date, report due and final dates',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['site.issue','Site issues','category, opened, due, status, description',['CTMS'],'Synced','Study ops',['Free'],['App','LLM'],'P','Open: keep the description or the category only.'],
+ ['site.capacity','Site capacity','screening slots a Site says it can take',['Pages'],'Born','Site mail',['Confidential'],['App','LLM'],'B','A Site Response form. For EN5.'],
+]);
+g('Subjects (pseudonymized)',[
+ ['subject','Subject','EDC subject ID, Site, current status',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Export'],'P','Every read is audited.'],
+ ['subject.milestones','Subject milestones','screened, consented, randomized, discontinued and completed dates',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Export','Mail'],'P','Reaches mail only as counts per Site. Randomization from the EDC, not the RTSM.'],
+ ['subject.screen_fail_reason','Screen-fail reason','reason category',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Mail'],'P','Reaches mail only as counts per Site.'],
+ ['subject.next_visit','Next visit','next and last visit date',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','Already allowed by ADR 0001; first needed by OP7.'],
+ ['subject.discontinuation_reason','Discontinuation reason','reason category',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','Widens ADR 0001. For EN4.7.',true],
+ ['subject.consent_version','Consent version','ICF version signed, date',['EDC','File'],'Synced','Subjects',['Health'],['App','LLM'],'B','Widens ADR 0001. eConsent file only if the EDC lacks it. For EG3.',true],
+ ['subject.lab_dates','Screening lab dates','screening lab collection and result dates',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','Widens ADR 0001. For EN4.1.',true],
+]);
+g('Referral funnel',[
+ ['referral.funnel','Referral counts','counts per Site, week, source channel and stage (referred, pre-screen passed or failed, handed to Site, scheduled)',['File'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P','Counts only: candidates have not consented and have no pseudonymized ID.'],
+ ['referral.prescreen_fails','Pre-screen fails','fail counts per pre-screen question, Site and week',['File'],'Synced','Study ops',['Confidential'],['App','LLM'],'P','Counts only.'],
+]);
+g('EDC operations',[
+ ['edc.query','EDC queries','Site, form, opened, answered, closed, status',['EDC'],'Synced','Study ops',['Confidential'],['App','LLM'],'B','Query text dropped. For OP4, OP5.1.'],
+ ['edc.entry_lag','Data-entry lag','per Site: visit date vs first entry date, missing pages',['EDC'],'Derived','Study ops',['Confidential'],['App','LLM'],'B','For OP5.2.'],
+]);
+g('External signals',[
+ ['trial.external','Competing trials','NCT number, title, conditions, phase, status, sponsor, eligibility, dates',['CTgov'],'Synced','Study ops',['Public'],['App','LLM','Mail'],'P'],
+ ['trial.external_site','Competing trial locations','facility, city, country, coordinates, recruiting status',['CTgov'],'Synced','Study ops',['Public'],['App','LLM','Mail'],'P'],
+ ['trial.match','Trial overlap per Site','Site, trial, distance, overlap judgment, first seen',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Mail'],'P','Distance rule, then Agent judgment.'],
+]);
+g('Engagement',[
+ ['action','Actions','kind, Study, Sites, owner, deadline, status, priority, impact line, email draft, origin, approval (who, when, meaning), rejection reason',['Ours'],'Born','Engagement',['Confidential','PII'],['App','LLM','Mail','Export'],'P','PII in email drafts.'],
+ ['campaign','Campaigns','Study, template, blocks, audience, schedule, status',['Ours'],'Born','Engagement',['Confidential'],['App','LLM'],'P'],
+ ['mail.outbound','Outbound mail','per-Site rendered mail, recipients, sender, scheduled and sent time, provider message ID',['Ours'],'Born','Engagement',['PII'],['Mail','App','Export'],'P'],
+ ['report','Reports','figures and text per Site and period, as sent',['Ours'],'Derived','Engagement',['Confidential'],['Mail','App'],'P'],
+ ['request','Requests','kind (acknowledge, short form), form fields, link token',['Ours'],'Born','Engagement',['Confidential'],['Mail','Pages'],'P'],
+ ['site.response','Site Responses','request, Site Contact, answer, time',['Pages'],'Born','Site mail',['Free'],['App','LLM'],'P','Classified by the Triage agent.'],
+ ['site.message','Site Messages','sender, recipients, subject, body, attachments, received time, thread, matched Site and Site Contact, classification, patient-information flag',['MailIn'],'Born','Site mail',['Free','PII'],['App','LLM'],'P','Stored as received, no redaction. The Triage agent flags possible patient information.'],
+ ['brief','Site meeting briefs','Site, meeting date, text, Evidence',['Ours'],'Born','Engagement',['Confidential'],['App','Export'],'P'],
+ ['mail.event','Delivery and open tracking','delivered, bounced, opened, clicked, per message',['Webhooks'],'Born','Engagement',['PII'],['App','LLM'],'B','Per Site Contact. For EG1, EG12.'],
+ ['metric.engagement','Engagement score','engagement score per Site and date',['Ours'],'Derived','Engagement',['Confidential'],['App','LLM'],'B','Formula not decided. For EG1.'],
+]);
+g('Insights and Agents',[
+ ['metric.site','Site metrics','per Site and sync: counts per stage, rates, expected, gap, status, bottleneck',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P','Aggregates of health data. Snapshot per sync.'],
+ ['metric.benchmark','Benchmarks','study median and peer percentiles per stage',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['metric.forecast','LPI forecast','projected LPI, delay in days, cost of delay, method',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Export'],'P'],
+ ['rule','Rules','metric, threshold, severity, Agent',['Ours'],'Born','Study ops',['Confidential'],['App'],'P','Our config.'],
+ ['flag','Flags','rule, Site, severity, opened, state, cool-down until',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['agent','Agents','Capability, instructions, schedule',['Ours'],'Born','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['agent.run','Agent runs','trigger, flags handled, tool reads, run summary, diagnosis lines, LLM calls',['Ours'],'Born','Study ops',['Mixed'],['App','LLM'],'P','As sensitive as what it read. Audited when it read Subjects.'],
+ ['evidence','Evidence','record type, record ID, record version, source system, as-of sync time',['Ours'],'Born','Engagement',['Confidential'],['App'],'P','Pointers only. The server rejects citations the Agent did not fetch.'],
+ ['agent.memory','Agent memory','Study, Agent, text, origin (rejection reason)',['Ours'],'Born','Study ops',['Confidential'],['App','LLM'],'P','Visible and deletable on the Agent’s page.'],
+ ['saved_check','Saved checks','question, schedule, owner',['Ours'],'Born','Study ops',['Confidential'],['App'],'P'],
+ ['prime.conversation','Prime conversations','question, plan, tool reads, answer, surface',['Ours'],'Born','Engagement',['Mixed'],['App'],'P','Audited when it read Subjects.'],
+]);
+g('Platform and compliance',[
+ ['sponsor','Sponsor','name, settings, retention periods, region',['Ours','Sponsor'],'Born','—',['Confidential'],['App'],'P'],
+ ['user','Sponsor users','name, email, role, Studies, status',['Ours'],'Born','People',['PII'],['App','LLM','Mail'],'P','LLM sees names only; mail uses the user as sender.'],
+ ['connection','Connections','system, vendor, mode (API, file), status, credentials reference',['Ours'],'Secret','—',['Secret','Confidential'],['App'],'P','App shows status only.'],
+ ['sync.run','Sync runs','connection, start and end, status, records read and dropped, file checksum, errors',['Ours'],'Born','Audit',['Confidential'],['App','LLM'],'P'],
+ ['audit.event','Audit trail','who, when, what, before and after, signature meaning',['Ours'],'Born','Audit',['Mixed'],['App','LLM','Export'],'P','Append-only. May cite Subject IDs. LLM sees summaries.'],
+]);
+R.forEach(r=>{r.widen=false});
+['subject.discontinuation_reason','subject.consent_version','subject.lab_dates'].forEach(id=>{R.find(r=>r.id===id).widen=true});
+
+const CONNECTED=['EDC','CTMS','CTgov','File'];
+function procsOf(r){
+  const p=[];
+  if(r.in.some(s=>CONNECTED.includes(s))) p.push('Parse');
+  if(r.st==='Derived') p.push('Metrics');
+  if(r.out.includes('LLM')) p.push('Agents');
+  if(r.out.includes('Mail')) p.push('Approve');
+  if(r.ret && r.ret!=='—') p.push('Purge');
+  return p;
+}
+function storesOf(r){
+  const s=[r.st];
+  if(r.in.some(x=>CONNECTED.includes(x))) s.unshift('Landing');
+  return s;
+}
+R.forEach(r=>{r.procs=procsOf(r);r.stores=storesOf(r)});
+
+// ---------- View content ----------
+const VIEWS={
+ pilot:{
+  title:'The pilot dataset',
+  what:[
+   'The first real Sponsor data (milestone M2). Two connected platforms, the <b>EDC</b> and the <b>CTMS</b>, read through their APIs or the Sponsor’s exports, plus one per-study file from the referral tool. Everything else is born on our platform or entered by the Sponsor.',
+   'Subject data stays inside the ADR 0001 list: no pilot Scenario needs a new Subject field. Referral data arrives as counts only.'
+  ],
+  scen:[['EN0','Enrollment by Site report'],['EN3','Recruitment blockers at one Site'],['EN10','Forecast LPI and cost of delay'],['EN6','Competing trials near a Site'],['EG7','One-off communication to a Site'],['EG8','Monthly Newsletter with per-Site Reports'],['EG9','Bulk-approve a Campaign'],['EN2.1','Sites at risk against plan'],['EG5','Brief for the next Site meeting']],
+  subs:[['Supabase','Database','EU'],['Vercel','Hosting','fra1, Frankfurt'],['Email provider','Outbound mail, inbound address','EU, provider not chosen'],['Anthropic (Claude API)','Prime and Agents','SCCs, zero data retention'],['Geocoding provider','Site address to coordinates (EN6)','Not chosen']],
+  qs:[
+   ['Subjects','Prime reads <b>Subject-level records</b> through its tools, so pseudonymized health data reaches Anthropic (zero retention, every read audited). Is that enough, or do we restrict Prime to counts?'],
+   ['Free text','<b>Site Messages</b> are stored as received with no redaction; the Triage agent only flags possible patient information. What should happen to a flagged message?'],
+   ['Free text','<b>CTMS Site issue descriptions</b>: keep the free text, or keep the category only?'],
+   ['Mail','Reports reach Sites with figures per Site only, never Subject IDs. Can a Report show a <b>small count</b> (such as 1 screen fail) to the Site that produced it?'],
+   ['Landing','Raw files are <b>deleted after parsing</b> (manifest and checksum only). How do we debug a failed parse without them, and is a short holding window acceptable?'],
+   ['Referrals','Can the referral tool export <b>counts per Site, week and stage</b>, so no per-candidate data reaches us?'],
+   ['Geocoding','May Site addresses be sent to a <b>geocoding provider</b>, and which one?'],
+   ['Retention','Adopt three more retention classes (<b>Study ops, Engagement, Audit</b>) next to Subjects, Site mail and People? Can Audit be purged on a rolling period, given Part 11 expects it kept as long as the records it covers?'],
+   ['History','Synced records keep <b>one row per version</b> so Evidence can point at what an Agent read. Does version history extend what we must purge or export?'],
+  ],
+  changes:null
+ },
+ beyond:{
+  title:'What later Scenarios add',
+  what:[
+   'Scenarios below the pilot cut reuse most pilot data. This view lists only the <b>data items they add</b>, and the changes they make to data already held. Boxes greyed out in the flow are not touched by these new items.',
+   'The main topics are three new <b>Subject fields</b> that would widen ADR 0001, <b>open and click tracking</b> of Site Contacts, and a new output surface in <b>Teams and Slack</b>.'
+  ],
+  scen:[['EN4.1','Screen fails on a lab criterion'],['EN4.2','Staff turnover cut referrals'],['EN4.7','Early withdrawals'],['EN5','Sites that can take more patients'],['EG1','Re-engage quiet Sites'],['EG3','Protocol reminder with a deadline'],['EG12','Campaign performance'],['OP4','Sites that need a monitoring visit'],['OP5.1','Queries open 30+ days'],['OP5.2','EDC data-entry lag'],['OP7','Visit load against Site resources']],
+  subs:[['Microsoft Teams','Prime in chat (D4)','Sponsor’s tenant'],['Slack','Prime in chat (D4)','Sponsor’s workspace'],['Email provider','Delivery and open/click webhooks','Same provider as the pilot']],
+  qs:[
+   ['Subjects','Widening ADR 0001 with <b>discontinuation reason, ICF version and screening lab dates</b>: what does each need (DPIA update, Sponsor sign-off, DPA annex)?'],
+   ['Tracking','<b>Open and click tracking</b> on mail to Site Contacts: do we need their consent or a notice, and can it be per Sponsor or per Site?'],
+   ['Chat','Teams and Slack carry Prime answers and Actions <b>outside our UI</b>. Are they the Sponsor’s own systems or our subprocessors, and may Subject counts appear there?'],
+   ['Contacts','<b>CRO and vendor contacts</b> from the CTMS: same basis as Site Contacts?'],
+   ['Files','<b>eConsent file</b> as a fallback for the ICF version, and <b>CRO cost lines</b> for the delay cost: each is a new per-study transfer to review.'],
+   ['EDC','EDC queries keep Site, form, dates and status, and <b>drop the query text</b>. Is that enough to keep them out of the health-data class?'],
+  ],
+  changes:[
+   ['Output','Teams and Slack become an output surface for Actions, saved checks and Prime answers, under the same rules as the web app.'],
+   ['Delay cost','CRO cost lines arrive as a per-study file next to the Sponsor-entered daily cost.'],
+   ['CTMS history','OP6 diffs two CTMS syncs, reading the version history already kept for every synced record.'],
+   ['Audit','OP9.1 and OP9.2 summarize the audit trail and export approvals for an inspection.'],
+   ['Not ingested','Won’t and Out Scenarios would add invoices, contracts, payment runs, campaign-tool spend, eIRB approvals, RTSM supply and eTMF documents. None is planned.'],
+  ]
+ }
+};
+
+// ---------- State ----------
+let view='pilot', sel=null, nodeF=null;
+const sensOn={};SENS_ORDER.forEach(s=>sensOn[s]=true);
+const el=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LBL={};[...SOURCES.map(x=>['in:'+x.id,x.n]),...STORES.map(x=>['st:'+x.id,x.n]),...PROCS.map(x=>['pr:'+x.id,x.n]),...OUTS.map(x=>['out:'+x.id,x.n])].forEach(([k,v])=>LBL[k]=v);
+const SRC_SHORT={EDC:'EDC',CTMS:'CTMS',File:'File',CTgov:'CT.gov',Sponsor:'Sponsor',Upload:'Upload',MailIn:'Mail in',Pages:'Pages',Webhooks:'Webhooks',Ours:'Ours'};
+const OUT_SHORT={App:'App',LLM:'LLM',Mail:'Mail',Pages:'Pages',Export:'Export',Chat:'Chat'};
+const ST_LBL={Synced:'Synced, versioned',Derived:'Derived',Born:'Born here',Secret:'Secret store'};
+
+function items(){return R.filter(r=>r.sc===(view==='pilot'?'P':'B'))}
+function touches(r,key){const [t,id]=key.split(':');
+  if(t==='in')return r.in.includes(id); if(t==='st')return r.stores.includes(id);
+  if(t==='pr')return r.procs.includes(id); return r.out.includes(id)}
+
+function render(){
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===view));
+  const V=VIEWS[view], its=items(), host=document.getElementById('view');
+  const cnt=k=>its.filter(r=>r.s.includes(k)).length;
+  const srcN=new Set(its.flatMap(r=>r.in)).size;
+  host.innerHTML='';
+  host.appendChild(el(`<section class="intro">
+    <div class="what"><div class="eyebrow">${view==='pilot'?'Conversation 1':'Conversation 2'}</div><h2>${V.title}</h2>${V.what.map(p=>`<p>${p}</p>`).join('')}
+      <div class="scen">${V.scen.map(s=>`<span><code>${s[0]}</code> ${esc(s[1])}</span>`).join('')}</div></div>
+    <div class="tally">
+      <div><b>${its.length}</b><span>data items${view==='beyond'?' added':''}</span></div>
+      <div><b>${srcN}</b><span>sources used</span></div>
+      <div><b>${cnt('Health')}</b><span>health (pseud.)</span></div>
+      <div><b>${cnt('PII')}</b><span>personal data (PII)</span></div>
+      <div><b>${cnt('Free')}</b><span>free text</span></div>
+      <div><b>${its.filter(r=>r.out.includes('LLM')).length}</b><span>sent to the LLM</span></div>
+    </div></section>`));
+
+  // Flow
+  const col=(key,h,q,arr,pref)=>`<div class="col"><div class="col-h"><h3>${h}</h3><span class="q">${q}</span></div>${arr.map(n=>{
+      const k=pref+':'+n.id, used=its.some(r=>touches(r,k)), isNew=n.only==='beyond';
+      if(isNew && view==='pilot') return '';
+      return `<button class="node${used?'':' off'}${pref==='out'&&(n.id==='Mail'||n.id==='Pages'||n.id==='Chat')?' sink':''}" data-key="${k}" aria-pressed="false"><span class="k">${esc(n.k)}</span><span class="n">${esc(n.n)}${isNew?' <span class="badge">new</span>':''}${view==='beyond'&&n.id==='EDC'&&pref==='in'?' <span class="badge warn">wider</span>':''}</span><span class="d">${esc(n.d)}</span></button>`}).join('')}</div>`;
+  host.appendChild(el(`<section><div class="sec-head"><h2>How the data moves</h2><p>Left to right: where we collect it, how we process it, where we store it, where it goes. Dashed boxes leave our platform and reach Site Contacts.</p></div>
+    <div class="flow">${col('in','Collect','Where we read it',SOURCES,'in')}${col('pr','Process','What touches it',PROCS,'pr')}${col('st','Store','How we hold it',STORES,'st')}${col('out','Deliver','Where it is written',OUTS,'out')}${subCol(V)}</div>
+    <div class="audit-rail"><b>Audit trail across every step:</b> syncs, AI drafts and classifications, approvals, sends, exports, settings, purges, and every read of Subject data.</div></section>`));
+
+  // Register
+  const sec=el(`<section><div class="sec-head"><h2>Data register</h2><p>One row per data item. Click a row to trace it in the flow above.</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="trace" id="trace"></div>
+    <div class="filters" id="filters"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Data item</th><th>What it holds</th><th>Collected from</th><th>Stored as</th><th>Retention class</th><th>Sensitivity</th><th>Goes to</th></tr></thead><tbody id="tb"></tbody></table></div></div></section>`);
+  host.appendChild(sec);
+
+  // Changes + questions
+  const qHtml=`<div><div class="sec-head"><h2>Questions for the review</h2></div><ul class="qlist">${V.qs.map(q=>`<li><span class="tag">${esc(q[0])}</span><p>${q[1]}</p></li>`).join('')}</ul></div>`;
+  const right=V.changes?`<div><div class="sec-head"><h2>Changes to data already held</h2></div><ul class="qlist">${V.changes.map(q=>`<li><span class="tag">${esc(q[0])}</span><p>${esc(q[1])}</p></li>`).join('')}</ul></div>`
+    :`<div><div class="sec-head"><h2>Sensitivity classes</h2></div><ul class="qlist">${[
+      ['Health','Pseudonymized Subject data. Still personal data, special category (GDPR art. 9). Every read is audited.'],
+      ['Free','Text we don’t control, which may hold patient information. Classified by the Triage agent.'],
+      ['PII','Personal data of people in a professional role: Site Contacts, Sponsor users, CRAs.'],
+      ['Secret','Credentials. Never reach the LLM or any output.'],
+      ['Mixed','As sensitive as what it records: Agent runs, conversations, audit events.'],
+      ['Confidential','The Sponsor’s business data, no people in it.'],
+      ['Public','Published by someone else: ClinicalTrials.gov records.']].map(s=>`<li><span class="tag"><span class="chip c-${s[0]}">${SENS_LABEL[s[0]]}</span></span><p>${s[1]}</p></li>`).join('')}</ul></div>`;
+  host.appendChild(el(`<section class="two">${qHtml}${right}</section>`));
+
+  host.querySelectorAll('.node').forEach(b=>b.addEventListener('click',()=>{
+    nodeF = nodeF===b.dataset.key?null:b.dataset.key; sel=null; renderTable(); paint();
+  }));
+  renderTable(); paint();
+}
+
+function subCol(V){
+  return `<div class="col"><div class="col-h"><h3>Who processes it</h3><span class="q">Subprocessors${view==='beyond'?' added':''}</span></div>${V.subs.map(s=>`<div class="node" style="cursor:default"><span class="k">${esc(s[2])}</span><span class="n">${esc(s[0])}</span><span class="d">${esc(s[1])}</span></div>`).join('')}</div>`;
+}
+
+function renderTable(){
+  const its=items();
+  const f=document.getElementById('filters');
+  f.innerHTML=`<span class="lbl">Sensitivity</span>`+SENS_ORDER.filter(s=>its.some(r=>r.s.includes(s))).map(s=>`<button class="chip c-${s}" data-s="${s}" aria-pressed="${sensOn[s]}">${SENS_LABEL[s]} <span class="ct">${its.filter(r=>r.s.includes(s)).length}</span></button>`).join('')
+    +(nodeF?` <span class="nodefilter">Only items touching <b>${esc(LBL[nodeF])}</b><button aria-label="Clear box filter" id="clr">×</button></span>`:'');
+  f.querySelectorAll('button.chip').forEach(b=>b.addEventListener('click',()=>{sensOn[b.dataset.s]=!sensOn[b.dataset.s];renderTable();paint()}));
+  const c=document.getElementById('clr'); if(c) c.addEventListener('click',()=>{nodeF=null;renderTable();paint()});
+  const rows=its.filter(r=>r.s.some(s=>sensOn[s]) && (!nodeF||touches(r,nodeF)));
+  const tb=document.getElementById('tb'); let html='', last='';
+  rows.forEach(r=>{
+    if(r.cat!==last){html+=`<tr class="grp"><td colspan="7">${esc(r.cat)}</td></tr>`;last=r.cat}
+    html+=`<tr class="item${sel===r.id?' sel':''}" data-id="${r.id}" tabindex="0">
+      <td class="id"><code>${r.id}</code><span class="nm">${esc(r.nm)}</span></td>
+      <td class="fields">${esc(r.f)}${r.widen?'<span class="note flagtxt">Widens ADR 0001</span>':''}${r.note&&!r.widen?`<span class="note">${esc(r.note)}</span>`:''}${r.widen?`<span class="note">${esc(r.note.replace('Widens ADR 0001. ',''))}</span>`:''}</td>
+      <td>${r.st==='Derived'&&r.in.join()==='Ours'?'<span class="src">Derived</span>':r.in.map(s=>`<span class="src">${SRC_SHORT[s]}</span>`).join('')}</td>
+      <td class="st">${ST_LBL[r.st]}${r.stores.includes('Landing')?'<small>via transient landing</small>':''}</td>
+      <td class="st">${esc(r.ret)}${r.s.includes('Health')?'<small>read-audited</small>':''}</td>
+      <td><div class="tags" style="display:flex;flex-wrap:wrap;gap:4px">${r.s.map(s=>`<span class="chip c-${s}">${SENS_LABEL[s]}</span>`).join('')}</div></td>
+      <td>${r.out.map(o=>`<span class="out">${OUT_SHORT[o]}</span>`).join('')}</td></tr>`;
+  });
+  tb.innerHTML=html||`<tr><td colspan="7" class="empty">No items match these filters.</td></tr>`;
+  tb.querySelectorAll('tr.item').forEach(tr=>{
+    const go=()=>{sel=sel===tr.dataset.id?null:tr.dataset.id;tb.querySelectorAll('tr.item').forEach(x=>x.classList.toggle('sel',x.dataset.id===sel));paint()};
+    tr.addEventListener('click',go); tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+  });
+}
+
+function paint(){
+  const r=sel?R.find(x=>x.id===sel):null;
+  document.querySelectorAll('.node[data-key]').forEach(n=>{
+    const k=n.dataset.key;
+    n.classList.toggle('on',!!r&&touches(r,k));
+    n.classList.toggle('pick',nodeF===k);
+    n.setAttribute('aria-pressed',nodeF===k);
+  });
+  const t=document.getElementById('trace');
+  if(!r){t.innerHTML=`<span class="muted">No item selected. Click a row to see where it comes from, what processes it, where it is stored and where it goes.</span>`;return}
+  const part=(arr,map)=>arr.map(x=>map[x]||x).join(' + ');
+  const PN={};PROCS.forEach(p=>PN[p.id]=p.n);const SN={};STORES.forEach(p=>SN[p.id]=p.n);const ON={};OUTS.forEach(p=>ON[p.id]=p.n);const IN={};SOURCES.forEach(p=>IN[p.id]=p.n);
+  t.innerHTML=`<b><code>${r.id}</code></b><span class="path">${esc(r.st==='Derived'&&r.in.join()==='Ours'?'Computed by us':part(r.in,IN))} <i>→</i> ${esc(part(r.procs.filter(p=>p!=='Purge'),PN)||'Written directly')} <i>→</i> ${esc(part(r.stores,SN))} <i>→</i> ${esc(part(r.out,ON))}</span>${r.ret&&r.ret!=='—'?`<span class="muted">Purged on the Sponsor’s ${esc(r.ret)} period</span>`:''}<button id="untrace">Clear</button>`;
+  document.getElementById('untrace').addEventListener('click',()=>{sel=null;document.querySelectorAll('tr.item.sel').forEach(x=>x.classList.remove('sel'));paint()});
+}
+
+function route(){const h=(location.hash||'').slice(1);view=h==='beyond'?'beyond':'pilot';sel=null;nodeF=null;render()}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{if(location.hash!=='#'+t.dataset.view){location.hash=t.dataset.view}else route()}));
+window.addEventListener('hashchange',route);
+route();
+})();
+</script>
