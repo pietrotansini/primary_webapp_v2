@@ -92,6 +92,36 @@ see `docs/adr/0002-rules-flag-agents-diagnose.md`.
 - **Crystallization:** a principle; in the MVP developers turn recurring diagnoses and rejection reasons into
   rules or metrics by hand.
 
+## Actions and the write-back flows (decided)
+
+Decided in [Pilot form of the prototype's write-back flows](https://github.com/pietrotansini/primary_webapp_v2/issues/12).
+No write-back into EDC / CTMS / eTMF / payment systems, with no exceptions.
+
+- **Three Action kinds:** an **Email Action** sends its drafted mail on approval (A6); a **Manual Action** is a
+  step a person does outside the platform (a CTMS edit, a vendor order, a budget amendment) and closes with an
+  outcome note; an **In-app Action** changes, on approval, only data the platform owns: the Newsletter recipient
+  overlay, Campaign content and schedule, Sponsor-entered values (per-Site plans, targets). Synced records are
+  never edited. A proposal's "from → to" list is its content, not something we apply.
+- **Statuses:** open → approved → closed, or rejected (reason required, fed to Agent memory).
+  An Email Action closes on send, unless its mail carries a Request: then it stays approved until the Site
+  Response arrives or the owner closes it with an outcome. A Manual Action is approved when its owner accepts it
+  and closed when they mark it done with an outcome note. An In-app Action is applied and closed on approval.
+  An approved Action past its deadline gets the overdue flag.
+- **Per prototype flow:**
+  - Ask Prime "Archive last IRB approval in the eTMF": Out (TM9, TMF).
+  - "Save brief to CTMS" (Ask Prime and the Site page, EG5): the brief is saved on our Site page with dated
+    history, with Copy and Download; the CRA files it in CTMS by hand.
+  - "Approve & request" changes (eCOA tablets OP7, patient navigator EN4.4): an Email Action to the named
+    recipient when we hold an address, otherwise a Manual Action.
+  - "Approve & apply" budget shift (EN7.1), pre-screen questions (EN7.2), CTMS contact update (OP10), Budget
+    agent payment release and invoice rejection (BU1, BU3, BU4): stay Won't.
+  - Newsletter recipients: a local overlay (add / remove) on the Site Contacts synced from the CTMS, each overlay
+    entry flagged "not in CTMS"; the CTMS stays the source on every sync.
+  - Audit Trail "Export to eTMF": a download (PDF / CSV, OP9.2) that the user files themselves.
+  - Connectors: every connector is labelled "Read only"; the eTMF and Payments tiles stay, shown as "Not in pilot".
+- **Later:** closing the loop on an Action's outcome (metric before and after against its expected impact) is
+  B7, in the fog; the MVP keeps the expected impact and the outcome note so that data exists.
+
 ## Data inventory (tentative)
 
 From [Data inventory per Scenario and a tentative data model](https://github.com/pietrotansini/primary_webapp_v2/issues/22);
@@ -164,13 +194,13 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
 | B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
 | D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
-| C1 | Actions workspace | Must | M | M | M1 | 5 EG7 | Pilot form of the write-back flows |
+| C1 | Actions workspace (Email, Manual and In-app Actions) | Must | M | M | M1 | 5 EG7 | |
 | A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | Backend architecture and stack (provider choice) |
 | A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
-| C4 | Campaigns and Newsletters | Must | L | L | M1 | 6 EG8 | Pilot form of the prototype's write-back flows; data model |
+| C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | Data model |
 | B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
 | A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
-| B3 | Site page (lite) | Must | M | M | M1 | 9 EG5 | Data model |
+| B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Agentic platform connectors prototype; data model (versioned synced records) |
 | A3 | Agentic connectors and data sync | Must | S | XL | M1 | prerequisite | Agentic platform connectors prototype; ingestion approach |
@@ -208,8 +238,8 @@ Assumptions the sizes rest on:
 - **A6** sends from a platform domain through an email provider and receives Site Messages at an inbound
   address; no mailbox access. Requests (acknowledge, short form) are links to pages we host.
 - **B2** uses connector data only: site-reported form figures never count as enrollment data.
-- **C1** escalation in the pilot is only an overdue flag; the assignee approving an email Action is what
-  completes it, with no second approver.
+- **C1** escalation in the pilot is only an overdue flag; the assignee approving an Email Action is what
+  sends it, with no second approver. Email, Manual and In-app Actions: see "Actions and the write-back flows".
 
 Pilot constraints from the map (they shape the backend notes below):
 one sponsor with several studies, the platform **sends the approved email itself**,
@@ -241,6 +271,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### A2. Study and site master data
 
 - **v0:** Must · FE S · BE M. Sites and Site Contacts are synced read-only from the CTMS; the CTMS owns them.
+  Newsletter recipients are a local overlay on top (C4).
 - **Frontend:** study picker, study cards (phase, enrolled/target, start, planned and baseline LPI dates),
   site rows (name, location, code), site contacts (PI, coordinator, CRA), protocol versions and visit schedules,
   contract rates. All read-only in the UI.
@@ -254,6 +285,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### A3. Connectors and data sync
 
 - **v0:** Must · FE S · BE XL. Agentic connectors crystallized into ingestion pipelines (to prototype); EDC and CTMS first.
+  Every connector is read-only; eTMF and Payments tiles are shown as "Not in pilot".
 - **Frontend:** Connectors page lists connected systems (EDC, CTMS, eTMF, eIRB, Site payments, CRM,
   Reimbursements) with vendor, last sync, access mode ("Read" / "Read | write with your approval") and
   connect/disconnect. "Add a system" opens a catalog of ~14 categories × ~70 vendors; picking one opens a
@@ -284,7 +316,7 @@ one sponsor with several studies, the platform **sends the approved email itself
   timestamped, attributable, before/after values, readable export; approvals carry signature meaning
   ("Approved for sending"), no re-authentication. Covers sign-ins, approvals/rejections, sends, AI drafts and
   classifications, syncs, settings and permission changes, exports, and every read of Subject-level data,
-  including Prime's tool reads. No eTMF export.
+  including Prime's tool reads. Export is a download the user files in the eTMF; no eTMF export.
 - **Frontend:** a reverse-chronological list "Every action taken, here and on other systems": time, dot, text,
   study. Prime chat on this page offers "Summarize what Prime did this week" and "Export approvals for an
   inspection" (export to eTMF). Once real: filters, paging, and an export file.
@@ -367,7 +399,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B3. Site detail
 
-- **v0:** Must (lite) · FE M · BE M. Contacts, engagement timeline (Actions, Campaigns, Site Responses, Site Messages), enrollment vs plan, engagement score. EDC queries, invoices, documents, training: Won't.
+- **v0:** Must (lite) · FE M · BE M. Contacts, engagement timeline (Actions, Campaigns, Site Responses, Site Messages), enrollment vs plan, engagement score, meeting briefs (EG5) saved here with dated history, Copy and Download, never written to CTMS. EDC queries, invoices, documents, training: Won't.
 - **Frontend:** one site's operational view: enrollment and funnel, recruitment blockers, Prime highlights and
   Prime news (e.g. competing trials), open EDC queries, missing CRF pages, pending invoices / payments,
   protocol version and re-consent status, required documents and their version history, training, site team
@@ -401,7 +433,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C1. Actions workspace
 
-- **v0:** Must · FE M · BE M. An Action is a task for one Sponsor-side person with a deadline; started by an Agent or by a Site Message; the proposing Agent picks the owner, anyone can change it; fields are priority (from the rule), one-line impact and Evidence, no cost impact, confidence or days saved; overdue is only flagged; the assignee approving an email Action sends and completes it.
+- **v0:** Must · FE M · BE M. An Action is a task for one Sponsor-side person with a deadline; started by an Agent or by a Site Message; the proposing Agent picks the owner, anyone can change it; fields are priority (from the rule), one-line impact and Evidence, no cost impact, confidence or days saved; overdue is only flagged; the assignee approving an Email Action sends it. Three kinds (Email, Manual, In-app) and their statuses: see "Actions and the write-back flows"; Manual Actions close with an outcome note.
 - **Frontend:** inbox of proposed actions with priority (P1–P3), study, sites, kind, confidence, filters and
   status groups (open / approved / closed / rejected). Each action shows what was observed, why, sources,
   expected impact, days saved and **cost impact** (days × study daily cost), then either an email draft
@@ -446,7 +478,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C4. Site engagements (newsletters and campaigns)
 
-- **v0:** Must · FE L · BE L. The core. Newsletters bundle Reports, Requests (acknowledge, short form) and reminders per Site; a Campaign is a scheduled set of Actions on the calendar, bulk-approved with per-Site overrides.
+- **v0:** Must · FE L · BE L. The core. Newsletters bundle Reports, Requests (acknowledge, short form) and reminders per Site; a Campaign is a scheduled set of Actions on the calendar, bulk-approved with per-Site overrides. Recipients are the CTMS Site Contacts plus a local overlay (add / remove, flagged "not in CTMS").
 - **Frontend:** dashboard with an upcoming campaign ("Approve the November newsletter?"), a calendar of sent,
   draft and planned campaigns, and a builder: templates (monthly newsletter, recruitment push, site spotlight,
   protocol notice, blank), drag-to-reorder blocks that are **shared** (same for all sites) or **personal**
@@ -498,7 +530,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D1. Ask Prime (task runner)
 
-- **v0:** Must · FE M · BE M. Q&A over our data; no write tasks (see "Pilot form of the prototype's write-back flows").
+- **v0:** Must · FE M · BE M. Q&A over our data; no write tasks; may draft Actions (see "Actions and the write-back flows").
 - **Frontend:** a prompt bar plus suggested tasks (e.g. "Pull data from CTMS", "Check last data entry in the
   EDC", "Reconcile invoice against last purchase order", "Archive last IRB approval in the eTMF",
   "Prepare meeting brief for each site", and more in `PRIME_MORE`). Running a task shows the **plan** (steps
@@ -563,7 +595,8 @@ Facts the later tickets will need to decide on; not decisions.
   systems: Ask Prime "Archive last IRB approval in the eTMF" and "Save brief to CTMS"; site meeting briefs
   "Saved to CTMS"; "changes" actions like "Approve & apply" a budget shift in the campaign tool; Budget agent
   releasing payments; Audit Trail "Export to eTMF"; eTMF/Payments shown as "Read | write with your approval".
-  Each needs a pilot form (store in our DB, email someone, or drop).
+  Each needs a pilot form (store in our DB, email someone, or drop). *Decided: see "Actions and the write-back
+  flows"; no write-back, with no exceptions.*
 - **Inbound email.** Engagements, engagement performance and some actions read "site emails" and replies.
   That is a data source the connector list doesn't name. *v0: now C6, through the platform's inbound address.*
 - **Hard-coded AI context.** Every prompt embeds DIA-2043 facts; grounding Prime in real data is a backend
