@@ -92,6 +92,27 @@ see `docs/adr/0002-rules-flag-agents-diagnose.md`.
 - **Crystallization:** a principle; in the MVP developers turn recurring diagnoses and rejection reasons into
   rules or metrics by hand.
 
+## Data inventory (tentative)
+
+From [Data inventory per Scenario and a tentative data model](https://github.com/pietrotansini/primary_webapp_v2/issues/22);
+details in `docs/data-model.md`. It is the input to "Data ingestion approach for the pilot" and "High-level data model".
+
+- **Sources for the pilot Scenarios:** EDC (Subjects and their milestone dates, screen-fail reasons), CTMS (Study,
+  plans, Sites, Site Contacts, CRA assignments, monitoring visits, Site issues), our own platform (mail, Site
+  Responses, Site Messages, Actions, Agent runs), ClinicalTrials.gov (EN6), Sponsor-entered settings (daily cost of
+  delay, NCT number when the CTMS lacks it), Study documents uploaded for A10, and one per-study file: referral
+  counts from the referral tool (B5).
+- **Choice rule:** connected platform before file; for the same data in two platforms, the easier one (CTMS for Study
+  and Site facts, EDC for Subjects; randomization from the EDC, not the RTSM).
+- **Referral data as counts only** (per Site, week, stage and source): pre-screened candidates haven't consented and
+  have no pseudonymized ID.
+- **No pilot Scenario widens ADR 0001.** Below the cut, EN4.7, EG3 and EN4.1 would add discontinuation reason,
+  ICF version and screening lab dates.
+- **Model shape:** transient landing (raw files deleted after parsing), versioned synced records (Evidence and OP6
+  point at a version), derived snapshots, and records born on the platform; `sponsor_id` on every row.
+- **Sensitivity classes:** Public, Confidential, PII, Health (pseudonymized, read-audited), Free text (may hold
+  patient information), Secret. Never ingested: patient identifiers, treatment arm and kit numbers.
+
 ## Scenarios drive the order
 
 The backlog is ordered by the Scenarios it serves: `docs/scenarios.md` lists every Scenario from the demos (In, Won't,
@@ -139,9 +160,9 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Ingestion approach; enrollment forecasting fog |
 | D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | Backend architecture and stack |
 | C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | 2 EN3 | |
-| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Ingestion approach (referral tool is a per-study file) |
+| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Ingestion approach (referral tool is a per-study file; counts only, see data inventory) |
 | B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
-| B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog |
+| B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
 | D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
 | C1 | Actions workspace | Must | M | M | M1 | 5 EG7 | Pilot form of the write-back flows |
 | A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | Backend architecture and stack (provider choice) |
@@ -151,7 +172,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
 | B3 | Site page (lite) | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
-| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Agentic platform connectors prototype |
+| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Agentic platform connectors prototype; data model (versioned synced records) |
 | A3 | Agentic connectors and data sync | Must | S | XL | M1 | prerequisite | Agentic platform connectors prototype; ingestion approach |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
