@@ -54,23 +54,23 @@ and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 | EN1 | Why a Study is behind plan, by Site and funnel stage | In | Ask | CTMS plan, EDC, referral log | API/File, File | metric, benchmark | Q&A | B2, B5, B9, D1 | H | M | `PAGE_CHAT` studies.why |
 | EN2.1 | Sites at risk against plan, across Studies (can be saved as a weekly check) | In | Both | CTMS plan, EDC | API/File | metric, rule | Agent run, Q&A | B2, B4, A9 | H | S | `PAGE_CHAT` prime.atrisk |
 | EN2.2 | Rank Sites by enrollment gap in each Study | In | Ask | CTMS plan, EDC | API/File | metric | Q&A | B2, D1 | M | S | `PAGE_CHAT` sites.rank |
-| EN2.3 | Compare each Site with the study median: referral, screening, consent conversion | In | Ask | EDC, referral log, eConsent | API/File, File | benchmark | Q&A | B5, B6, B9 | M | M | `PAGE_CHAT` sites.median |
+| EN2.3 | Compare each Site with the study median: referral, screening, consent conversion | In | Ask | EDC consent dates, referral log | API/File, File | benchmark | Q&A | B5, B6, B9 | M | M | `PAGE_CHAT` sites.median |
 | EN3 | Recruitment blockers at one Site: where candidates drop out between referral and randomization, and why | In | Ask | EDC screening log, referral log, Site Messages | API/File, File, Ours | metric, benchmark, LLM | Q&A | B5, B9, C6, D1 | H | M | `siteChat` blockers |
 | EN4.1 | Diagnose a lagging Site: screen fails on a lab inclusion criterion | In | Agent | EDC screen-fail reasons and lab result dates, Site Messages | API/File, Ours | rule, LLM | Agent run | B4, A9 | H | M | `ITEMS` nwu, nwu-lab; `ENG_INS` nwu |
 | EN4.2 | Diagnose a lagging Site: staff turnover cut referrals (escalate to the CRO) | In | Agent | CTMS Site staff, referral log | API/File, File | trend, LLM | Agent run, send | B4, B5, A9 | M | M | `ITEMS` charite |
 | EN4.3 | Diagnose a lagging Site: activated, no first patient | In | Agent | CTMS activation date, EDC | API/File | rule, benchmark | Agent run | B4, B9, A9 | H | S | `ITEMS` houston; `ENG_INS` hou |
-| EN4.4 | Diagnose a lagging Site: candidates drop at consent | In | Agent | eConsent, EDC, participant feedback | File | rule, LLM | Agent run | B4, B6 | M | M | `ITEMS` barcelona; `ENG_INS` bcn |
+| EN4.4 | Diagnose a lagging Site: candidates drop at consent | In | Agent | EDC screening and consent dates | API/File | rule, LLM | Agent run | B4, B6 | M | M | `ITEMS` barcelona; `ENG_INS` bcn |
 | EN4.5 | Diagnose a lagging Site: few referrals reach screening | In | Agent | referral log, EDC | File, API/File | benchmark | Agent run | B4, B5, B9 | M | M | `ENG_INS` phx |
 | EN4.6 | Diagnose a lagging Site: few referred candidates are eligible | In | Agent | referral pre-screen answers, EDC | File, API/File | benchmark | Agent run | B4, B5, B9 | M | M | `ENG_INS` mil |
 | EN4.7 | Diagnose a lagging Site: early withdrawals | In | Agent | EDC discontinuations | API/File | rule | Agent run | B4 | M | S | `ENG_INS` lyo |
 | EN4.8 | Diagnose a lagging Site: stopped screening for N weeks | In | Agent | EDC screening dates | API/File | rule | Agent run | B4 | H | S | `ENG_INS` cha |
 | EN5 | Sites that can take more patients | In | Ask | CTMS plan, EDC, screening capacity from Site Responses | API/File, Ours | metric | Q&A | B2, B9, C6 | M | S | `PAGE_CHAT` studies.capacity |
-| EN6 | Competing trials near a Site, with talking points for the PIs | In | Agent | ClinicalTrials.gov, referral log | Public, File | rule, LLM | Agent run, send | D5 | L | M | `ITEMS` nash; `BS_COMP` |
+| EN6 | Competing trials near a Site, with talking points for the PIs | In | Agent | ClinicalTrials.gov, CTMS Site addresses, referral log | Public, API/File, File | rule, LLM | Agent run, send | D5 | L | M | `ITEMS` nash; `BS_COMP` |
 | EN7.1 | Shift paid-referral budget between Sites | Won't | Agent | campaign tool spend, EDC | File | metric | write-back | | | | `ITEMS` budget |
 | EN7.2 | Tighten the pre-screen questions on a referral form | Won't | Agent | referral form, EDC | File | benchmark | write-back | | | | `ITEMS` campaign |
 | EN8 | Draft a recovery plan for at-risk Sites | In | Ask | stored diagnoses | Ours | LLM | Q&A, Action drafts | B4, C1, D1 | M | S | `PAGE_CHAT` sites.plan |
 | EN9 | Did an Action work? Compare the metric before and after | In | Agent | metric snapshots, Actions | Ours | trend | Agent run, schedule | B7, A9 | H | M | follow-ups on every `ITEMS` entry |
-| EN10 | Forecast last-patient-in and the cost of delay | In | Both | CTMS plan, EDC, CRO cost lines | API/File, File | forecast | report | B11 | M | L | `STUDIES`, `costOf` |
+| EN10 | Forecast last-patient-in and the cost of delay | In | Both | CTMS plan, EDC, Sponsor-entered daily cost of delay | API/File, Ours | forecast | report | B11 | M | L | `STUDIES`, `costOf` |
 
 ## EG: Engagement
 
@@ -157,5 +157,10 @@ and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 - **OP3.1** cannot rank by days saved or cost impact: "How Prime generates insights" dropped those fields. Ranking is
   by priority and expected impact text.
 - **EG4, EG7** need Study documents (protocol, Site reference manual) as a source Prime can read: candidate A10.
+- **Data sources** follow `docs/data-model.md` ("Data inventory per Scenario and a tentative data model",
+  [#22](https://github.com/pietrotansini/primary_webapp_v2/issues/22)): a connected platform (EDC, CTMS) before a
+  per-study file. So EN2.3 and EN4.4 read consent dates from the EDC instead of eConsent (participant feedback
+  has no source), EN10 takes a daily cost of delay the Sponsor enters instead of CRO cost lines, and EN6 reads
+  Site addresses from the CTMS.
 - Rows with `write-back` in Tech conflict with the pilot's no-write-back rule. They are Won't or Out, unless
   "Pilot form of the prototype's write-back flows" turns them into a drafted email.
