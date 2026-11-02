@@ -135,8 +135,8 @@ Output: `App`, `LLM`, `Export`.
 | Data | Item | Source |
 |---|---|---|
 | Study condition, phase, key eligibility | `study`, `study.eligibility` | CT.gov record of the Study (by NCT number), else `study.document` |
-| NCT number of the Study | `study` | CTMS, else Sponsor |
-| Site address and coordinates | `site`, `site.geo` | CTMS, geocoded (Derived) |
+| NCT number of the Study | `study` | CTMS, else a CT.gov search by Study code; confirmed by the Sponsor |
+| Site address and coordinates | `site`, `site.geo` | CTMS; coordinates from the CT.gov location, else geocoded |
 | Recruiting trials, their locations and eligibility | `trial.external`, `trial.external_site` | CT.gov |
 | Which trials overlap which Site, and how much | `trial.match` | Derived (distance rule, then Agent judgment) |
 | Referral trend at the Site, to judge the impact | `referral.funnel` | File (optional) |
@@ -263,7 +263,7 @@ others follow). Retention class and audit are in **Storage**.
 
 | Item | Fields | Scenarios | Input | Output | Storage | Sensitivity |
 |---|---|---|---|---|---|---|
-| `study` | study code, title, phase, condition, countries, status, NCT number | **all** | CTMS (NCT: CTMS, else Sponsor) | App, LLM, Mail, Export | Synced · Study ops | Confidential |
+| `study` | study code, title, phase, condition, countries, status, NCT number | **all** | CTMS (NCT: CTMS, else CT.gov search; Sponsor confirms) | App, LLM, Mail, Export | Synced · Study ops | Confidential |
 | `study.plan` | target randomizations, planned and baseline FPI/LPI, planned Site count | **EN0, EN10, EG8, EN2.1**, EN1, EN2.2, OP2 | CTMS | App, LLM, Export | Synced · Study ops | Confidential |
 | `study.protocol_version` | version, approval date, re-consent required | **EG8**, EG3 | CTMS | App, LLM, Mail | Synced · Study ops | Confidential |
 | `study.eligibility` | key inclusion and exclusion criteria (text) | **EN6** | CT.gov (Study's own record), else from `study.document` | App, LLM, Mail | Synced · Study ops | Public or Confidential |
@@ -278,7 +278,7 @@ others follow). Retention class and audit are in **Storage**.
 | Item | Fields | Scenarios | Input | Output | Storage | Sensitivity |
 |---|---|---|---|---|---|---|
 | `site` | CTMS site ID, site number, institution, address, country, time zone, status, planned and actual activation dates, close date | **all** | CTMS | App, LLM, Mail, Export | Synced · Study ops | Confidential |
-| `site.geo` | coordinates | **EN6** | Derived (geocoder on the address) | App, LLM | Derived · Study ops | Confidential |
+| `site.geo` | coordinates | **EN6** | CT.gov location geoPoint, else Derived (Nominatim on the address), else Sponsor pin | App, LLM | Derived · Study ops | Confidential |
 | `site.plan` | Site target, expected randomizations per month | **EN0, EN10, EG8, EN2.1**, EN1, EN2.2, EN5, EG2 | CTMS if held, else Sponsor file | App, LLM, Mail (in Reports) | Synced · Study ops | Confidential |
 | `site.contact` | name, role (PI, coordinator, …), email, phone, start and end dates | **EN6, EG7, EG8, EG9, EG5**, EN4.2, EG2, EG3 | CTMS | App, LLM, Mail | Synced · People | PII |
 | `site.assignment` | Sponsor-side CRA or monitor per Site | **EG5**, EG6, OP3.2 | CTMS, matched to `user` | App, LLM | Synced · People | PII |
@@ -303,8 +303,10 @@ subject ID, Site, status and status dates, screen-fail reason category and next 
 
 ### 4. Referral funnel
 
-Pre-screened candidates have not consented to the Study and have no pseudonymized ID, so we propose taking
-**counts only**: no per-candidate rows, and names and contacts never reach us.
+Pre-screened candidates have not consented to the Study and have no pseudonymized ID, so we store **counts
+only**. The uploaded file may hold one row per candidate: the parser keeps only Site, date, channel, stage and
+failing question, in memory, and writes the counts; the raw file never touches disk (decided in "Data ingestion
+approach for the pilot").
 
 | Item | Fields | Scenarios | Input | Output | Storage | Sensitivity |
 |---|---|---|---|---|---|---|
@@ -375,7 +377,8 @@ Pre-screened candidates have not consented to the Study and have no pseudonymize
 
 1. **Landing (Transient).** Files and API payloads as received. Parsed, filtered to the fields above, then deleted;
    only the manifest and a checksum stay on `sync.run`. Raw exports can't be kept because they hold Subject fields
-   ADR 0001 says to drop at ingestion.
+   ADR 0001 says to drop at ingestion. A failed parse keeps the raw file 7 days, encrypted and readable only by
+   Primary support with every access audited; referral files are cut down in memory and never land raw.
 2. **Synced records.** Our canonical copy of EDC, CTMS, CT.gov and file data, one row per version (valid from and
    to, `sync.run` that wrote it). Evidence points at a version; OP6 diffs two syncs.
 3. **Derived.** Metrics, benchmarks, forecasts, flags, matches and Reports, recomputed after each sync and
@@ -444,16 +447,15 @@ to add an `INSTITUTION` above it (to show one hospital across Studies) is left t
 
 ## Open questions
 
-For **Data ingestion approach for the pilot**:
+Answered by **Data ingestion approach for the pilot** (#7):
 
-- Does the pilot Sponsor's CTMS hold **per-Site plans** (target, expected monthly randomizations)? If not, take a
-  Sponsor spreadsheet, or derive a straight line from the Site target and activation date.
-- **Referral tool:** which tool, and can it export counts per Site, week and stage, so no per-candidate data
-  reaches us?
-- **Landing:** confirm raw files are deleted after parsing (manifest and checksum only), and how a failed parse is
-  debugged without them.
-- **Geocoding** Site addresses for EN6: which provider, and whether Site addresses may be sent to it.
-- **NCT number:** is it in the CTMS Study record?
+- **Per-Site plans:** CTMS when mapped, else the Sponsor's per-Site plan template, else a derived straight line.
+- **Referral tool:** per-candidate exports are accepted and counted in memory; only counts are stored. Which tool
+  the pilot Sponsor uses is still unknown.
+- **Landing:** raw files are deleted after a good parse; a failed parse keeps the raw file 7 days, encrypted and
+  audited, for Primary support.
+- **Geocoding:** the CT.gov location geoPoint, else OpenStreetMap Nominatim, else a Sponsor pin.
+- **NCT number:** CTMS or a CT.gov search proposes it; the Sponsor confirms once.
 
 For **High-level data model**:
 

@@ -10,6 +10,10 @@ A site-engagement CRM for biotech sponsors: it keeps a Sponsor's clinical operat
 The biotech company that runs the Studies. Its clinical operations team are the people who sign in.
 _Avoid_: customer, client, tenant
 
+**Sponsor admin**:
+A person on the Sponsor's team who looks after the platform's connections to the Sponsor's systems: reviews Recipes, grants the access they need and uploads the Sponsor's files. The rest of the clinical operations team only sees how fresh the data is.
+_Avoid_: admin, IT, superuser
+
 **Study**:
 A clinical trial the Sponsor runs, identified by its study code, such as DIA-2043.
 _Avoid_: trial, protocol, project

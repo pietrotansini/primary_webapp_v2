@@ -34,7 +34,8 @@ score (C7) and Campaign performance (C5) are now Should; the three proof points 
 
 Decided in [Compliance and security bar for the pilot](https://github.com/pietrotansini/primary_webapp_v2/issues/4):
 
-- **M1, functional demo:** sample or anonymized data only; no compliance items are required.
+- **M1, functional demo:** sample or anonymized data only, coming in through Recipes on the pilot Sponsor's
+  sandboxes (see "Data ingestion"); no compliance items are required.
 - **M2, real-data pilot:** the first real Sponsor data. Its entry gate is the compliance bar below (A7, A8 and the
   M2 parts of A1, A5); everything tagged M1 must also be in place.
 
@@ -134,14 +135,47 @@ details in `docs/data-model.md`. It is the input to "Data ingestion approach for
   counts from the referral tool (B5).
 - **Choice rule:** connected platform before file; for the same data in two platforms, the easier one (CTMS for Study
   and Site facts, EDC for Subjects; randomization from the EDC, not the RTSM).
-- **Referral data as counts only** (per Site, week, stage and source): pre-screened candidates haven't consented and
-  have no pseudonymized ID.
+- **Referral data stored as counts only** (per Site, week, stage and source): pre-screened candidates haven't
+  consented and have no pseudonymized ID. The file may carry one row per candidate; it is cut down and counted in
+  memory while parsing (see "Data ingestion" below).
 - **No pilot Scenario widens ADR 0001.** Below the cut, EN4.7, EG3 and EN4.1 would add discontinuation reason,
   ICF version and screening lab dates.
 - **Model shape:** transient landing (raw files deleted after parsing), versioned synced records (Evidence and OP6
   point at a version), derived snapshots, and records born on the platform; `sponsor_id` on every row.
 - **Sensitivity classes:** Public, Confidential, PII, Health (pseudonymized, read-audited), Free text (may hold
   patient information), Secret. Never ingested: patient identifiers, treatment arm and kit numbers.
+
+## Data ingestion (decided)
+
+Decided in [Data ingestion approach for the pilot](https://github.com/pietrotansini/primary_webapp_v2/issues/7):
+
+- **M1 data comes through real Recipes**, run against the pilot Sponsor's own EDC and CTMS sandboxes; M1 is done
+  only when it does. Until those sandboxes arrive, developers build on **dev-only fixtures** in the synced-record
+  shape (today's `logic.ts` sample data moved into the DB), never shown as the demo. **Dependency:** the pilot
+  Sponsor, its EDC and CTMS vendors and sandbox access are not known yet; they gate M1.
+- **Build order: UI Recipes first** (they work on any vendor and are A3's novelty), then export-file Recipes, then
+  API Recipes. Build order only: at runtime ADR 0003's per-platform preference (API, then export, then UI) holds,
+  and an API Recipe replaces a UI one once it exists.
+- **Files arrive by upload only**, on the Connectors page, by the Sponsor admin or Primary staff. No SFTP, no
+  email attachments.
+- **Landing:** a successful parse deletes the raw file (manifest and checksum stay on `sync.run`). A failed parse
+  keeps the raw file 7 days, encrypted, readable only by Primary support with every access audited, then deletes
+  it (sooner once fixed).
+- **Referral files** may hold one row per candidate: the parser keeps only the allowlisted columns (Site, date,
+  channel, stage, failing pre-screen question) in memory, counts them and writes only the counts. The raw file never
+  touches disk; a failed parse quarantines only the cut-down file. Processing candidate data is named in the M2
+  compliance pack (A8).
+- **Per-Site plans:** from the CTMS when mapped; else the Sponsor admin uploads our per-Site plan template; until
+  then a straight line from the Site target and activation date, labelled as derived.
+- **NCT number:** prefilled from the CTMS, else from a ClinicalTrials.gov search by Study code, and confirmed once
+  in Study setup; CT.gov reads (EN6) wait on the confirmation.
+- **Site coordinates (EN6):** the geoPoint of the Site's location in the Study's ClinicalTrials.gov record; else
+  OpenStreetMap Nominatim on the CTMS address; else a pin the Sponsor drops.
+- **Sync cadence:** EDC and CTMS Recipes nightly, files on arrival, ClinicalTrials.gov weekly, "sync now" for the
+  Sponsor admin. Agents run after each sync, as decided.
+- **Connectors is admin-only:** the Sponsor admin and Primary staff see it; ClinOps only see freshness (last sync in
+  the TopBar, stale markers on figures, sync time on Evidence). No vendor catalog, no credentials modal: access goes
+  through the per-Recipe access request (#28).
 
 ## Scenarios drive the order
 
@@ -187,10 +221,10 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 
 | # | Feature | MoSCoW | FE | BE | Milestone | First Scenario | Most likely moved by |
 |---|---|---|---|---|---|---|---|
-| B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Ingestion approach; enrollment forecasting fog |
+| B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Enrollment forecasting fog; pilot Sponsor's EDC (dependency) |
 | D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | Backend architecture and stack |
 | C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | 2 EN3 | |
-| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Ingestion approach (referral tool is a per-study file; counts only, see data inventory) |
+| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Uploaded file aggregated in memory to counts (decided in "Data ingestion"); which referral tool the Sponsor uses |
 | B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
 | B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
 | D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
@@ -203,7 +237,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
-| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; ingestion approach |
+| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; pilot Sponsor's EDC and CTMS (dependency) |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
@@ -227,7 +261,8 @@ Assumptions the sizes rest on:
 
 - **A3** is XL because connectors are agent-driven (an agent learns to work a platform's UI or API) and then
   crystallized into Recipes replayed with no LLM, plus the repair loop, checks, quarantine and review history;
-  no pilot Sponsor, EDC or CTMS is picked yet, so it stays generic. Builds on `clinical-platform-connector`
+  no pilot Sponsor, EDC or CTMS is picked yet, so it stays generic. UI Recipes are built first, then file
+  upload, then APIs. Builds on `clinical-platform-connector`
   (Playwright recordings), `clinical-platform-connector-pietro` (assisted and automatic Castor export, immutable
   snapshots with receipts) and `castor_api_connector` (Castor API export).
 - **A4 / D1 / D2 / D4** reuse the `primary_teams` agent (LangGraph, Knowledge Base, Teams and Slack Surfaces
@@ -266,6 +301,8 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **Frontend:** none. The user is hard-coded as "Marie Curious, Clinical Operations" (Sidebar). The study team
   (`TEAM`: ClinOps, CRAs, Study Manager, Clinical Finance) appears as assignees in Actions and the team view.
   Needs a sign-in page, a user menu, and real people in every assignee picker.
+- **Sponsor admin:** one admin flag on the Sponsor team (Connectors, file uploads, Recipe review), decided in
+  "Data ingestion approach for the pilot" (#7); finer roles stay in the roles fog.
 - **Backend:** reads users, roles and study membership; writes sessions and team assignments.
   No AI. External: an email provider for magic links; an IdP only if a Sponsor asks for SSO. Simulated: everything.
 - **Source:** `views/Sidebar.tsx`, `TEAM`, `DEF_ASG`, `who()` in `logic.ts`.
@@ -307,9 +344,17 @@ one sponsor with several studies, the platform **sends the approved email itself
   at the source is required where it is cheap (Vault CTMS field-level security) and optional where it needs a
   study-build change (Rave, Clinical One, Castor; Vault EDC has none, so we read Retrieve Subjects only). The
   parse-time drop (ADR 0001) stays on every platform, with an alert on an unexpected field.
-- **Frontend (pilot):** Connectors page lists each Recipe with source (API, export, UI), version, approver, last
-  good sync, status (ok, stale, quarantined, needs a person, awaiting approval) and its change history, so the
-  Sponsor admin can review it. Sign-in hand-off for MFA on UI Recipes.
+- **Decided ("Data ingestion approach for the pilot" (#7)):** build UI Recipes first (runtime preference unchanged); M1 runs Recipes
+  against the pilot Sponsor's sandboxes, dev work uses fixtures until then. Files arrive by upload only. Raw files
+  are deleted after a good parse and kept 7 days (encrypted, audited) after a failed one; referral files are cut
+  down and counted in memory. Cadence: EDC and CTMS nightly, files on arrival, ClinicalTrials.gov weekly, "sync
+  now" for the Sponsor admin. See "Data ingestion (decided)".
+- **Frontend (pilot):** Connectors page, **admin-only** (Sponsor admin and Primary staff): each Recipe with source
+  (API, export, UI), version, approver, last good sync, status (ok, stale, quarantined, needs a person, awaiting
+  approval) and its change history, so the Sponsor admin can review it; file upload per Study (CTMS export,
+  referral file, per-Site plan template); "sync now"; sign-in hand-off for MFA on UI Recipes; "request a
+  connector". No vendor catalog and no credentials modal. ClinOps see freshness only: last sync in the TopBar,
+  stale markers on figures, sync time on Evidence.
 - **Frontend:** Connectors page lists connected systems (EDC, CTMS, eTMF, eIRB, Site payments, CRM,
   Reimbursements) with vendor, last sync, access mode ("Read" / "Read | write with your approval") and
   connect/disconnect. "Add a system" opens a catalog of ~14 categories × ~70 vendors; picking one opens a

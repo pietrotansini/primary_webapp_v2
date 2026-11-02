@@ -193,10 +193,10 @@ td .n { color: var(--muted); font-size: 12.5px; }
 
 <script>
 const BL = [
-  ["B2", "Enrollment per Site", "Must", "M", "M", "M1", "First: EN0 (1); Ingestion approach; enrollment forecasting fog"],
+  ["B2", "Enrollment per Site", "Must", "M", "M", "M1", "First: EN0 (1); Enrollment forecasting fog; pilot Sponsor's EDC (dependency)"],
   ["D1", "Ask Prime (Q&A, no writes)", "Must", "M", "M", "M1", "First: EN0 (1); Backend architecture and stack"],
   ["C6", "Site Responses and Site Messages (Triage agent)", "Must", "M", "L", "M1", "First: EN3 (2)"],
-  ["B5", "Referral and pre-screening data (funnel top)", "Must", "–", "–", "M1", "First: EN3 (2); Ingestion approach (referral tool is a per-study file; counts only, see data inventory)"],
+  ["B5", "Referral and pre-screening data (funnel top)", "Must", "–", "–", "M1", "First: EN3 (2); Uploaded file aggregated in memory to counts (decided in \"Data ingestion\"); which referral tool the Sponsor uses"],
   ["B9", "Site benchmarks (study median, peer Sites)", "Must", "–", "–", "M1", "First: EN3 (2)"],
   ["B11", "Enrollment forecast and cost of delay", "Must", "–", "–", "M1", "First: EN10 (3); Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory)"],
   ["D5", "Competing trials", "Must", "S", "M", "M1", "First: EN6 (4); External signals fog"],
@@ -209,7 +209,7 @@ const BL = [
   ["B3", "Site page (lite), with saved meeting briefs", "Must", "M", "M", "M1", "First: EG5 (9); Data model"],
   ["A1", "Sign-in (magic link) and Sponsor team", "Must", "S", "M", "M1", "Prerequisite; Roles and permissions fog"],
   ["A2", "Study, Site and Site Contact master data (from CTMS)", "Must", "S", "M", "M1", "Prerequisite; Data model (versioned synced records)"],
-  ["A3", "Agentic connectors and data sync (Recipes)", "Must", "S", "XL", "M1", "Prerequisite; Repair gates; ingestion approach"],
+  ["A3", "Agentic connectors and data sync (Recipes)", "Must", "S", "XL", "M1", "Prerequisite; Repair gates; pilot Sponsor's EDC and CTMS (dependency)"],
   ["A4", "Prime (front and orchestrator)", "Must", "S", "L", "M1", "Prerequisite; Backend architecture and stack"],
   ["A5", "Audit Trail (Part 11-shaped)", "Must", "S", "M", "M1", "Prerequisite"],
   ["A7", "Retention and purge", "Must", "S", "S", "M2", "Prerequisite"],
