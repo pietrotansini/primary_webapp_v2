@@ -203,7 +203,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
-| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; least-privilege access; Jev and Obscura research; ingestion approach |
+| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; least-privilege access; ingestion approach |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
@@ -296,6 +296,11 @@ one sponsor with several studies, the platform **sends the approved email itself
   #29); mapped field gone → agent proposes, a person decides; contract broken → quarantined, store marked stale;
   sign-in or MFA → a person. Primary approves Recipes; the Sponsor admin can review them. Every run, repair,
   dry-run and promotion is an audit event. See `docs/adr/0003-connectors-replay-recipes-agents-propose-versions.md`.
+- **Decided ("Fast decision models and the Obscura browser for the connector agent", #27):** Playwright with
+  Chromium (not Obscura: no visible mode for MFA hand-off, no downloads, always presents as Chrome). Claude
+  learns Recipes. Repair runs in tiers: fallback locators, then a fast decision model (Jev) choosing among the
+  page's controls with Subject IDs redacted, then Claude, then a person; the step's post-condition judges every
+  tier. Pilot starts Claude-only; Jev is added once its US data terms are agreed and failures are recorded.
 - **Frontend (pilot):** Connectors page lists each Recipe with source (API, export, UI), version, approver, last
   good sync, status (ok, stale, quarantined, needs a person, awaiting approval) and its change history, so the
   Sponsor admin can review it. Sign-in hand-off for MFA on UI Recipes.
