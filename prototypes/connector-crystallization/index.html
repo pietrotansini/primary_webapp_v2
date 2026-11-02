@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Connector crystallization</title>
+<style>
+  :root { --bg:#f6f6f4; --card:#fff; --line:#ddd; --ink:#222; --muted:#666; --ok:#17723a; --bad:#b3261e; --warn:#9a5b00; --agent:#5b3cc4; --human:#0b5cad; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--ink); }
+  header { padding: 10px 16px; background: #2f2257; color: #fff; }
+  header b { font-size: 15px; }
+  .banner { background: #ffe9a8; color: #5a4300; padding: 6px 16px; font-size: 12px; }
+  main { display: grid; grid-template-columns: 360px 1fr 1fr; gap: 12px; padding: 12px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-bottom: 12px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; color: var(--muted); }
+  h3 { font-size: 13px; margin: 10px 0 4px; }
+  button { margin: 2px 0; padding: 5px 8px; border: 1px solid #bbb; background: #fafafa; border-radius: 4px; cursor: pointer; text-align: left; width: 100%; font: inherit; font-size: 13px; }
+  button:hover { background: #f0edfa; }
+  button.primary { background: #2f2257; color: #fff; border-color: #2f2257; text-align: center; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .tabs button { width: auto; font-size: 12px; padding: 3px 7px; }
+  .tabs button.on { background: #2f2257; color: #fff; }
+  .say { background: #f4f1fc; border-left: 3px solid var(--agent); padding: 8px; min-height: 70px; white-space: pre-wrap; }
+  pre { font: 11.5px/1.35 ui-monospace, monospace; background: #f3f3f3; padding: 6px; white-space: pre-wrap; margin: 4px 0; max-height: 380px; overflow: auto; }
+  .log { max-height: 420px; overflow: auto; }
+  .log div { font: 12px ui-monospace, monospace; border-bottom: 1px dotted #eee; padding: 2px 0; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); } .agent { color: var(--agent); } .human { color: var(--human); } .muted { color: var(--muted); }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 9px; font-size: 11px; font-weight: 600; }
+  .pill.ok { background: #dff3e5; } .pill.bad { background: #fbe0de; } .pill.warn { background: #fdefd3; } .pill.agent { background: #ebe5fb; } .pill.muted { background: #eee; }
+  table { border-collapse: collapse; font-size: 12px; width: 100%; }
+  td, th { border: 1px solid var(--line); padding: 3px 6px; text-align: left; }
+  .diff-add { background: #e3f6e8; } .diff-del { background: #fbe4e2; text-decoration: line-through; }
+  label { font-size: 13px; display: block; margin: 3px 0; }
+  .grp { font-size: 11px; color: var(--muted); margin: 8px 0 2px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<header><b>Agentic connector → crystallized Recipe → replay → drift → re-learn</b></header>
+<div class="banner">PROTOTYPE, throwaway. Answers ticket "Agentic platform connectors that crystallize into ingestion pipelines" (#14). Castor is simulated in memory; nothing is persisted. Built on the shapes in clinical-platform-connector(-pietro) and castor_api_connector.</div>
+<main>
+  <div>
+    <section>
+      <h2>Guided walkthroughs</h2>
+      <div class="tabs" id="tabs"></div>
+      <div class="say" id="say">Pick a walkthrough, or use free play below.</div>
+      <button class="primary" id="next">Next step ▶</button>
+    </section>
+    <section>
+      <h2>Free play</h2>
+      <div class="grp">Policy</div>
+      <label><input type="checkbox" id="pol-api" checked> Prefer the API when credentials exist</label>
+      <label><input type="checkbox" id="pol-auto" checked> Auto-promote locator-only repairs that pass every check</label>
+      <div class="grp">Agent and pipeline</div>
+      <button onclick="act(learn)">🤖 Agent: learn the connector (first time)</button>
+      <button onclick="act(()=>runSync())">⏱ Run the scheduled sync (crystallized Recipe, no LLM)</button>
+      <button onclick="act(approve)">👤 Approve the candidate Recipe</button>
+      <button onclick="act(reject)">👤 Reject the candidate Recipe</button>
+      <button onclick="act(relogin)">👤 Sign in again (MFA)</button>
+      <button onclick="act(timePasses)">📅 A week passes (new Subjects at Sites)</button>
+      <div class="grp">Castor changes under us</div>
+      <button onclick="act(()=>uiRename('exportAll','Export data'))">UI: "Export all" button renamed to "Export data"</button>
+      <button onclick="act(()=>uiRename('actions','More'))">UI: "Actions" menu renamed to "More"</button>
+      <button onclick="act(()=>fieldRename('randomized','rand_date'))">Study design: field randomisation_datetime renamed to rand_date</button>
+      <button onclick="act(()=>fieldRename('site','site_name'))">Study design: column institute renamed to site_name</button>
+      <button onclick="act(addField)">Study design: a new field pat_weight is added</button>
+      <button onclick="act(filterOn)">Someone leaves an institute filter on the export</button>
+      <button onclick="act(filterOff)">Filter removed</button>
+      <button onclick="act(expire)">Browser session expires</button>
+      <button onclick="act(toggleApi)">Toggle: API credentials available / revoked</button>
+      <button onclick="act(()=>{reset();log('muted','— reset —')})">Reset everything</button>
+    </section>
+  </div>
+
+  <div>
+    <section>
+      <h2>Active Recipe (the crystallized form)</h2>
+      <div id="active"></div>
+    </section>
+    <section>
+      <h2>Candidate Recipe (proposed by the agent)</h2>
+      <div id="candidate"></div>
+    </section>
+  </div>
+
+  <div>
+    <section>
+      <h2>Canonical store (what the Control Tower reads)</h2>
+      <div id="store"></div>
+    </section>
+    <section>
+      <h2>Last run</h2>
+      <div id="lastrun"></div>
+    </section>
+    <section>
+      <h2>Log</h2>
+      <div class="log" id="log"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+// ---------------------------------------------------------------- simulated Castor
+const SITES = ['Amsterdam UMC', 'Leiden UMC', 'Rotterdam EMC'];
+const pad = n => String(n).padStart(2, '0');
+function seedSubjects() {
+  const out = []; let n = 1;
+  SITES.forEach((site, si) => {
+    const k = [10, 8, 6][si];
+    for (let i = 0; i < k; i++) {
+      const d = `2026-${pad(3 + (i % 6))}-${pad(5 + i)}`;
+      out.push({ id: `${site.slice(0, 3).toUpperCase()}-${String(n++).padStart(3, '0')}`, site,
+        screened: d, consented: i % 4 !== 3 ? d : '', randomized: i % 3 === 0 ? d : '' });
+    }
+  });
+  return out;
+}
+function freshPlatform() {
+  return {
+    apiCreds: true, sessionValid: true, filterLeftOn: false,
+    // what the live UI currently shows, keyed by the step it serves
+    ui: { studyLink: 'Test Study: Test Study', actions: 'Actions', exportAll: 'Export all', exportConfirm: 'Export', download: 'Participant data / CSV' },
+    // current column / field-variable name for each canonical meaning
+    cols: { id: 'record_id', site: 'institute', screened: 'created_on', consented: 'ic_date', randomized: 'randomisation_datetime' },
+    extraCols: ['pat_birth_year', 'pat_sex', 'his_diabetes', 'his_smoke', 'inc_criteria'],
+    subjects: seedSubjects(),
+    contacts: [
+      { institute: 'Amsterdam UMC', user_name: 'Dr. A. de Vries', email: 'a.devries@amc.example', study_role: 'Investigator' },
+      { institute: 'Amsterdam UMC', user_name: 'M. Bakker', email: 'm.bakker@amc.example', study_role: 'Study nurse' },
+      { institute: 'Leiden UMC', user_name: 'Dr. J. Jansen', email: 'j.jansen@lumc.example', study_role: 'Investigator' },
+      { institute: 'Rotterdam EMC', user_name: 'Dr. S. Visser', email: 's.visser@emc.example', study_role: 'Investigator' },
+    ],
+  };
+}
+function rawSubjectExport(p) {
+  let subs = p.subjects;
+  if (p.filterLeftOn) subs = subs.filter(s => s.site === SITES[0]);
+  return subs.map(s => {
+    const r = {};
+    for (const [k, col] of Object.entries(p.cols)) r[col] = s[k] ?? '';
+    for (const c of p.extraCols) r[c] = '…';
+    return r;
+  });
+}
+
+// ---------------------------------------------------------------- state
+let S;
+function reset(opts = {}) {
+  S = { platform: freshPlatform(), active: null, candidate: null, store: null, lastRun: null, log: [], day: 0, recipeSeq: 0 };
+  Object.assign(S.platform, opts);
+}
+const clone = o => JSON.parse(JSON.stringify(o));
+function log(cls, msg) { S.log.unshift({ cls, msg: `d${S.day} ${msg}` }); }
+const pol = () => ({ api: document.getElementById('pol-api').checked, auto: document.getElementById('pol-auto').checked });
+
+// ---------------------------------------------------------------- the crystallized form
+const CHECKS = [
+  ['fields', 'every mapped source field is present'],
+  ['dates', 'milestone dates parse and are ordered (screened ≤ consented ≤ randomized)'],
+  ['sites', 'every Subject belongs to a Site in the site_contacts feed'],
+  ['monotonic', 'randomized count per Site never drops vs the last good snapshot'],
+  ['volume', 'Subject count ≥ 95% of the last good snapshot'],
+];
+function uiFetch(p) {
+  return [
+    { key: 'studyLink', intent: 'Open the study', locator: { role: 'link', name: p.ui.studyLink }, post: 'URL matches /study/{id}' },
+    { key: 'actions', intent: 'Open the participant Actions menu', locator: { role: 'button', name: p.ui.actions }, post: 'a menu with an export item is visible' },
+    { key: 'exportAll', intent: 'Request an export of all participants', locator: { role: 'button', name: p.ui.exportAll }, post: 'export dialog is open' },
+    { key: 'exportConfirm', intent: 'Confirm a CSV export', locator: { role: 'button', name: p.ui.exportConfirm }, post: 'a new export row appears' },
+    { key: 'download', intent: 'Download the new participant-data row', locator: { role: 'gridcell', name: p.ui.download }, post: 'downloaded file is a participant-data zip' },
+  ];
+}
+const API_FETCH = [
+  { intent: 'Token', call: 'POST /oauth/token (client credentials from the vault)' },
+  { intent: 'Sites', call: 'GET /api/study/{study_id}/site' },
+  { intent: 'Subjects with Site', call: 'GET /api/study/{study_id}/participant  (paged)' },
+  { intent: 'Milestone fields', call: 'GET /api/study/{study_id}/data-points/study?fields=<mapped fields>  (paged)' },
+];
+function newRecipe(source, p) {
+  return {
+    version: ++S.recipeSeq,
+    platform: 'castor', tenant: 'uk.castoredc.com', study: 'Test Study',
+    source,                              // 'api' | 'ui-export'
+    fetch: source === 'api' ? clone(API_FETCH) : uiFetch(p),
+    feeds: {
+      subjects: {                         // EDC → subject, subject.milestones
+        map: { subject_id: p.cols.id, site: p.cols.site, screened: p.cols.screened, consented: p.cols.consented, randomized: p.cols.randomized },
+        keep: 'only the mapped fields; every other column is dropped at parse (ADR 0001)',
+      },
+      site_contacts: {                    // CTMS stand-in → site, site.contact
+        map: { site: 'institute', name: 'user_name', email: 'email', role: 'study_role' },
+      },
+    },
+    checks: CHECKS.map(c => c[0]),
+    approved_by: null,
+  };
+}
+
+// ---------------------------------------------------------------- replay (deterministic, no LLM)
+function execute(recipe, { dry }) {
+  const p = S.platform, res = { recipe: recipe.version, dry, checks: [], notices: [] };
+  // 1. fetch
+  if (recipe.source === 'api') {
+    if (!p.apiCreds) return { ...res, status: 'needs_human', detail: 'API credentials rejected (401). A person must re-issue them.' };
+  } else {
+    if (!p.sessionValid) return { ...res, status: 'needs_human', detail: 'Login page instead of /studies: session expired, MFA needed.' };
+    for (const [i, st] of recipe.fetch.entries()) {
+      if (p.ui[st.key] !== st.locator.name)
+        return { ...res, status: 'step_failed', step: i, detail: `Step ${i + 1} "${st.intent}": no ${st.locator.role} named "${st.locator.name}"` };
+    }
+  }
+  const raw = rawSubjectExport(p);
+  const cols = raw.length ? Object.keys(raw[0]) : [];
+  // 2. extract
+  const map = recipe.feeds.subjects.map;
+  const missing = Object.entries(map).filter(([, c]) => !cols.includes(c));
+  res.checks.push({ id: 'fields', pass: !missing.length, msg: missing.length ? `missing: ${missing.map(m => m[1]).join(', ')}` : 'all present' });
+  if (missing.length) return { ...res, status: 'schema_drift', missing, cols };
+  const known = new Set(Object.values(map));
+  const ignored = cols.filter(c => !known.has(c));
+  const unseen = ignored.filter(c => !S.platform.extraColsAtLearn?.includes(c));
+  if (unseen.length) res.notices.push(`new source columns ignored (not mapped): ${unseen.join(', ')}`);
+  const subjects = raw.map(r => Object.fromEntries(Object.entries(map).map(([k, c]) => [k, r[c]])));
+  // 3. checks
+  const badDates = subjects.filter(s => (s.consented && s.consented < s.screened) || (s.randomized && s.randomized < (s.consented || s.screened)));
+  res.checks.push({ id: 'dates', pass: !badDates.length, msg: badDates.length ? `${badDates.length} out of order` : 'ok' });
+  const siteSet = new Set(p.contacts.map(c => c.institute));
+  const orphan = subjects.filter(s => !siteSet.has(s.site));
+  res.checks.push({ id: 'sites', pass: !orphan.length, msg: orphan.length ? `${orphan.length} Subjects at unknown Sites` : 'ok' });
+  const perSite = aggregate(subjects);
+  const last = S.store;
+  if (last) {
+    const drops = SITES.filter(s => (perSite[s]?.randomized ?? 0) < (last.perSite[s]?.randomized ?? 0));
+    res.checks.push({ id: 'monotonic', pass: !drops.length, msg: drops.length ? `randomized dropped at ${drops.join(', ')}` : 'ok' });
+    const ratio = subjects.length / last.subjects;
+    res.checks.push({ id: 'volume', pass: ratio >= 0.95, msg: `${subjects.length} vs ${last.subjects} last good (${Math.round(ratio * 100)}%)` });
+  } else {
+    res.checks.push({ id: 'monotonic', pass: true, msg: 'first snapshot' }, { id: 'volume', pass: true, msg: 'first snapshot' });
+  }
+  const failed = res.checks.filter(c => !c.pass);
+  if (failed.length) return { ...res, status: 'quarantined', detail: 'Data fetched fine but breaks a contract: not committed, not auto-repaired.' };
+  return { ...res, status: 'ok', perSite, subjects: subjects.length };
+}
+function aggregate(subjects) {
+  const o = {};
+  for (const s of subjects) {
+    o[s.site] ??= { screened: 0, consented: 0, randomized: 0 };
+    o[s.site].screened++; if (s.consented) o[s.site].consented++; if (s.randomized) o[s.site].randomized++;
+  }
+  return o;
+}
+function commit(res, recipe) {
+  S.store = { perSite: res.perSite, subjects: res.subjects, asOf: S.day, recipe: recipe.version, contacts: S.platform.contacts.length };
+  log('ok', `committed snapshot from Recipe v${recipe.version}: ${res.subjects} Subjects, raw export deleted after parse, receipt kept`);
+}
+
+// ---------------------------------------------------------------- the pipeline around replay
+function runSync() {
+  if (!S.active) { log('bad', 'no active Recipe: the agent has to learn the connector first'); return; }
+  S.day++;
+  const res = execute(S.active, { dry: false });
+  S.lastRun = res;
+  res.notices.forEach(n => log('warn', `notice: ${n}`));
+  switch (res.status) {
+    case 'ok': commit(res, S.active); break;
+    case 'needs_human': log('human', `NEEDS HUMAN: ${res.detail} Store keeps the last good snapshot.`); break;
+    case 'quarantined': log('bad', `QUARANTINED: ${res.detail} ${res.checks.filter(c => !c.pass).map(c => c.id + ': ' + c.msg).join('; ')}`); break;
+    case 'step_failed':
+      log('bad', `STEP FAILED: ${res.detail}`);
+      repairStep(res); break;
+    case 'schema_drift':
+      log('bad', `SCHEMA DRIFT: mapped fields ${res.missing.map(m => m[1]).join(', ')} are gone`);
+      repairMapping(res); break;
+  }
+}
+
+// ---------------------------------------------------------------- the agent (only produces Recipe diffs)
+function learn() {
+  const p = S.platform, useApi = p.apiCreds && pol().api;
+  S.day++;
+  log('agent', `agent explores Castor for "Subject milestones per Site" and "Sites and Site Contacts"`);
+  if (useApi) log('agent', 'agent finds API credentials in the vault, reads the API docs, lists fields of the study design');
+  else log('agent', 'no API access: agent drives the web UI (assisted recording), keeps role+name locators and a post-condition per step');
+  log('agent', `agent proposes a field mapping by reading field labels and sample values: ${Object.entries(p.cols).map(([k, v]) => `${k} ← ${v}`).join(', ')}`);
+  S.platform.extraColsAtLearn = [...p.extraCols];
+  const r = newRecipe(useApi ? 'api' : 'ui-export', p);
+  propose(r, 'first-learn', 'A first Recipe always needs a person to confirm what each field means.');
+}
+function repairStep(res) {
+  const st = S.active.fetch[res.step];
+  const live = S.platform.ui[st.key];
+  log('agent', `agent invoked on step ${res.step + 1} only, with screenshot + accessibility tree + the step's intent "${st.intent}"`);
+  log('agent', `agent finds ${st.locator.role} "${live}" serving that intent and checks the post-condition "${st.post}"`);
+  const r = clone(S.active); r.version = ++S.recipeSeq; r.approved_by = null;
+  r.fetch[res.step].locator.name = live;
+  propose(r, 'locator', 'Navigation-only change: same data, same mapping.');
+}
+function repairMapping(res) {
+  const r = clone(S.active); r.version = ++S.recipeSeq; r.approved_by = null;
+  const known = new Set(Object.values(S.active.feeds.subjects.map));
+  const fresh = res.cols.filter(c => !known.has(c) && !S.platform.extraColsAtLearn.includes(c));
+  log('agent', `agent compares the study design with the last one: new fields ${fresh.join(', ') || '(none)'}`);
+  for (const [k, oldCol] of res.missing) {
+    const guess = S.platform.cols[k];   // stands in for: label + type + sample values match
+    if (fresh.includes(guess)) { r.feeds.subjects.map[k] = guess; log('agent', `agent proposes ${k} ← ${guess} (was ${oldCol}): same label, same date type, same values on the last snapshot`); }
+    else log('agent', `agent finds no candidate for ${k}`);
+  }
+  propose(r, 'mapping', 'Meaning-bearing change: a person confirms it.');
+}
+function propose(r, kind, why) {
+  const dry = execute(r, { dry: true });
+  S.candidate = { recipe: r, kind, why, dry };
+  log('agent', `candidate Recipe v${r.version} (${kind}) dry-run: ${dry.status}${dry.status === 'ok' ? ', ' + dry.subjects + ' Subjects, all checks pass' : ''}`);
+  const autoOk = kind === 'locator' && dry.status === 'ok' && pol().auto;
+  if (autoOk) { log('ok', 'policy: locator-only repair passed every check → auto-promoted, audit event written'); promote('policy:auto-locator'); }
+  else if (dry.status === 'ok') log('human', `AWAITING APPROVAL: ${why}`);
+  else log('bad', 'dry-run failed: candidate kept for inspection, a person has to look');
+}
+function promote(by) {
+  const c = S.candidate; c.recipe.approved_by = by;
+  S.active = c.recipe; S.candidate = null;
+  if (c.dry.status === 'ok') { S.lastRun = c.dry; commit(c.dry, S.active); }
+}
+function approve() {
+  if (!S.candidate) return log('muted', 'no candidate');
+  if (S.candidate.dry.status !== 'ok') return log('bad', 'cannot approve: the dry-run did not pass');
+  log('human', `ClinOps admin approves Recipe v${S.candidate.recipe.version} (${S.candidate.kind})`);
+  promote('ClinOps admin');
+}
+function reject() { if (S.candidate) { log('human', `candidate v${S.candidate.recipe.version} rejected; active Recipe unchanged`); S.candidate = null; } }
+
+// ---------------------------------------------------------------- the world changes
+function uiRename(key, name) { log('warn', `Castor release: "${S.platform.ui[key]}" is now "${name}"`); S.platform.ui[key] = name; }
+function fieldRename(k, name) { log('warn', `study builder renames field ${S.platform.cols[k]} → ${name}`); S.platform.cols[k] = name; }
+function addField() { S.platform.extraCols.push('pat_weight'); log('warn', 'study builder adds field pat_weight'); }
+function filterOn() { S.platform.filterLeftOn = true; log('warn', `export now silently filtered to ${SITES[0]}`); }
+function filterOff() { S.platform.filterLeftOn = false; log('human', 'filter removed'); }
+function expire() { S.platform.sessionValid = false; log('warn', 'browser session expired'); }
+function relogin() { S.platform.sessionValid = true; log('human', 'a person signs in with MFA in the assisted browser; the session is saved'); }
+function toggleApi() { S.platform.apiCreds = !S.platform.apiCreds; log('warn', `API credentials ${S.platform.apiCreds ? 'available' : 'revoked'}`); }
+function timePasses() {
+  let n = S.platform.subjects.length;
+  SITES.forEach((site, i) => { for (let j = 0; j <= i % 2; j++) S.platform.subjects.push({ id: `NEW-${++n}`, site, screened: '2026-10-20', consented: '2026-10-22', randomized: j === 0 ? '2026-10-29' : '' }); });
+  log('muted', 'a week passes: new Subjects screened and randomized in Castor');
+}
+
+// ---------------------------------------------------------------- render
+function recipeView(r, base) {
+  if (!r) return '<span class="muted">none</span>';
+  const changed = path => base && JSON.stringify(path(r)) !== JSON.stringify(path(base));
+  let h = `<div><span class="pill agent">v${r.version}</span> <span class="pill muted">${r.source}</span> approved by: <b>${r.approved_by ?? '—'}</b></div>`;
+  h += '<h3>fetch</h3><pre>' + r.fetch.map((s, i) => {
+    const line = s.call ? `${i + 1}. ${s.call}` : `${i + 1}. ${s.intent}\n   getByRole('${s.locator.role}', { name: '${s.locator.name}' })\n   then: ${s.post}`;
+    return changed(x => x.fetch[i]) ? `<span class="diff-add">${line}</span>  ← was "${base.fetch[i].locator.name}"` : line;
+  }).join('\n') + '</pre>';
+  h += '<h3>feeds.subjects.map (canonical ← source)</h3><pre>' + Object.entries(r.feeds.subjects.map).map(([k, v]) =>
+    changed(x => x.feeds.subjects.map[k]) ? `<span class="diff-add">${k} ← ${v}</span>  ← was ${base.feeds.subjects.map[k]}` : `${k} ← ${v}`).join('\n')
+    + `\n# ${r.feeds.subjects.keep}</pre>`;
+  h += '<h3>feeds.site_contacts.map</h3><pre>' + Object.entries(r.feeds.site_contacts.map).map(([k, v]) => `${k} ← ${v}`).join('\n') + '</pre>';
+  h += '<h3>checks</h3><pre>' + CHECKS.map(([id, d]) => `${id}: ${d}`).join('\n') + '</pre>';
+  return h;
+}
+function statusPill(s) { const m = { ok: 'ok', needs_human: 'warn', quarantined: 'bad', step_failed: 'bad', schema_drift: 'bad' }; return `<span class="pill ${m[s] || 'muted'}">${s}</span>`; }
+function render() {
+  document.getElementById('active').innerHTML = recipeView(S.active);
+  const c = S.candidate;
+  document.getElementById('candidate').innerHTML = c
+    ? `<div><span class="pill agent">${c.kind}</span> dry-run ${statusPill(c.dry.status)} <span class="muted">${c.why}</span></div>` + recipeView(c.recipe, S.active)
+    : '<span class="muted">none</span>';
+  const st = S.store;
+  const stale = st && S.lastRun && S.lastRun.status !== 'ok' && !S.lastRun.dry;
+  document.getElementById('store').innerHTML = st
+    ? `<div>As of day ${st.asOf} · Recipe v${st.recipe} ${stale ? '<span class="pill warn">STALE: last sync did not commit</span>' : '<span class="pill ok">fresh</span>'}</div>
+       <table><tr><th>Site</th><th>Screened</th><th>Consented</th><th>Randomized</th></tr>${SITES.map(s => `<tr><td>${s}</td><td>${st.perSite[s]?.screened ?? 0}</td><td>${st.perSite[s]?.consented ?? 0}</td><td>${st.perSite[s]?.randomized ?? 0}</td></tr>`).join('')}</table>
+       <div class="muted">${st.subjects} Subjects (pseudonymized, 5 fields each) · ${st.contacts} Site Contacts</div>`
+    : '<span class="muted">empty</span>';
+  const lr = S.lastRun;
+  document.getElementById('lastrun').innerHTML = lr
+    ? `<div>Recipe v${lr.recipe}${lr.dry ? ' (dry-run)' : ''} ${statusPill(lr.status)} ${lr.detail ? '<div class="muted">' + lr.detail + '</div>' : ''}</div>
+       <table>${CHECKS.map(([id]) => { const ck = lr.checks.find(x => x.id === id); return `<tr><td>${id}</td><td class="${ck ? (ck.pass ? 'ok' : 'bad') : 'muted'}">${ck ? (ck.pass ? '✓ ' : '✗ ') + ck.msg : 'not reached'}</td></tr>`; }).join('')}</table>
+       ${lr.notices.map(n => `<div class="warn">ⓘ ${n}</div>`).join('')}`
+    : '<span class="muted">no run yet</span>';
+  document.getElementById('log').innerHTML = S.log.map(l => `<div class="${l.cls}">${l.msg}</div>`).join('');
+}
+function act(fn) { fn(); render(); }
+
+// ---------------------------------------------------------------- walkthroughs
+const setPol = (api, auto) => { document.getElementById('pol-api').checked = api; document.getElementById('pol-auto').checked = auto; };
+function boot(source) { reset({ apiCreds: source === 'api' }); setPol(true, true); learn(); approve(); }
+const WALKS = {
+  'Learn via API': [
+    ['Fresh start. Castor API credentials are in the vault (castor_api_connector path).', () => { reset(); setPol(true, true); }],
+    ['The agent learns. Its output is not data, it is a Recipe: the API calls, a field mapping and the checks. It sits as a candidate until a person approves it, because "which field means randomized" is a clinical question.', learn],
+    ['ClinOps admin approves. The Recipe becomes active and its dry-run snapshot is committed.', approve],
+    ['From now on the sync runs the Recipe on a schedule. No LLM in the loop.', timePasses],
+    ['Scheduled sync.', runSync],
+  ],
+  'Learn via UI': [
+    ['No API access (Sponsor won\'t issue an API user). Same goal.', () => { reset({ apiCreds: false }); setPol(true, true); }],
+    ['The agent drives the export in the browser (the assisted mode in clinical-platform-connector-pietro). It keeps role+name locators plus a post-condition per step, not raw codegen with typed passwords.', learn],
+    ['Approve. Note the same feeds, map and checks as the API Recipe: only "fetch" differs.', approve],
+    ['A week passes, scheduled sync.', () => { timePasses(); runSync(); }],
+  ],
+  'Button renamed': [
+    ['UI Recipe active and synced.', () => boot('ui')],
+    ['Castor ships a release: "Export all" becomes "Export data".', () => uiRename('exportAll', 'Export data')],
+    ['Scheduled sync. Step 3 fails. The pipeline calls the agent on that step only; it proposes v2 and dry-runs it. Policy: a locator-only change that passes every check is promoted without a person (toggle it off in Policy to compare).', runSync],
+  ],
+  'Field renamed': [
+    ['API Recipe active and synced.', () => boot('api')],
+    ['The study builder renames randomisation_datetime → rand_date. This breaks the API Recipe too: the API protects us from navigation drift, not from study-design drift.', () => fieldRename('randomized', 'rand_date')],
+    ['Scheduled sync → schema drift. The agent proposes a mapping change; dry-run passes, but a mapping change is never auto-promoted.', runSync],
+    ['Person approves; v2 is active and the snapshot committed.', approve],
+  ],
+  'Silent drift': [
+    ['UI Recipe active and synced.', () => boot('ui')],
+    ['Someone leaves an institute filter on in Castor. Every step still works and every field is there.', filterOn],
+    ['Sync: the volume and monotonic checks catch it. Quarantined: nothing committed, store marked stale, the agent is not asked to "fix" it (there\'s nothing wrong with the Recipe).', runSync],
+    ['A person removes the filter. Next sync commits.', () => { filterOff(); runSync(); }],
+  ],
+  'Session expired': [
+    ['UI Recipe active and synced.', () => boot('ui')],
+    ['The browser session expires; Castor asks for MFA.', expire],
+    ['Sync stops at login. Not a re-learn case: a person must sign in (this is the main ops cost of the UI path).', runSync],
+    ['Person signs in; sync resumes.', () => { relogin(); runSync(); }],
+  ],
+  'New field': [
+    ['API Recipe active and synced.', () => boot('api')],
+    ['The study adds pat_weight.', addField],
+    ['Sync commits. The new column is logged as a notice and dropped at parse: the mapping is an allowlist, so additions never break it and never leak into our store.', runSync],
+  ],
+};
+let walk = null, stepIx = 0;
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = Object.keys(WALKS).map(k => `<button class="${k === walk ? 'on' : ''}" onclick="startWalk('${k}')">${k}</button>`).join('');
+}
+function startWalk(k) { walk = k; stepIx = 0; reset(); renderTabs(); document.getElementById('say').textContent = `${k}: press Next step.`; render(); }
+document.getElementById('next').onclick = () => {
+  if (!walk) return;
+  const steps = WALKS[walk];
+  if (stepIx >= steps.length) { document.getElementById('say').textContent = 'Done. Free play continues from here.'; return; }
+  const [say, fn] = steps[stepIx++];
+  fn();
+  document.getElementById('say').textContent = `(${stepIx}/${steps.length}) ${say}`;
+  render();
+};
+
+reset(); renderTabs(); render();
+</script>
+</body>
+</html>
