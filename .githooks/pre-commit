@@ -1,0 +1,16 @@
+#!/bin/sh
+# Versioned pre-commit hook. Enable once per clone: git config core.hooksPath .githooks
+set -e
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if echo "$staged" | grep -qE '^docs/(scenarios|mvp-backlog)\.md$|^docs/pages/mvp-backlog\.html$'; then
+  python3 scripts/build_backlog_page.py --check
+fi
+
+if echo "$staged" | grep -qE '\.(ts|tsx)$'; then
+  if [ -x node_modules/.bin/tsc ]; then
+    node_modules/.bin/tsc --noEmit -p .
+  else
+    echo "pre-commit: node_modules missing, typecheck skipped (run npm install)" >&2
+  fi
+fi
