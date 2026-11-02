@@ -95,9 +95,11 @@ def backlog():
 
 
 def render(page):
-    sc = "const SC = " + json.dumps(scenarios(), ensure_ascii=False) + ";"
+    # One row per line, so a diff of the page (or an Artifact publish conflict) shows only the rows that changed.
+    sc = "const SC = [\n" + ",\n".join("  " + json.dumps(r, ensure_ascii=False) for r in scenarios()) + "\n];"
     bl = "const BL = [\n" + ",\n".join("  " + json.dumps(r, ensure_ascii=False) for r in backlog()) + "\n];"
-    page, n_sc = re.subn(r"^const SC = .*;$", lambda _: sc, page, count=1, flags=re.M)
+    # The first form is the one-line layout older pages used.
+    page, n_sc = re.subn(r"^const SC = (?:\[\n.*?\n\]|\[[^\n]*\]);$", lambda _: sc, page, count=1, flags=re.M | re.S)
     page, n_bl = re.subn(r"^const BL = \[\n.*?\n\];$", lambda _: bl, page, count=1, flags=re.M | re.S)
     if n_sc != 1 or n_bl != 1:
         sys.exit(f"Could not find the SC and BL arrays in {PAGE.relative_to(ROOT)}")
