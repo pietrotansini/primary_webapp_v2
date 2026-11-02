@@ -225,6 +225,9 @@ tr.flash td{animation:flash 1.4s ease-out}
 .pane ul.lv{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
 .pane ul.lv li span{color:var(--muted)}
 .pane .warn{border-left:3px solid var(--s-health);padding:6px 10px;background:color-mix(in srgb,var(--s-health) 7%,transparent);font-size:13px}
+.pane .scope{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.pane .scope .chip.in{--c:var(--accent)}
+.pane .scope .chip.out{--c:var(--s-pii)}
 .pane .desc{display:flex;flex-direction:column;gap:10px}
 .pane .desc>p{font-size:15px;line-height:1.5}
 .pane .ex{background:var(--sunk);padding:9px 12px;display:flex;flex-direction:column;gap:3px}
@@ -684,7 +687,7 @@ function openPane(code){
   const health=its.filter(r=>r.s.includes('Health')), widen=its.filter(r=>r.widen), added=its.filter(r=>r.sc==='B');
   const rows=d.rows?d.rows.map(x=>`<tr><td>${esc(x.what)}<br>${x.items.map(itemBtn).join('')}</td><td>${esc(x.src)}</td></tr>`).join('')
     :its.map(r=>`<tr><td>${esc(r.nm)}<br>${itemBtn(r.id)}</td><td>${r.in.map(x=>SRC_SHORT[x]).join(', ')}${r.st==='Derived'?' (derived)':''}</td></tr>`).join('');
-  pane.innerHTML=`<div class="ph"><div><div class="eyebrow">${s.sc==='P'?'Pilot':'Beyond the pilot'}${d.rank?' · rank '+d.rank:''}</div><code>${code}</code><h2 id="pane-title">${esc(d.title||s.name)}</h2></div><button class="x" aria-label="Close" id="pane-x">×</button></div>
+  pane.innerHTML=`<div class="ph"><div><div class="scope"><span class="chip ${s.sc==='P'?'in':'out'}">${s.sc==='P'?'Pilot':'Beyond the pilot'}</span>${d.rank?`<span class="eyebrow">Rank ${d.rank}</span>`:''}</div><code>${code}</code><h2 id="pane-title">${esc(d.title||s.name)}</h2></div><button class="x" aria-label="Close" id="pane-x">×</button></div>
    ${DESC[code]?`<section class="desc"><p>${esc(DESC[code][0])}</p><div class="ex"><span class="eyebrow">Example, illustrative</span><p>${esc(DESC[code][1])}</p></div></section>`:''}
    <section><h3>Scenario</h3><dl>
      <dt>Started by</dt><dd>${esc({Ask:'A user asks Prime',Agent:'An Agent raises it',Both:'A user or an Agent',UI:'A user in the app',Site:'A Site’s mail or click'}[d.trigger]||d.trigger||'')}</dd>
@@ -778,7 +781,7 @@ function renderTable(){
       <td>${r.out.map(o=>`<span class="out">${OUT_SHORT[o]}</span>`).join('')}</td></tr>`;
   });
   tb.innerHTML=html||`<tr><td colspan="8" class="empty">No items match these filters.</td></tr>`;
-  tb.querySelectorAll('button.sc').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const c=b.dataset.sc;setScenario(scen===c?null:c)}));
+  tb.querySelectorAll('button.sc').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const c=b.dataset.sc;openPane(c)}));
   tb.querySelectorAll('tr.item').forEach(tr=>{
     const go=()=>{sel=sel===tr.dataset.id?null:tr.dataset.id;tb.querySelectorAll('tr.item').forEach(x=>x.classList.toggle('sel',x.dataset.id===sel));paint()};
     tr.addEventListener('click',go); tr.addEventListener('keydown',e=>{if(e.target!==tr)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
