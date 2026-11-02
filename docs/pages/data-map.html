@@ -1,0 +1,815 @@
+<title>Control Tower Data Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a regulatory dossier. Ground rules up top, then one tab per conversation (Pilot / Beyond),
+   each with a left-to-right data flow (collect → ingest → store → process → deliver) and the item register below it. */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --sunk:#E9EEF0; --ink:#13202A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6478; --accent-ink:#FFFFFF; --hl:#FFF3C4; --hl-line:#C9A227;
+  --s-public:#66737F; --s-conf:#2B58A6; --s-pii:#A35F00; --s-health:#B0233F; --s-free:#6B3DB0; --s-secret:#2A2F33; --s-mixed:#3F7A55;
+  --read:#2462A8; --write:#C2410C; --t-sponsor:#8A6414; --t-public:#66737F; --t-proc:#8B3A8F; --t-people:#3F7A55;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1418; --surface:#151E24; --sunk:#1B262D; --ink:#E2E9ED; --muted:#91A3AE; --line:#2A3740;
+  --accent:#4DB2C9; --accent-ink:#0B1316; --hl:#3A3214; --hl-line:#D8B33E;
+  --s-public:#9AA6B0; --s-conf:#7FA6EE; --s-pii:#E5A24A; --s-health:#F07A90; --s-free:#B394EE; --s-secret:#C9D1D6; --s-mixed:#7CC596;
+  --read:#7DAEF0; --write:#F59A62; --t-sponsor:#D9AE55; --t-public:#9AA6B0; --t-proc:#D18AD5; --t-people:#7CC596;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1418; --surface:#151E24; --sunk:#1B262D; --ink:#E2E9ED; --muted:#91A3AE; --line:#2A3740;
+  --accent:#4DB2C9; --accent-ink:#0B1316; --hl:#3A3214; --hl-line:#D8B33E;
+  --s-public:#9AA6B0; --s-conf:#7FA6EE; --s-pii:#E5A24A; --s-health:#F07A90; --s-free:#B394EE; --s-secret:#C9D1D6; --s-mixed:#7CC596;
+  --read:#7DAEF0; --write:#F59A62; --t-sponsor:#D9AE55; --t-public:#9AA6B0; --t-proc:#D18AD5; --t-people:#7CC596;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--f-display);font-stretch:85%;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(28px,4.4vw,42px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:15px;font-weight:700;font-stretch:90%}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Header */
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 32px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:20px}
+header .lede{max-width:68ch;color:var(--muted);margin-top:10px}
+.status{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);background:var(--surface);padding:10px 12px;display:grid;grid-template-columns:auto auto;gap:2px 14px;white-space:nowrap}
+.status b{font-weight:500;color:var(--ink)}
+.status span{color:var(--muted)}
+@media (max-width:720px){header{grid-template-columns:1fr}.status{white-space:normal}}
+
+/* Ground rules */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.rule{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rule h3{font-size:13.5px}
+.rule p{font-size:13.5px;color:var(--muted)}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 20px;margin-bottom:12px}
+.sec-head p{color:var(--muted);font-size:13.5px;max-width:70ch}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tab{border:1px solid transparent;border-bottom:none;background:none;padding:10px 18px 11px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-bottom:-1px;text-align:left}
+.tab .t{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:17px}
+.tab .s{font-size:12px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);border-top:3px solid var(--accent);padding-top:8px}
+.tab:not([aria-selected="true"]):hover .t{color:var(--accent)}
+
+.view{display:flex;flex-direction:column;gap:32px;margin-top:24px}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px}
+@media (max-width:860px){.intro{grid-template-columns:1fr}}
+.intro .what{display:flex;flex-direction:column;gap:10px}
+.intro .what p{max-width:70ch}
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);align-self:start}
+.tally div{background:var(--surface);padding:10px 12px}
+.tally b{display:block;font-family:var(--f-display);font-stretch:80%;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tally span{font-size:12px;color:var(--muted)}
+.scen{display:flex;flex-wrap:wrap;gap:6px}
+.scen span{font-size:12.5px;border:1px solid var(--line);background:var(--surface);padding:2px 8px}
+.scen span code{color:var(--accent);font-weight:500}
+
+/* Flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;position:relative}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.col:not(:last-child):not(:nth-last-child(2))::after{content:"→";position:absolute;right:-17px;top:2px;color:var(--muted);font-size:16px}
+.col-h{display:flex;flex-direction:column;gap:0;padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:2px}
+.col-h .q{font-size:12px;color:var(--muted)}
+.node{background:var(--surface);border:1px solid var(--line);padding:9px 10px 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background .15s,border-color .15s,opacity .15s;position:relative}
+.node:hover{border-color:var(--accent)}
+.node .n{font-weight:600;font-size:13.5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.node .d{font-size:12px;color:var(--muted);line-height:1.4}
+.node .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.node.off{opacity:.38}
+.node.on{background:var(--hl);border-color:var(--hl-line)}
+.node.pick{outline:2px solid var(--accent);outline-offset:-2px}
+.node.sink{border-style:dashed}
+.badge{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border:1px solid currentColor;color:var(--accent);font-weight:500}
+.badge.warn{color:var(--s-pii)}
+.audit-rail{margin-top:10px;border:1px dashed var(--line);padding:8px 12px;font-size:12.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.audit-rail b{color:var(--ink);font-weight:600}
+@media (max-width:980px){
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .col:not(:last-child):not(:nth-last-child(2))::after{display:none}
+}
+@media (max-width:560px){.flow{grid-template-columns:1fr}}
+
+/* Trace bar */
+.trace{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 14px;font-size:13.5px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline}
+.trace .path{font-family:var(--f-mono);font-size:12.5px}
+.trace .path i{font-style:normal;color:var(--muted)}
+.trace button{margin-left:auto;background:none;border:1px solid var(--line);padding:2px 10px;cursor:pointer;font-size:12.5px}
+
+/* Filters */
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters .lbl{font-size:12.5px;color:var(--muted);margin-right:4px}
+.chip{--c:var(--muted);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:1px 7px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 11%,transparent);color:var(--c);white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;background:var(--c);display:inline-block}
+button.chip{cursor:pointer;padding:4px 10px;font-size:12.5px}
+button.chip[aria-pressed="false"]{background:none;opacity:.6}
+button.chip .ct{font-family:var(--f-mono);font-size:11px;opacity:.8}
+.c-Public{--c:var(--s-public)} .c-Confidential{--c:var(--s-conf)} .c-PII{--c:var(--s-pii)} .c-Health{--c:var(--s-health)} .c-Free{--c:var(--s-free)} .c-Secret{--c:var(--s-secret)} .c-Mixed{--c:var(--s-mixed)}
+.nodefilter{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;background:var(--hl);border:1px solid var(--hl-line);padding:3px 4px 3px 10px}
+.nodefilter button{border:none;background:none;cursor:pointer;padding:0 6px;font-size:14px;line-height:1}
+
+/* Register table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--ink);background:var(--surface);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.grp td{background:var(--sunk);font-family:var(--f-display);font-stretch:90%;font-weight:700;font-size:13px;padding:6px 10px}
+tr.item{cursor:pointer}
+tr.item:hover td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+tr.item.sel td{background:var(--hl)}
+td.id code{font-weight:500;color:var(--ink)}
+td.id .nm{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+td.fields{max-width:300px;color:var(--ink)}
+td .note{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+td.tags{display:flex;flex-wrap:wrap;gap:4px}
+.src,.out{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);padding:0 5px;white-space:nowrap;display:inline-block;margin:0 3px 3px 0}
+.st{font-size:12.5px;white-space:nowrap}
+.st small{display:block;color:var(--muted);font-size:11.5px}
+.flagtxt{color:var(--s-health);font-weight:600}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+
+/* Lists */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.qlist li{padding:11px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px}
+.qlist .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);padding-top:3px;min-width:84px}
+.qlist p{font-size:13.5px}
+.qlist p b{font-weight:600}
+.sub{width:100%;border-collapse:collapse;font-size:13px;min-width:0}
+.sub th,.sub td{padding:8px 10px 8px 0}
+.never{display:flex;flex-wrap:wrap;gap:6px}
+.never span{font-size:12.5px;border:1px solid var(--line);padding:3px 8px;text-decoration:line-through;text-decoration-color:var(--s-health);text-decoration-thickness:1.5px;background:var(--surface)}
+footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+/* Platform graph */
+.picker{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:10px}
+.picker label{font-size:13px;color:var(--muted)}
+select{font:inherit;font-size:13.5px;padding:6px 8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+.picker .clear{background:none;border:1px solid var(--line);padding:5px 10px;cursor:pointer;font-size:12.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);align-items:center;margin-bottom:10px}
+.lg-line{display:inline-block;width:28px;height:0;border-top:2px solid var(--read);vertical-align:middle;margin-right:6px}
+.lg-line.w{border-top:2px dashed var(--write)}
+.lg-box{display:inline-block;width:12px;height:12px;border:1.5px solid var(--tc);vertical-align:-1px;margin-right:6px}
+.gwrap{overflow-x:auto;border:1px solid var(--line);background:var(--bg)}
+.graph{position:relative;width:1180px;height:960px;margin:0 auto}
+.graph svg{position:absolute;left:0;top:0}
+.t-sponsor{--tc:var(--t-sponsor)} .t-public{--tc:var(--t-public)} .t-ours{--tc:var(--accent)} .t-proc{--tc:var(--t-proc)} .t-people{--tc:var(--t-people)}
+.gnode{position:absolute;border:1.5px solid var(--tc);background:var(--surface);padding:8px 10px;display:flex;flex-direction:column;gap:2px;transition:opacity .15s;z-index:1}
+.gnode .ty{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--tc)}
+.gnode .nm{font-family:var(--f-display);font-stretch:88%;font-weight:700;font-size:16px;line-height:1.15}
+.gnode .sb{font-size:11.5px;color:var(--muted);line-height:1.35}
+.gnode.t-ours{border-width:2px;background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.gnode ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.gnode li{font-size:12px;border-top:1px solid var(--line);padding-top:5px;display:flex;justify-content:space-between;gap:8px}
+.gnode li span{color:var(--muted);font-size:11px;text-align:right}
+.gnode.dim{opacity:.3}
+path.e{fill:none;stroke-width:1.6;transition:opacity .15s,stroke-width .15s}
+path.e.read{stroke:var(--read)}
+path.e.write{stroke:var(--write);stroke-dasharray:6 4}
+path.e.off{opacity:.14}
+path.e.hot{stroke-width:2.8}
+.k-read{--kc:var(--read)} .k-write{--kc:var(--write)}
+.elab{position:absolute;width:196px;background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--kc);padding:5px 7px 6px;font-size:11.5px;z-index:2}
+.elab .eh{display:flex;gap:6px;align-items:baseline;font-size:11px;color:var(--muted);margin-bottom:4px;line-height:1.3}
+.elab .kt{font-family:var(--f-mono);font-size:10px;font-weight:600;color:var(--kc);letter-spacing:.06em}
+.elab .ei{display:flex;flex-wrap:wrap;gap:3px}
+.elab button{font-size:11.5px;border:1px solid var(--line);background:var(--bg);padding:1px 6px;cursor:pointer;line-height:1.4;text-align:left}
+.elab button:hover{border-color:var(--kc);color:var(--kc)}
+.elab button.was{border-style:dashed;color:var(--muted)}
+.elab button.more{background:none;color:var(--kc);border-color:transparent;text-decoration:underline;text-underline-offset:2px}
+.scen button{font-size:12.5px;border:1px solid var(--line);background:var(--surface);padding:2px 8px;cursor:pointer;text-align:left}
+.scen button code{color:var(--accent);font-weight:500}
+.scen button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+/* Why column */
+td.why{min-width:150px}
+.sc{font-family:var(--f-mono);font-size:11px;border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);color:var(--accent);background:none;padding:0 5px;margin:0 3px 3px 0;cursor:pointer;white-space:nowrap}
+.sc.later{border-color:var(--line);color:var(--muted)}
+.sc.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+td.why small{display:block;color:var(--muted);font-size:11.5px}
+.inpilot{display:inline-block;font-family:var(--f-mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px dashed var(--line);padding:0 4px;margin-top:3px}
+tr.flash td{animation:flash 1.4s ease-out}
+@keyframes flash{0%{background:var(--hl-line)}100%{background:var(--hl)}}
+/* Scenario pane */
+.pane{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:-10px 0 28px color-mix(in srgb,var(--ink) 10%,transparent);z-index:20;overflow-y:auto;padding-top:calc(env(safe-area-inset-top,0px) + 18px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px);padding-left:20px;padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+.pane .ph{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.pane .ph h2{font-size:21px}
+.pane .ph code{color:var(--accent);font-size:15px;display:block;margin-bottom:4px}
+.pane .x{background:none;border:1px solid var(--line);width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;flex:none}
+.pane h3{font-size:13px;font-family:var(--f-mono);font-stretch:100%;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pane dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;margin:0;font-size:13px}
+.pane dt{color:var(--muted)}
+.pane dd{margin:0}
+.pane .ptbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:0}
+.pane .ptbl td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.pane .ptbl td:last-child{color:var(--muted);white-space:normal;padding-right:0}
+.pane .ib{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);background:var(--bg);padding:0 5px;margin:3px 3px 0 0;cursor:pointer;display:inline-block}
+.pane .ib:hover{border-color:var(--accent);color:var(--accent)}
+.pane .ib.new{border-color:var(--s-health);color:var(--s-health)}
+.pane p{font-size:13px}
+.pane ul.lv{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.pane ul.lv li span{color:var(--muted)}
+.pane .warn{border-left:3px solid var(--s-health);padding:6px 10px;background:color-mix(in srgb,var(--s-health) 7%,transparent);font-size:13px}
+.pane .scope{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.pane .scope .chip.in{--c:var(--accent)}
+.pane .scope .chip.out{--c:var(--s-pii)}
+.pane .desc{display:flex;flex-direction:column;gap:10px}
+.pane .desc>p{font-size:15px;line-height:1.5}
+.pane .ex{background:var(--sunk);padding:9px 12px;display:flex;flex-direction:column;gap:3px}
+.pane .ex p{font-size:13.5px}
+.pane .sens{display:flex;flex-wrap:wrap;gap:5px}
+@media (min-width:1280px){body.pane-open .wrap{margin-right:440px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Recruitment Control Tower · data protection review</div>
+      <h1>Control Tower Data Map</h1>
+      <p class="lede">What data we need, where we collect it, how we process it, where we store it and where it goes. Split in two: the <b>pilot</b> (the 9 Scenarios above the cut, first real Sponsor data) and <b>beyond the pilot</b> (what later Scenarios would add). The platform map shows every system the data moves between; pick a Scenario to see only the data it needs, and click any data name to jump to its row in the register.</p>
+    </div>
+    <div class="status">
+      <span>Status</span><b>Tentative</b>
+      <span>As of</span><b>2 Nov 2026</b>
+      <span>Source</span><b>docs/data-model.md</b>
+      <span>Decided</span><b>ADR 0001, 0002, M2 bar</b>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <h2>Ground rules for both conversations</h2>
+      <p>Decided in the M2 compliance bar and the ADRs. These apply to every dataset below.</p>
+    </div>
+    <div class="rules">
+      <div class="rule"><h3>Roles</h3><p>The Sponsor is controller, we are processor. A DPA and a subprocessor list with regions are signed before real data arrives.</p></div>
+      <div class="rule"><h3>Read-only sources</h3><p>We never write back into the EDC, CTMS or any other Sponsor system. Only data born on our platform is ours to change.</p></div>
+      <div class="rule"><h3>Pseudonymized Subjects only</h3><p>EDC subject ID, Site, status and status dates, screen-fail reason category, next visit date. Every other field is dropped while parsing, before anything is written (ADR 0001).</p></div>
+      <div class="rule"><h3>Residency</h3><p>EU by default where it costs nothing extra: Supabase EU, Vercel fra1, an EU email provider. Not a go-live gate. Anthropic is a disclosed subprocessor under SCCs with zero data retention.</p></div>
+      <div class="rule"><h3>Audit trail</h3><p>Append-only, timestamped, attributable, before/after values. Covers sign-ins, approvals, sends, AI drafts and classifications, syncs, settings, exports, and every read of Subject data by a user or by Prime.</p></div>
+      <div class="rule"><h3>Part 11-ready, not validated</h3><p>Approvals record approver, time and signature meaning. No re-authentication at approval, no validation package, no CSV/CSA.</p></div>
+      <div class="rule"><h3>Retention</h3><p>Rolling periods set by the Sponsor per data class at onboarding, no defaults. Nothing is purged until a period is set. At contract end: export to the Sponsor, then delete.</p></div>
+      <div class="rule"><h3>Security</h3><p>Encryption in transit and at rest. Email magic-link sign-in, SSO optional. Review pack: CAIQ-lite / SIG Lite, data-flow note, DPA, subprocessors. SOC 2, ISO 27001 and pen test deferred.</p></div>
+    </div>
+  </section>
+
+  <div>
+    <div class="tabs" role="tablist" aria-label="Conversation">
+      <button class="tab" role="tab" id="tab-pilot" aria-controls="view" data-view="pilot"><span class="t">Pilot</span><span class="s">9 Scenarios, first real data (M2)</span></button>
+      <button class="tab" role="tab" id="tab-beyond" aria-controls="view" data-view="beyond"><span class="t">Beyond the pilot</span><span class="s">What later Scenarios add</span></button>
+    </div>
+    <div id="view" class="view" role="tabpanel"></div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Never ingested</h2>
+      <p>In either conversation. Fields outside the allowlist are dropped while parsing, before anything is written.</p>
+    </div>
+    <div class="never">
+      <span>Patient names</span><span>Initials</span><span>Dates of birth</span><span>Patient contact details</span><span>Medical record numbers</span><span>Treatment arm</span><span>Kit numbers and anything that could unblind</span><span>CRF data beyond the listed Subject fields</span><span>RTSM supply data</span><span>Per-candidate referral rows</span><span>EDC query text</span><span>Invoices and contracts</span><span>Payment runs</span><span>eIRB approvals</span><span>eTMF documents</span>
+    </div>
+  </section>
+
+  <footer>Generated from <code>docs/data-model.md</code>, <code>docs/mvp-backlog.md</code> (Compliance bar for M2) and <code>docs/adr/</code>. Everything marked tentative waits on "Data ingestion approach for the pilot" (#7) and "High-level data model" (#9).</footer>
+</div>
+
+<script>
+(function(){
+// ---------- Pipeline nodes ----------
+const SOURCES=[
+  {id:'EDC',n:'EDC',k:'Connected · API or export',d:'Rave Web Services, Vault EDC or Clinical One; else the Sponsor’s export. Subjects and milestone dates.'},
+  {id:'CTMS',n:'CTMS',k:'Connected · API or export',d:'Study, plans, Sites, Site Contacts, CRA assignments, monitoring visits, Site issues.'},
+  {id:'File',n:'Per-study files',k:'File transfer',d:'Referral tool counts; Site plan spreadsheet if the CTMS lacks it.'},
+  {id:'CTgov',n:'ClinicalTrials.gov',k:'Public API v2',d:'Competing recruiting trials and their locations.'},
+  {id:'Sponsor',n:'Sponsor settings',k:'Entered in the app',d:'NCT number if missing, daily cost of delay, retention periods.'},
+  {id:'Upload',n:'Study documents',k:'Uploaded by the Sponsor',d:'Protocol, Site reference manual, approved FAQs.'},
+  {id:'MailIn',n:'Inbound mail',k:'Email provider',d:'Site Messages sent to our inbound address. Free text.'},
+  {id:'Pages',n:'Hosted Request pages',k:'Our web pages',d:'Site Responses: acknowledgements and short forms.'},
+  {id:'Webhooks',n:'Mail delivery webhooks',k:'Email provider',d:'Delivered, bounced, opened, clicked, per message.',only:'beyond'},
+  {id:'Ours',n:'Our platform',k:'Born here',d:'Users, Actions, Campaigns, Agent runs, conversations, audit events.'},
+];
+const STORES=[
+  {id:'Landing',n:'Landing',k:'Transient',d:'Files and API payloads as received. Deleted after parsing; only a manifest and checksum stay.'},
+  {id:'Synced',n:'Synced records',k:'Versioned copy',d:'Our copy of EDC, CTMS, CT.gov and file data. One row per version, so Evidence points to what an Agent read.'},
+  {id:'Derived',n:'Derived',k:'Recomputed per sync',d:'Metrics, benchmarks, forecast, flags, trial matches, Reports. Snapshots kept for trends.'},
+  {id:'Born',n:'Born on the platform',k:'System of record',d:'Engagement, Agents, users, audit. We are the source.'},
+  {id:'Secret',n:'Secret store',k:'Credentials',d:'Connector users, API keys, file-drop keys. Never reach the LLM or any output.'},
+];
+const PROCS=[
+  {id:'Parse',n:'Parse and allowlist',k:'Deterministic',d:'Keep listed fields, drop the rest before writing. Referral data taken as counts only.'},
+  {id:'Metrics',n:'Metrics and rules',k:'Deterministic',d:'Per-Site metrics after each sync; fixed rules raise flags with a severity (ADR 0002).'},
+  {id:'Agents',n:'Prime and Agents',k:'LLM · Claude API',d:'Diagnose flags with read tools on our DB, draft Actions, classify Site Messages and flag possible patient information.'},
+  {id:'Approve',n:'Human approval',k:'Signature meaning',d:'A Sponsor user approves every mail before it leaves. Approver, time and meaning recorded.'},
+  {id:'Purge',n:'Retention purge',k:'Scheduled job',d:'Applies the Sponsor’s rolling period per data class. Each purge is audited.'},
+];
+const OUTS=[
+  {id:'App',n:'Web app',k:'Study team only',d:'Screens behind sign-in.'},
+  {id:'LLM',n:'Claude API',k:'Subprocessor · ZDR',d:'Prime and Agents read data through tools. Zero data retention, SCCs.'},
+  {id:'Mail',n:'Mail to Site Contacts',k:'Leaves our control',d:'Only what that Site may see. Subject data only as counts.'},
+  {id:'Pages',n:'Request pages',k:'Seen by Site Contacts',d:'The Request a Site answers, reached by a link token.'},
+  {id:'Export',n:'Exports',k:'Audited',d:'CSV/PDF downloads, inspection export, end-of-contract export.'},
+  {id:'Chat',n:'Teams and Slack',k:'Outside our UI',d:'Prime answers, Actions and weekly checks in chat (D4, Should).',only:'beyond'},
+];
+
+// ---------- Register ----------
+const SENS_ORDER=['Health','Free','PII','Secret','Mixed','Confidential','Public'];
+const SENS_LABEL={Health:'Health (pseud.)',Free:'Free text',PII:'PII',Secret:'Secret',Mixed:'Mixed',Confidential:'Confidential',Public:'Public'};
+const R=[];
+function g(cat,rows){rows.forEach(r=>R.push({id:r[0],nm:r[1],f:r[2],in:r[3],st:r[4],ret:r[5],s:r[6],out:r[7],sc:r[8],note:r[9]||'',widen:!!r[10],cat}))}
+g('Study',[
+ ['study','Study record','study code, title, phase, condition, countries, status, NCT number',['CTMS','Sponsor'],'Synced','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P','NCT number entered by the Sponsor when the CTMS lacks it.'],
+ ['study.plan','Study plan','target randomizations, planned and baseline FPI/LPI, planned Site count',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Export'],'P'],
+ ['study.protocol_version','Protocol versions','version, approval date, re-consent required',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P'],
+ ['study.eligibility','Key eligibility','key inclusion and exclusion criteria (text)',['CTgov','Upload'],'Synced','Study ops',['Public','Confidential'],['App','LLM','Mail'],'P','From the Study’s own CT.gov record, else from the protocol.'],
+ ['study.document','Study documents','protocol, Site reference manual, approved FAQs: file, version, text chunks',['Upload'],'Born','Study ops',['Confidential'],['App','LLM','Mail'],'P','Passages may be quoted in mail.'],
+ ['study.delay_cost','Daily cost of delay','amount, currency',['Sponsor'],'Born','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['study.team','Study team','Sponsor users on the Study and their role',['Ours'],'Born','People',['PII'],['App','LLM'],'P'],
+ ['study.visit_schedule','Visit schedule','visits, windows, procedures',['EDC'],'Synced','Study ops',['Confidential'],['App','LLM'],'B','From the EDC’s ODM study design.'],
+ ['study.external_contact','CRO and vendor contacts','CRO or vendor contacts we may write to',['CTMS','Sponsor'],'Synced','People',['PII'],['App','LLM','Mail'],'B'],
+]);
+g('Sites and people',[
+ ['site','Site record','CTMS site ID, site number, institution, address, country, time zone, status, activation and close dates',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P'],
+ ['site.geo','Site coordinates','coordinates',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P','Site address sent to a geocoding provider. Provider not chosen.'],
+ ['site.plan','Site plan','Site target, expected randomizations per month',['CTMS','File'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P','CTMS if held, else a Sponsor spreadsheet.'],
+ ['site.contact','Site Contacts','name, role (PI, coordinator…), email, phone, start and end dates',['CTMS'],'Synced','People',['PII'],['App','LLM','Mail'],'P'],
+ ['site.assignment','CRA per Site','Sponsor-side CRA or monitor per Site',['CTMS'],'Synced','People',['PII'],['App','LLM'],'P'],
+ ['site.visit','Monitoring visits','visit type, planned and actual date, report due and final dates',['CTMS'],'Synced','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['site.issue','Site issues','category, opened, due, status, description',['CTMS'],'Synced','Study ops',['Free'],['App','LLM'],'P','Open: keep the description or the category only.'],
+ ['site.capacity','Site capacity','screening slots a Site says it can take',['Pages'],'Born','Site mail',['Confidential'],['App','LLM'],'B','A Site Response form.'],
+]);
+g('Subjects (pseudonymized)',[
+ ['subject','Subject','EDC subject ID, Site, current status',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Export'],'P','Every read is audited.'],
+ ['subject.milestones','Subject milestones','screened, consented, randomized, discontinued and completed dates',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Export','Mail'],'P','Reaches mail only as counts per Site. Randomization from the EDC, not the RTSM.'],
+ ['subject.screen_fail_reason','Screen-fail reason','reason category',['EDC'],'Synced','Subjects',['Health'],['App','LLM','Mail'],'P','Reaches mail only as counts per Site.'],
+ ['subject.next_visit','Next visit','next and last visit date',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','Already allowed by ADR 0001.'],
+ ['subject.discontinuation_reason','Discontinuation reason','reason category',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','',true],
+ ['subject.consent_version','Consent version','ICF version signed, date',['EDC','File'],'Synced','Subjects',['Health'],['App','LLM'],'B','eConsent file only if the EDC lacks it.',true],
+ ['subject.lab_dates','Screening lab dates','screening lab collection and result dates',['EDC'],'Synced','Subjects',['Health'],['App','LLM'],'B','',true],
+]);
+g('Referral funnel',[
+ ['referral.funnel','Referral counts','counts per Site, week, source channel and stage (referred, pre-screen passed or failed, handed to Site, scheduled)',['File'],'Synced','Study ops',['Confidential'],['App','LLM','Mail'],'P','Counts only: candidates have not consented and have no pseudonymized ID.'],
+ ['referral.prescreen_fails','Pre-screen fails','fail counts per pre-screen question, Site and week',['File'],'Synced','Study ops',['Confidential'],['App','LLM'],'P','Counts only.'],
+]);
+g('EDC operations',[
+ ['edc.query','EDC queries','Site, form, opened, answered, closed, status',['EDC'],'Synced','Study ops',['Confidential'],['App','LLM'],'B','Query text dropped.'],
+ ['edc.entry_lag','Data-entry lag','per Site: visit date vs first entry date, missing pages',['EDC'],'Derived','Study ops',['Confidential'],['App','LLM'],'B'],
+]);
+g('External signals',[
+ ['trial.external','Competing trials','NCT number, title, conditions, phase, status, sponsor, eligibility, dates',['CTgov'],'Synced','Study ops',['Public'],['App','LLM','Mail'],'P'],
+ ['trial.external_site','Competing trial locations','facility, city, country, coordinates, recruiting status',['CTgov'],'Synced','Study ops',['Public'],['App','LLM','Mail'],'P'],
+ ['trial.match','Trial overlap per Site','Site, trial, distance, overlap judgment, first seen',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Mail'],'P','Distance rule, then Agent judgment.'],
+]);
+g('Engagement',[
+ ['action','Actions','kind, Study, Sites, owner, deadline, status, priority, impact line, email draft, origin, approval (who, when, meaning), rejection reason',['Ours'],'Born','Engagement',['Confidential','PII'],['App','LLM','Mail','Export'],'P','PII in email drafts.'],
+ ['campaign','Campaigns','Study, template, blocks, audience, schedule, status',['Ours'],'Born','Engagement',['Confidential'],['App','LLM'],'P'],
+ ['mail.outbound','Outbound mail','per-Site rendered mail, recipients, sender, scheduled and sent time, provider message ID',['Ours'],'Born','Engagement',['PII'],['Mail','App','Export'],'P'],
+ ['report','Reports','figures and text per Site and period, as sent',['Ours'],'Derived','Engagement',['Confidential'],['Mail','App'],'P'],
+ ['request','Requests','kind (acknowledge, short form), form fields, link token',['Ours'],'Born','Engagement',['Confidential'],['Mail','Pages'],'P'],
+ ['site.response','Site Responses','request, Site Contact, answer, time',['Pages'],'Born','Site mail',['Free'],['App','LLM'],'P','Classified by the Triage agent.'],
+ ['site.message','Site Messages','sender, recipients, subject, body, attachments, received time, thread, matched Site and Site Contact, classification, patient-information flag',['MailIn'],'Born','Site mail',['Free','PII'],['App','LLM'],'P','Stored as received, no redaction. The Triage agent flags possible patient information.'],
+ ['brief','Site meeting briefs','Site, meeting date, text, Evidence',['Ours'],'Born','Engagement',['Confidential'],['App','Export'],'P'],
+ ['mail.event','Delivery and open tracking','delivered, bounced, opened, clicked, per message',['Webhooks'],'Born','Engagement',['PII'],['App','LLM'],'B','Per Site Contact.'],
+ ['metric.engagement','Engagement score','engagement score per Site and date',['Ours'],'Derived','Engagement',['Confidential'],['App','LLM'],'B','Formula not decided.'],
+]);
+g('Insights and Agents',[
+ ['metric.site','Site metrics','per Site and sync: counts per stage, rates, expected, gap, status, bottleneck',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Mail','Export'],'P','Aggregates of health data. Snapshot per sync.'],
+ ['metric.benchmark','Benchmarks','study median and peer percentiles per stage',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['metric.forecast','LPI forecast','projected LPI, delay in days, cost of delay, method',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM','Export'],'P'],
+ ['rule','Rules','metric, threshold, severity, Agent',['Ours'],'Born','Study ops',['Confidential'],['App'],'P','Our config.'],
+ ['flag','Flags','rule, Site, severity, opened, state, cool-down until',['Ours'],'Derived','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['agent','Agents','Capability, instructions, schedule',['Ours'],'Born','Study ops',['Confidential'],['App','LLM'],'P'],
+ ['agent.run','Agent runs','trigger, flags handled, tool reads, run summary, diagnosis lines, LLM calls',['Ours'],'Born','Study ops',['Mixed'],['App','LLM'],'P','As sensitive as what it read. Audited when it read Subjects.'],
+ ['evidence','Evidence','record type, record ID, record version, source system, as-of sync time',['Ours'],'Born','Engagement',['Confidential'],['App'],'P','Pointers only. The server rejects citations the Agent did not fetch.'],
+ ['agent.memory','Agent memory','Study, Agent, text, origin (rejection reason)',['Ours'],'Born','Study ops',['Confidential'],['App','LLM'],'P','Visible and deletable on the Agent’s page.'],
+ ['saved_check','Saved checks','question, schedule, owner',['Ours'],'Born','Study ops',['Confidential'],['App'],'P'],
+ ['prime.conversation','Prime conversations','question, plan, tool reads, answer, surface',['Ours'],'Born','Engagement',['Mixed'],['App'],'P','Audited when it read Subjects.'],
+]);
+g('Platform and compliance',[
+ ['sponsor','Sponsor','name, settings, retention periods, region',['Ours','Sponsor'],'Born','—',['Confidential'],['App'],'P'],
+ ['user','Sponsor users','name, email, role, Studies, status',['Ours'],'Born','People',['PII'],['App','LLM','Mail'],'P','LLM sees names only; mail uses the user as sender.'],
+ ['connection','Connections','system, vendor, mode (API, file), status, credentials reference',['Ours'],'Secret','—',['Secret','Confidential'],['App'],'P','App shows status only.'],
+ ['sync.run','Sync runs','connection, start and end, status, records read and dropped, file checksum, errors',['Ours'],'Born','Audit',['Confidential'],['App','LLM'],'P'],
+ ['audit.event','Audit trail','who, when, what, before and after, signature meaning',['Ours'],'Born','Audit',['Mixed'],['App','LLM','Export'],'P','Append-only. May cite Subject IDs. LLM sees summaries.'],
+]);
+const BYID={};R.forEach(r=>BYID[r.id]=r);
+
+// ---------- Scenarios (why we collect each item) ----------
+const SC=[
+ ['EN0','Enrollment by Site report','P',['study','study.plan','site','subject.milestones','metric.site','site.plan']],
+ ['EN3','Recruitment blockers at one Site, from referral to randomization','P',['site','referral.funnel','referral.prescreen_fails','subject.milestones','subject.screen_fail_reason','metric.benchmark','site.message','site.response','site.issue']],
+ ['EN10','Forecast last-patient-in and the cost of delay','P',['study.plan','site.plan','subject.milestones','site','study.delay_cost','metric.forecast']],
+ ['EN6','Competing trials near a Site, with talking points for the PIs','P',['study','study.eligibility','study.document','site','site.geo','trial.external','trial.external_site','trial.match','referral.funnel','site.contact','action','mail.outbound']],
+ ['EG7','Draft a one-off communication to a Site','P',['site.contact','flag','agent.run','metric.site','study.document','action','mail.outbound','user','study.team']],
+ ['EG8','Plan the monthly Newsletter Campaign with per-Site Reports','P',['site.contact','metric.site','site.plan','site.response','site.message','action','study.protocol_version','study.plan','campaign','mail.outbound','report','request']],
+ ['EG9','Bulk-approve a Campaign, preview it as a Site','P',['campaign','mail.outbound','site','action','audit.event']],
+ ['EN2.1','Sites at risk against plan, across Studies','P',['subject.milestones','metric.site','site.plan','site','rule','flag','agent','agent.run','evidence','action','agent.memory','saved_check','study.team']],
+ ['EG5','Brief for the next Site meeting','P',['site.visit','site.issue','metric.site','site.message','site.response','action','site.contact','site.assignment','brief']],
+ ['EN2.2','Rank Sites by enrollment gap','B',['study.plan','site.plan','subject.milestones','metric.site']],
+ ['EN1','Why a Study is behind plan','B',['study.plan','site.plan','subject.milestones','subject.screen_fail_reason','referral.funnel','metric.benchmark']],
+ ['EN2.3','Compare each Site with the study median','B',['referral.funnel','subject.milestones','metric.benchmark']],
+ ['EN4.1','Screen fails on a lab criterion','B',['subject.screen_fail_reason','subject.lab_dates','site.message']],
+ ['EN4.2','Staff turnover cut referrals','B',['site.contact','referral.funnel','study.external_contact']],
+ ['EN4.3','Activated, no first patient','B',['site','subject.milestones']],
+ ['EN4.4','Candidates drop at consent','B',['subject.milestones']],
+ ['EN4.5','Few referrals reach screening','B',['referral.funnel','subject.milestones']],
+ ['EN4.6','Few referred candidates are eligible','B',['referral.prescreen_fails','subject.screen_fail_reason']],
+ ['EN4.7','Early withdrawals','B',['subject.milestones','subject.discontinuation_reason']],
+ ['EN4.8','Stopped screening for N weeks','B',['subject.milestones']],
+ ['EN5','Sites that can take more patients','B',['site.plan','subject.milestones','site.capacity']],
+ ['EN8','Draft a recovery plan','B',['agent.run','flag','action']],
+ ['EN9','Did an Action work?','B',['metric.site','action']],
+ ['EG1','Re-engage quiet Sites','B',['site.message','site.response','mail.event','metric.site','metric.engagement']],
+ ['EG2','Thank the top-recruiting Sites','B',['metric.site','site.plan','site.contact']],
+ ['EG3','Protocol reminder with a deadline','B',['study.protocol_version','subject.consent_version','site.contact']],
+ ['EG4','Repeated Site questions into an FAQ','B',['site.message','study.document']],
+ ['EG6','Site issues into CRA follow-ups','B',['site.issue','site.visit','site.assignment','user']],
+ ['EG10','A Site acknowledges a Request','B',['request','site.response']],
+ ['EG11','A Site replies by email','B',['site.message','action']],
+ ['EG12','Campaign performance','B',['campaign','mail.event','site.response','site.message','metric.site']],
+ ['EG13','Campaigns that led to randomizations','B',['mail.outbound','subject.milestones']],
+ ['EG14','Automate weekly Site check-ins','B',['agent','saved_check','campaign']],
+ ['OP1','What needs my attention today','B',['action','agent.run','campaign']],
+ ['OP2','Weekly update for study leadership','B',['audit.event','metric.site','study.plan']],
+ ['OP3.1','Rank open Actions by priority and impact','B',['action']],
+ ['OP3.2','Assign owners to unowned Actions','B',['action','user','study.team']],
+ ['OP3.3','Reassign and chase overdue Actions','B',['action']],
+ ['OP3.4','Reject a proposal with a reason, so the Agent learns','B',['action','agent.memory']],
+ ['OP4','Sites that need a monitoring visit','B',['site.visit','edc.query','metric.site']],
+ ['OP5.1','Queries open for 30+ days','B',['edc.query']],
+ ['OP5.2','EDC data-entry lag','B',['edc.entry_lag']],
+ ['OP5.3','Overdue monitoring visit reports','B',['site.visit']],
+ ['OP6','What changed in CTMS since the last sync','B',['sync.run','study','study.plan','site','site.contact','site.visit','site.issue']],
+ ['OP7','Visit load against Site resources','B',['subject.next_visit','study.visit_schedule','site.message']],
+ ['OP8','Tune an Agent','B',['agent','agent.run','agent.memory']],
+ ['OP9.1','What Prime did this week','B',['audit.event','agent.run']],
+ ['OP9.2','Export approvals for an inspection','B',['audit.event']],
+ ['OP9.3','Which connections need attention','B',['connection','sync.run']],
+].map(s=>{const it=new Set(s[3]);if(s[3].some(x=>x.startsWith('subject.')))it.add('subject');return {code:s[0],name:s[1],sc:s[2],items:it}});
+const SD={"EN0": {"title": "Enrollment by Site report", "trigger": "Ask", "data": "CTMS, EDC randomizations", "avail": "API/File", "analysis": "metric", "tech": "Q&A, report", "features": "B2, D1", "value": "M", "size": "S", "rank": 1, "rows": [{"what": "Study code, title, target", "items": ["study", "study.plan"], "src": "CTMS"}, {"what": "Site name, country, status, activation date", "items": ["site"], "src": "CTMS"}, {"what": "Screened, consented, randomized per Site, to date and this month", "items": ["subject.milestones", "metric.site"], "src": "EDC (fallback: CTMS Metrics)"}, {"what": "Site target, to show \"vs plan\"", "items": ["site.plan"], "src": "CTMS, else Sponsor file"}], "output": "App (report, table), LLM (Q&A), Export (CSV)."}, "EN1": {"title": "Why a Study is behind plan, by Site and funnel stage", "trigger": "Ask", "data": "CTMS plan, EDC, referral log", "avail": "API/File, File", "analysis": "metric, benchmark", "tech": "Q&A", "features": "B2, B5, B9, D1", "value": "H", "size": "M", "rank": 11, "newsrc": ""}, "EN2.1": {"title": "Sites at risk against plan, across Studies (can be saved as a weekly check)", "trigger": "Both", "data": "CTMS plan, EDC", "avail": "API/File", "analysis": "metric, rule", "tech": "Agent run, Q&A", "features": "B2, B4, A9", "value": "H", "size": "S", "rank": 8, "rows": [{"what": "Randomizations per Site over time", "items": ["subject.milestones", "metric.site"], "src": "EDC"}, {"what": "Expected pace per Site", "items": ["site.plan"], "src": "CTMS, else Sponsor file (pace method: forecasting fog)"}, {"what": "Activation date", "items": ["site"], "src": "CTMS"}, {"what": "Rules, severities, flags", "items": ["rule", "flag"], "src": "Ours (config), Derived"}, {"what": "Diagnosis, proposed Action, Evidence, memory", "items": ["agent.run", "evidence", "action", "agent.memory"], "src": "Ours"}, {"what": "Saved weekly check", "items": ["saved_check"], "src": "Ours"}], "output": "App, LLM, Chat (weekly check, later)."}, "EN2.2": {"title": "Rank Sites by enrollment gap in each Study", "trigger": "Ask", "data": "CTMS plan, EDC", "avail": "API/File", "analysis": "metric", "tech": "Q&A", "features": "B2, D1", "value": "M", "size": "S", "rank": 10, "newsrc": ""}, "EN2.3": {"title": "Compare each Site with the study median: referral, screening, consent conversion", "trigger": "Ask", "data": "EDC consent dates, referral log", "avail": "API/File, File", "analysis": "benchmark", "tech": "Q&A", "features": "B5, B6, B9", "value": "M", "size": "M", "rank": 12, "newsrc": ""}, "EN3": {"title": "Recruitment blockers at one Site: where candidates drop out between referral and randomization, and why", "trigger": "Ask", "data": "EDC screening log, referral log, Site Messages", "avail": "API/File, File, Ours", "analysis": "metric, benchmark, LLM", "tech": "Q&A", "features": "B5, B9, C6, D1", "value": "H", "size": "M", "rank": 2, "rows": [{"what": "Referrals, pre-screen passes and fails, hand-offs to the Site, by week", "items": ["referral.funnel"], "src": "File (referral tool)"}, {"what": "Pre-screen failures by question", "items": ["referral.prescreen_fails"], "src": "File (referral tool)"}, {"what": "Screened, consented, randomized, discontinued, with dates", "items": ["subject.milestones"], "src": "EDC"}, {"what": "Screen-fail reason categories", "items": ["subject.screen_fail_reason"], "src": "EDC"}, {"what": "Study median and peer Sites for each stage", "items": ["metric.benchmark"], "src": "Derived"}, {"what": "What the Site said about it", "items": ["site.message", "site.response"], "src": "Mail in, Pages"}, {"what": "Open Site issues", "items": ["site.issue"], "src": "CTMS (optional)"}], "output": "App, LLM. Referral and EDC data can't be joined per person (a candidate gets an EDC subject ID only at screening), so the funnel compares stage counts per period, not cohorts."}, "EN4.1": {"title": "Diagnose a lagging Site: screen fails on a lab inclusion criterion", "trigger": "Agent", "data": "EDC screen-fail reasons and lab result dates, Site Messages", "avail": "API/File, Ours", "analysis": "rule, LLM", "tech": "Agent run", "features": "B4, A9", "value": "H", "size": "M", "rank": 13, "notes": ["needs lab result dates against the screening window. Those are outside the pseudonymized Subject fields set in docs/adr/0001-store-pseudonymized-subject-records.md (status dates and a screen-fail reason category only), so supporting it as shown means widening that list or diagnosing from reason counts alone."], "newsrc": "EDC lab dates (widens ADR 0001)"}, "EN4.2": {"title": "Diagnose a lagging Site: staff turnover cut referrals (escalate to the CRO)", "trigger": "Agent", "data": "CTMS Site staff, referral log", "avail": "API/File, File", "analysis": "trend, LLM", "tech": "Agent run, send", "features": "B4, B5, A9", "value": "M", "size": "M", "rank": 14, "newsrc": "CTMS"}, "EN4.3": {"title": "Diagnose a lagging Site: activated, no first patient", "trigger": "Agent", "data": "CTMS activation date, EDC", "avail": "API/File", "analysis": "rule, benchmark", "tech": "Agent run", "features": "B4, B9, A9", "value": "H", "size": "S", "rank": 15, "newsrc": ""}, "EN4.4": {"title": "Diagnose a lagging Site: candidates drop at consent", "trigger": "Agent", "data": "EDC screening and consent dates", "avail": "API/File", "analysis": "rule, LLM", "tech": "Agent run", "features": "B4, B6", "value": "M", "size": "M", "rank": 16, "newsrc": ""}, "EN4.5": {"title": "Diagnose a lagging Site: few referrals reach screening", "trigger": "Agent", "data": "referral log, EDC", "avail": "File, API/File", "analysis": "benchmark", "tech": "Agent run", "features": "B4, B5, B9", "value": "M", "size": "M", "rank": 17, "newsrc": ""}, "EN4.6": {"title": "Diagnose a lagging Site: few referred candidates are eligible", "trigger": "Agent", "data": "referral pre-screen answers, EDC", "avail": "File, API/File", "analysis": "benchmark", "tech": "Agent run", "features": "B4, B5, B9", "value": "M", "size": "M", "rank": 18, "newsrc": ""}, "EN4.7": {"title": "Diagnose a lagging Site: early withdrawals", "trigger": "Agent", "data": "EDC discontinuations", "avail": "API/File", "analysis": "rule", "tech": "Agent run", "features": "B4", "value": "M", "size": "S", "rank": 19, "newsrc": "EDC (widens ADR 0001)"}, "EN4.8": {"title": "Diagnose a lagging Site: stopped screening for N weeks", "trigger": "Agent", "data": "EDC screening dates", "avail": "API/File", "analysis": "rule", "tech": "Agent run", "features": "B4", "value": "H", "size": "S", "rank": 20, "newsrc": ""}, "EN5": {"title": "Sites that can take more patients", "trigger": "Ask", "data": "CTMS plan, EDC, screening capacity from Site Responses", "avail": "API/File, Ours", "analysis": "metric", "tech": "Q&A", "features": "B2, B9, C6", "value": "M", "size": "S", "rank": 21, "newsrc": "Pages (a Site Response form)"}, "EN6": {"title": "Competing trials near a Site, with talking points for the PIs", "trigger": "Agent", "data": "ClinicalTrials.gov, CTMS Site addresses, referral log", "avail": "Public, API/File, File", "analysis": "rule, LLM", "tech": "Agent run, send", "features": "D5", "value": "L", "size": "M", "rank": 4, "rows": [{"what": "Study condition, phase, key eligibility", "items": ["study", "study.eligibility"], "src": "CT.gov record of the Study (by NCT number), else `study.document`"}, {"what": "NCT number of the Study", "items": ["study"], "src": "CTMS, else Sponsor"}, {"what": "Site address and coordinates", "items": ["site", "site.geo"], "src": "CTMS, geocoded (Derived)"}, {"what": "Recruiting trials, their locations and eligibility", "items": ["trial.external", "trial.external_site"], "src": "CT.gov"}, {"what": "Which trials overlap which Site, and how much", "items": ["trial.match"], "src": "Derived (distance rule, then Agent judgment)"}, {"what": "Referral trend at the Site, to judge the impact", "items": ["referral.funnel"], "src": "File (optional)"}, {"what": "PI to write to", "items": ["site.contact"], "src": "CTMS"}], "output": "App, LLM, Mail (talking points to PIs, as an Action)."}, "EN8": {"title": "Draft a recovery plan for at-risk Sites", "trigger": "Ask", "data": "stored diagnoses", "avail": "Ours", "analysis": "LLM", "tech": "Q&A, Action drafts", "features": "B4, C1, D1", "value": "M", "size": "S", "rank": 24, "newsrc": ""}, "EN9": {"title": "Did an Action work? Compare the metric before and after", "trigger": "Agent", "data": "metric snapshots, Actions", "avail": "Ours", "analysis": "trend", "tech": "Agent run, schedule", "features": "B7, A9", "value": "H", "size": "M", "rank": 25, "newsrc": ""}, "EN10": {"title": "Forecast last-patient-in and the cost of delay", "trigger": "Both", "data": "CTMS plan, EDC, Sponsor-entered daily cost of delay", "avail": "API/File, Ours", "analysis": "forecast", "tech": "report", "features": "B11", "value": "M", "size": "L", "rank": 3, "notes": ["waits on the \"Enrollment forecasting\" fog on the map; the demo's forecast and cost of delay are fixed numbers."], "rows": [{"what": "Target, planned and baseline LPI", "items": ["study.plan"], "src": "CTMS"}, {"what": "Per-Site targets and expected pace", "items": ["site.plan"], "src": "CTMS, else Sponsor file"}, {"what": "Randomization history per Site (run rate)", "items": ["subject.milestones"], "src": "EDC"}, {"what": "Activation dates, and planned dates for Sites not yet active", "items": ["site"], "src": "CTMS"}, {"what": "Daily cost of a delay", "items": ["study.delay_cost"], "src": "Sponsor (settings); CRO cost lines (File) later"}, {"what": "Forecast LPI, delay, cost of delay", "items": ["metric.forecast"], "src": "Derived (method: \"Enrollment forecasting\" fog)"}], "output": "App, LLM, Export."}, "EG1": {"title": "Re-engage quiet Sites", "trigger": "Both", "data": "Site Messages, Site Responses, EDC", "avail": "Ours, API/File", "analysis": "metric, rule", "tech": "Agent run, send", "features": "C7, C1, A6", "value": "H", "size": "S", "rank": 26, "newsrc": "Mail in (delivery webhooks)"}, "EG2": {"title": "Thank the top-recruiting Sites and share what works", "trigger": "Both", "data": "EDC randomizations, CTMS plan", "avail": "API/File", "analysis": "rule", "tech": "Agent run, send", "features": "B2, C4, A6", "value": "M", "size": "S", "rank": 27, "newsrc": ""}, "EG3": {"title": "Protocol reminder with a deadline, such as re-consent to a new version", "trigger": "Both", "data": "eConsent, CTMS protocol versions", "avail": "File, API/File", "analysis": "lookup", "tech": "send, schedule", "features": "B6, C4, A6", "value": "M", "size": "M", "rank": 28, "newsrc": "EDC (widens ADR 0001); eConsent file only if the EDC lacks it"}, "EG4": {"title": "Repeated Site questions turned into a clarification or FAQ", "trigger": "Agent", "data": "Site Messages, approved guidance (SRM, protocol)", "avail": "Ours, Docs", "analysis": "LLM", "tech": "Agent run (Triage), send", "features": "C6, A10", "value": "H", "size": "M", "rank": 29, "notes": ["need Study documents (protocol, Site reference manual) as a source Prime can read: candidate A10."], "newsrc": ""}, "EG5": {"title": "Brief for the next Site meeting", "trigger": "Ask", "data": "CTMS issues and visits, EDC, Site Messages, Actions", "avail": "API/File, Ours", "analysis": "LLM", "tech": "Q&A", "features": "B3, D1", "value": "H", "size": "S", "rank": 9, "rows": [{"what": "Last and next monitoring visits", "items": ["site.visit"], "src": "CTMS"}, {"what": "Open Site issues", "items": ["site.issue"], "src": "CTMS"}, {"what": "Enrollment and funnel figures", "items": ["metric.site"], "src": "Derived"}, {"what": "Recent Site Messages and Site Responses", "items": ["site.message", "site.response"], "src": "Ours"}, {"what": "Open Actions for the Site", "items": ["action"], "src": "Ours"}, {"what": "Who attends", "items": ["site.contact", "site.assignment"], "src": "CTMS"}, {"what": "The brief", "items": ["brief"], "src": "Ours"}], "output": "App, LLM, Export (no \"Saved to CTMS\": no write-back)."}, "EG6": {"title": "Turn a Site's open issues into CRA follow-up Actions", "trigger": "Ask", "data": "CTMS issue log, last visit report", "avail": "API/File", "analysis": "LLM", "tech": "Q&A, Action drafts", "features": "C1, D1", "value": "M", "size": "S", "rank": 30, "newsrc": ""}, "EG7": {"title": "Draft a one-off communication to a Site", "trigger": "Ask", "data": "Site findings, protocol", "avail": "Ours, Docs", "analysis": "LLM", "tech": "Action draft, send", "features": "C1, A6, A10", "value": "M", "size": "S", "rank": 5, "notes": ["need Study documents (protocol, Site reference manual) as a source Prime can read: candidate A10."], "rows": [{"what": "Recipients", "items": ["site.contact"], "src": "CTMS"}, {"what": "What we know about the Site: flags, diagnoses, figures", "items": ["flag", "agent.run", "metric.site"], "src": "Derived"}, {"what": "Protocol and Site reference manual passages", "items": ["study.document"], "src": "Upload (A10)"}, {"what": "Draft, approval, send", "items": ["action", "mail.outbound"], "src": "Ours"}, {"what": "Sender", "items": ["user"], "src": "Ours"}], "output": "App, LLM, Mail."}, "EG8": {"title": "Plan the monthly Newsletter Campaign with per-Site Reports", "trigger": "Ask", "data": "EDC, CTMS, Site Responses", "avail": "API/File, Ours", "analysis": "metric, LLM", "tech": "Agent run (Newsletter), schedule", "features": "C4", "value": "H", "size": "L", "rank": 6, "rows": [{"what": "Recipients per Site", "items": ["site.contact"], "src": "CTMS"}, {"what": "Per-Site figures for the Reports (enrollment vs plan, screening this month)", "items": ["metric.site", "site.plan"], "src": "Derived, CTMS"}, {"what": "Open asks and answers per Site", "items": ["site.response", "site.message", "action"], "src": "Ours"}, {"what": "Protocol milestones and reminders", "items": ["study.protocol_version", "study.plan"], "src": "CTMS"}, {"what": "Campaign, template, blocks, per-Site content", "items": ["campaign", "mail.outbound", "report"], "src": "Ours"}], "output": "App, LLM, Mail."}, "EG9": {"title": "Bulk-approve a Campaign, preview it as a Site", "trigger": "UI", "data": "Campaign drafts", "avail": "Ours", "analysis": "none", "tech": "send, schedule", "features": "C4, A6", "value": "H", "size": "M", "rank": 7, "rows": [{"what": "Per-Site rendered drafts and recipients", "items": ["campaign", "mail.outbound"], "src": "Ours"}, {"what": "Send time in the Site's time zone", "items": ["site"], "src": "CTMS, else Derived from address"}, {"what": "Approvals with signature meaning", "items": ["action", "audit.event"], "src": "Ours"}], "output": "App, Mail."}, "EG10": {"title": "A Site acknowledges a Request or answers its form", "trigger": "Site", "data": "Request clicks and forms", "avail": "Ours", "analysis": "lookup", "tech": "inbound", "features": "C6", "value": "H", "size": "M", "rank": 31, "newsrc": ""}, "EG11": {"title": "A Site replies by email: classified, asks become Actions", "trigger": "Site", "data": "inbound Site Messages", "avail": "Ours", "analysis": "LLM", "tech": "inbound, Agent run (Triage)", "features": "C6, A6", "value": "H", "size": "M", "rank": 32, "newsrc": ""}, "EG12": {"title": "Campaign performance", "trigger": "UI", "data": "sends, Site Responses, EDC", "avail": "Ours, API/File", "analysis": "metric", "tech": "report", "features": "C5", "value": "M", "size": "M", "rank": 33, "newsrc": ""}, "EG13": {"title": "Which Campaigns led to new randomizations", "trigger": "Ask", "data": "sends, EDC randomizations", "avail": "Ours, API/File", "analysis": "attribution", "tech": "Q&A", "features": "C8", "value": "M", "size": "L", "rank": 34, "newsrc": ""}, "EG14": {"title": "Automate weekly Site check-ins", "trigger": "Ask", "data": "Agent instructions", "avail": "Ours", "analysis": "LLM", "tech": "schedule", "features": "D3", "value": "L", "size": "M", "rank": 35, "newsrc": ""}, "OP1": {"title": "What needs my attention today", "trigger": "Both", "data": "Actions, Agent runs, Campaigns", "avail": "Ours", "analysis": "lookup", "tech": "Q&A, report", "features": "B1, D1", "value": "H", "size": "S", "rank": 36, "newsrc": ""}, "OP2": {"title": "Weekly update for study leadership", "trigger": "Ask", "data": "Audit Trail, CTMS, EDC", "avail": "Ours, API/File", "analysis": "LLM", "tech": "Q&A, schedule, send", "features": "C9", "value": "M", "size": "M", "rank": 37, "newsrc": ""}, "OP3.1": {"title": "Rank open Actions by priority and impact", "trigger": "Ask", "data": "Actions", "avail": "Ours", "analysis": "lookup", "tech": "Q&A", "features": "C1", "value": "L", "size": "S", "rank": 38, "notes": ["cannot rank by days saved or cost impact: \"How Prime generates insights\" dropped those fields. Ranking is by priority and expected impact text."], "newsrc": ""}, "OP3.2": {"title": "Assign owners to unowned Actions", "trigger": "Ask", "data": "Actions, Study team", "avail": "Ours", "analysis": "LLM", "tech": "Q&A", "features": "C1, A1", "value": "L", "size": "S", "rank": 39, "newsrc": ""}, "OP3.3": {"title": "Reassign and chase overdue Actions", "trigger": "UI", "data": "Actions", "avail": "Ours", "analysis": "rule", "tech": "report", "features": "C1", "value": "M", "size": "S", "rank": 40, "newsrc": ""}, "OP3.4": {"title": "Reject a proposal with a reason, so the Agent learns", "trigger": "UI", "data": "Actions, Agent memory", "avail": "Ours", "analysis": "none", "tech": "Agent run", "features": "A9, C1", "value": "H", "size": "S", "rank": 41, "newsrc": ""}, "OP4": {"title": "Sites that need a monitoring visit this month", "trigger": "Ask", "data": "CTMS visits, EDC queries, enrollment", "avail": "API/File", "analysis": "rule", "tech": "Q&A", "features": "B8", "value": "M", "size": "M", "rank": 42, "newsrc": "EDC"}, "OP5.1": {"title": "Data queries open for more than 30 days, by Site", "trigger": "Ask", "data": "EDC queries", "avail": "API/File", "analysis": "metric", "tech": "Q&A", "features": "B8", "value": "M", "size": "S", "rank": 43, "newsrc": "EDC"}, "OP5.2": {"title": "EDC data-entry lag against visits", "trigger": "Ask", "data": "EDC visit and CRF timestamps", "avail": "API/File", "analysis": "metric", "tech": "Q&A", "features": "B8", "value": "L", "size": "M", "rank": 44, "newsrc": "EDC"}, "OP5.3": {"title": "Overdue monitoring visit reports", "trigger": "Ask", "data": "CTMS visit and report dates", "avail": "API/File", "analysis": "rule", "tech": "Q&A", "features": "B8", "value": "L", "size": "S", "rank": 45, "newsrc": ""}, "OP6": {"title": "What changed in CTMS since the last sync", "trigger": "Ask", "data": "CTMS snapshots", "avail": "Ours", "analysis": "lookup", "tech": "Q&A", "features": "A3, A2", "value": "L", "size": "S", "rank": 46, "newsrc": ""}, "OP7": {"title": "Upcoming visit load against Site resources (devices, coordinator hours)", "trigger": "Agent", "data": "EDC next visit dates, Site Messages", "avail": "API/File, Ours", "analysis": "rule", "tech": "Agent run", "features": "B10", "value": "L", "size": "M", "rank": 47, "newsrc": "EDC (ODM study design)"}, "OP8": {"title": "Tune an Agent: instructions, runs, memory", "trigger": "UI", "data": "Agent config and runs", "avail": "Ours", "analysis": "none", "tech": "none", "features": "A9", "value": "M", "size": "M", "rank": 48, "newsrc": ""}, "OP9.1": {"title": "What Prime did this week", "trigger": "Ask", "data": "Audit Trail, Agent runs", "avail": "Ours", "analysis": "LLM", "tech": "Q&A", "features": "A5, A9, D1", "value": "M", "size": "S", "rank": 49, "newsrc": ""}, "OP9.2": {"title": "Export approvals for an inspection", "trigger": "UI", "data": "Audit Trail", "avail": "Ours", "analysis": "none", "tech": "export", "features": "A5", "value": "M", "size": "S", "rank": 50, "newsrc": ""}, "OP9.3": {"title": "Which connections need attention", "trigger": "Both", "data": "sync runs", "avail": "Ours", "analysis": "rule", "tech": "report", "features": "A3", "value": "M", "size": "S", "rank": 51, "newsrc": ""}};
+const DESC={"EN0": ["A table of screening, consent and randomization per Site, to date and this month, against each Site’s target.", "“Show me a report of enrollment by site for DIA-2043.” Prime answers with a table: Atlanta 11, San Diego 10, Phoenix 8…"], "EN3": ["For one Site, where candidates drop out between referral and randomization, compared with the study median, and what the Site has said about it.", "“What’s blocking recruitment at Northwestern?” Screen failures are the largest blocker, mostly on the HbA1c criterion."], "EN10": ["Projects when the last patient will be randomized, from each Site’s pace, and what each day of delay costs.", "DIA-2043 is forecast to finish recruiting after its planned last-patient-in; Prime prices the gap with the daily cost of delay the Sponsor entered."], "EN6": ["Finds recruiting trials near a Site that compete for the same patients, and drafts talking points for its PIs.", "Competing NASH trials open near Hamburg and Chicago; Prime drafts NASH-3301 differentiator points for both PIs, sent after approval."], "EG7": ["Drafts a one-off email to a Site from what we know about it and from the protocol. A user approves it before it is sent.", "Send Northwestern an HbA1c sample-timing checklist before the Nov 5 monitoring visit."], "EG8": ["Plans the monthly Newsletter: one mail per Site with its own figures (Reports), open asks and protocol reminders.", "The October Newsletter goes to 17 Sites and 51 contacts; each Site sees its own screening against plan."], "EG9": ["A user reviews a whole Campaign, previews the mail as each Site will see it, and approves all the sends at once.", "Approve the November Newsletter for 17 Sites, sending Tuesday 09:00 in each Site’s time zone."], "EN2.1": ["Rules flag Sites behind their expected pace; an Agent diagnoses each one and proposes an Action. Can be saved as a weekly check.", "Houston Metro Research has screened no one since activation on May 20. Proposed Action: a first-patient-in check-in."], "EG5": ["Prepares a brief before a meeting with a Site: enrollment, open issues, recent mail and open Actions, with points to discuss.", "Brief for the Nov 5 meeting with Northwestern’s PI: enrollment, 3 open issues, recent emails and 3 recommended points."], "EN2.2": ["Ranks a Study’s Sites by how far they are behind their target.", "“Rank the DIA-2043 Sites by enrollment gap.”"], "EN1": ["Explains why a Study is behind plan, by Site and by funnel stage.", "“Why is DIA-2043 behind plan?” Most of the gap sits at a few Sites, at the screening stage."], "EN2.3": ["Compares each Site’s referral, screening and consent conversion with the study median.", "Phoenix: about 9% of referrals reach screening, well below the study median."], "EN4.1": ["An Agent spots a Site whose screen fails cluster on one lab criterion, by checking lab result dates against the screening window.", "Northwestern’s screening conversion fell from 50% to 20%; most fails were HbA1c results arriving after the window."], "EN4.2": ["An Agent links a drop in referrals to staff leaving a Site, and proposes escalating to the CRO.", "Referrals at Charité fell after a coordinator left; Prime proposes asking Medpace for a CRA staffing plan."], "EN4.3": ["An Agent flags a Site activated weeks ago that has not screened a patient yet.", "Houston Metro Research: activated May 20, 7 referrals logged, 0 screened."], "EN4.4": ["An Agent flags a Site where many candidates decline at the consent discussion.", "Barcelona Metabolic: 5 of 14 candidates declined at consent, mostly over the number of visits."], "EN4.5": ["An Agent flags a Site where few referred candidates reach a screening visit.", "Phoenix: 104 referrals since June, about 9% reached screening."], "EN4.6": ["An Agent flags a Site where few referred candidates pass pre-screening.", "Milan: 22% of referred candidates eligible at pre-screening."], "EN4.7": ["An Agent flags early withdrawals at a Site, with their recorded reasons.", "Lyon: 2 of 7 randomized participants withdrew before Week 12, citing the visit schedule."], "EN4.8": ["An Agent flags a Site that has stopped screening for several weeks.", "A Site with no new screening visit in 26 days, after two to three a month since April."], "EN5": ["Finds Sites that could take more patients, from their pace and the screening capacity they report.", "“Which Sites can take more patients?” Atlanta is ahead of target and reports free screening slots."], "EN8": ["Drafts a recovery plan for at-risk Sites from the diagnoses already stored.", "“Draft a recovery plan for the at-risk Sites in DIA-2043.”"], "EN9": ["Compares a Site’s metric before and after an Action, to tell whether it worked.", "Did screening at Northwestern recover after the HbA1c checklist was sent?"], "EG1": ["Finds Sites that have gone quiet (no replies, no acknowledgements) and plans a check-in.", "A check-in to 14 coordinators at 6 quiet Sites, Tuesday 09:00 Site time, with a CRA follow-up call."], "EG2": ["Thanks the top-recruiting Sites and shares what works with the others.", "A recognition mail to Atlanta (11 randomized against 9 planned) and the Sites on plan."], "EG3": ["Sends a reminder with a deadline, such as re-consenting participants to a new protocol version.", "A reminder to 11 coordinators at 5 Sites: re-consent to protocol v4.0 by Nov 30."], "EG4": ["Spots the same question coming from several Sites and drafts a clarification or FAQ from approved guidance.", "3 questions from Barcelona and Madrid about the Week 4 visit window; an FAQ drafted from the Site reference manual, section 5.2."], "EG6": ["Turns a Site’s open issues into follow-up Actions for its CRA.", "3 follow-ups for Northwestern’s CRA, due Nov 6 to Nov 13."], "EG10": ["A Site clicks Acknowledge or fills the short form in one of our mails, and the answer is recorded.", "81% of contacts clicked Acknowledge on the September Newsletter."], "EG11": ["A Site replies by email; Prime classifies the message and turns any ask into an Action.", "A coordinator asks about the HbA1c retest window; it becomes an Action for the study lead."], "EG12": ["Shows how a Campaign performed: delivery, acknowledgements and responses.", "September Newsletter: 51 of 51 delivered, 41 acknowledged, 15 responses from 11 Sites."], "EG13": ["Estimates which Campaigns were followed by new randomizations.", "“Which Campaigns drove randomizations this quarter?”"], "EG14": ["Sets up an Agent that sends weekly check-ins to Sites on its own.", "“Every Monday, check in with the Sites that haven’t screened in two weeks.”"], "OP1": ["Lists what needs the user today: Actions due, new proposals, Campaigns to approve.", "“What needs my attention today?”"], "OP2": ["Drafts a weekly update for study leadership: enrollment against plan, what was done, open risks.", "The weekly DIA-2043 update, ready for the Monday leadership call."], "OP3.1": ["Ranks open Actions by priority and expected impact.", "“Which Actions should I do first?”"], "OP3.2": ["Proposes owners from the Study team for Actions nobody owns.", "“Assign owners to the unowned Actions.”"], "OP3.3": ["Reassigns and chases Actions past their deadline.", "Two Actions are overdue: reassign one, remind the owner of the other."], "OP3.4": ["A user rejects a proposal with a reason, and the Agent remembers it in later runs.", "“Don’t propose budget changes for Barcelona; the amendment is already in review.”"], "OP4": ["Lists Sites that need a monitoring visit this month, from visit history, EDC queries and enrollment.", "“Which Sites need a monitoring visit in November?”"], "OP5.1": ["Lists data queries open for more than 30 days, by Site.", "“List the Sites with open queries older than 30 days.”"], "OP5.2": ["Finds Sites whose EDC data entry lags behind participant visits.", "“Which Sites are behind on data entry?”"], "OP5.3": ["Finds monitoring visit reports past their due date.", "Reports still unsigned more than 10 business days after the visit."], "OP6": ["Shows what changed in the CTMS since the last sync.", "Site status, enrollment counts and monitoring visits for DIA-2043, compared with the last snapshot."], "OP7": ["Compares upcoming participant visits at a Site with the coordinator time they need.", "Northwestern: participant visits in the next 4 weeks and the coordinator hours they take."], "OP8": ["Lets a user review and tune an Agent: its instructions, its runs and what it remembers.", "Edit the Enrollment agent’s instructions and delete a memory item it learned."], "OP9.1": ["Summarizes what Prime and its Agents did this week.", "“Summarize what Prime did this week.”"], "OP9.2": ["Exports the record of approvals for an inspection.", "“Export approvals for an inspection.”"], "OP9.3": ["Shows which connections failed or have gone stale.", "The CTMS sync failed last night; the EDC is current."]};
+const SCBY={};SC.forEach(s=>SCBY[s.code]=s);
+const SCN={};R.forEach(r=>SCN[r.id]=SC.filter(s=>s.items.has(r.id)).map(s=>s.code));
+const WHY_EXTRA={sponsor:'Tenancy: every Scenario',connection:'Connectors (A3): every synced item',user:'Sign-in (A1): every Scenario','sync.run':'Every sync','audit.event':'Required by every Scenario','prime.conversation':'Every question asked to Prime','subject':'Holds the milestones below'};
+
+// ---------- Platform graph ----------
+const GEN=['action','agent.run','brief','report','site.message','site.response','trial.match','prime.conversation'];
+const BYUSER=['study','sponsor','study.delay_cost','study.document','action','campaign','user','study.team','agent','saved_check','prime.conversation'];
+const CHAT=['action','saved_check','prime.conversation'];
+const GN=[
+ {id:'EDC',t:'sponsor',ty:'Sponsor system',nm:'EDC',sb:'Rave, Vault EDC or Clinical One. We only read.',x:20,y:40,w:210,h:70},
+ {id:'CTMS',t:'sponsor',ty:'Sponsor system',nm:'CTMS',sb:'Vault CTMS or similar. We only read.',x:20,y:200,w:210,h:70},
+ {id:'Files',t:'sponsor',ty:'Sponsor or vendor files',nm:'Per-study files',sb:'Referral tool counts, Site plan sheet; later eConsent, CRO cost lines.',x:20,y:368,w:210,h:88},
+ {id:'CTgov',t:'public',ty:'Public source',nm:'ClinicalTrials.gov',sb:'Public API v2.',x:20,y:540,w:210,h:70},
+ {id:'CT',t:'ours',ty:'Our platform',nm:'Control Tower',sb:'System of record for everything born here.',x:470,y:230,w:240,h:420,inner:[['Landing','transient'],['Database','Supabase EU'],['Metrics and rules','deterministic'],['Agent runtime','Prime, Agents'],['Mail and Request pages','outbound, inbound'],['Audit trail','append-only'],['Hosting','Vercel fra1']]},
+ {id:'Users',t:'people',ty:'Sponsor people',nm:'Study team',sb:'Web app behind sign-in; exports.',x:470,y:860,w:240,h:72},
+ {id:'Claude',t:'proc',ty:'Subprocessor',nm:'Claude API',sb:'Anthropic. SCCs, zero data retention.',x:950,y:30,w:210,h:72},
+ {id:'Geo',t:'proc',ty:'Subprocessor · open',nm:'Geocoding provider',sb:'Not chosen.',x:950,y:250,w:210,h:64},
+ {id:'Chat',t:'proc',ty:'Surface · later',nm:'Teams and Slack',sb:'Prime in chat (D4).',x:950,y:405,w:210,h:64,only:'beyond'},
+ {id:'Email',t:'proc',ty:'Subprocessor',nm:'Email provider',sb:'EU, not chosen. Outbound, inbound, webhooks.',x:950,y:550,w:210,h:80},
+ {id:'Sites',t:'people',ty:'Site people',nm:'Site Contacts',sb:'PIs and coordinators at each Site.',x:950,y:860,w:210,h:72},
+];
+// p: x1,y1,x2,y2; o: h|v; l: label anchor x,y; pos: above|below|center
+const GE=[
+ {id:'r-edc',k:'read',from:'EDC',to:'CT',p:[230,75,470,290],o:'h',l:[350,182],pos:'center',f:r=>r.in.includes('EDC')},
+ {id:'r-ctms',k:'read',from:'CTMS',to:'CT',p:[230,235,470,360],o:'h',l:[350,297],pos:'center',f:r=>r.in.includes('CTMS')},
+ {id:'r-files',k:'read',from:'Files',to:'CT',p:[230,412,470,430],o:'h',l:[350,421],pos:'center',f:r=>r.in.includes('File')},
+ {id:'r-ctgov',k:'read',from:'CTgov',to:'CT',p:[230,575,470,500],o:'h',l:[350,540],pos:'center',f:r=>r.in.includes('CTgov')},
+ {id:'w-claude',k:'write',from:'CT',to:'Claude',p:[710,270,950,55],o:'h',l:[830,172],pos:'above',f:r=>r.out.includes('LLM'),hint:'Read by Prime and Agents through tools'},
+ {id:'r-claude',k:'read',from:'Claude',to:'CT',p:[950,85,710,300],o:'h',l:[830,182],pos:'below',f:r=>GEN.includes(r.id),hint:'Drafts, classifications, diagnoses'},
+ {id:'w-geo',k:'write',from:'CT',to:'Geo',p:[710,370,950,272],o:'h',l:[830,327],pos:'above',f:null,hint:'Site address only'},
+ {id:'r-geo',k:'read',from:'Geo',to:'CT',p:[950,295,710,395],o:'h',l:[830,337],pos:'below',f:r=>r.id==='site.geo'},
+ {id:'w-chat',k:'write',from:'CT',to:'Chat',p:[710,452,950,437],o:'h',l:[830,445],pos:'center',f:null,only:'beyond'},
+ {id:'w-email',k:'write',from:'CT',to:'Email',p:[710,560,950,578],o:'h',l:[830,580],pos:'above',f:r=>r.out.includes('Mail'),hint:'Approved mail only'},
+ {id:'r-email',k:'read',from:'Email',to:'CT',p:[950,605,710,595],o:'h',l:[830,590],pos:'below',f:r=>r.in.includes('MailIn')||r.in.includes('Webhooks')},
+ {id:'w-sites',k:'write',from:'Email',to:'Sites',p:[1030,630,1030,860],o:'v',l:[1062,740],pos:'above',f:r=>r.out.includes('Mail'),hint:'Delivered to Site Contacts'},
+ {id:'r-sites',k:'read',from:'Sites',to:'Email',p:[1090,860,1090,630],o:'v',l:[1062,750],pos:'below',f:r=>r.in.includes('MailIn'),hint:'Mail to our inbound address'},
+ {id:'w-pages',k:'write',from:'CT',to:'Sites',p:[710,615,950,880],o:'h',l:[830,752],pos:'above',f:r=>r.out.includes('Pages'),hint:'Hosted Request pages'},
+ {id:'r-pages',k:'read',from:'Sites',to:'CT',p:[950,912,710,635],o:'h',l:[830,762],pos:'below',f:r=>r.in.includes('Pages'),hint:'Answers on Request pages'},
+ {id:'w-users',k:'write',from:'CT',to:'Users',p:[560,650,560,860],o:'v',l:[590,750],pos:'above',f:r=>r.out.includes('App')||r.out.includes('Export'),hint:'Screens and exports'},
+ {id:'r-users',k:'read',from:'Users',to:'CT',p:[620,860,620,650],o:'v',l:[590,760],pos:'below',f:r=>BYUSER.includes(r.id),hint:'Settings, uploads, approvals'},
+];
+const GNBY={};GN.forEach(n=>GNBY[n.id]=n);
+const CAP=4;
+
+// ---------- State ----------
+let view='pilot', sel=null, nodeF=null, edgeF=null, scen=null, pendingScen=null, pendingRow=null;
+const sensOn={};SENS_ORDER.forEach(s=>sensOn[s]=true);
+const el=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LBL={};[...SOURCES.map(x=>['in:'+x.id,x.n]),...STORES.map(x=>['st:'+x.id,x.n]),...PROCS.map(x=>['pr:'+x.id,x.n]),...OUTS.map(x=>['out:'+x.id,x.n])].forEach(([k,v])=>LBL[k]=v);
+const SRC_SHORT={EDC:'EDC',CTMS:'CTMS',File:'File',CTgov:'CT.gov',Sponsor:'Sponsor',Upload:'Upload',MailIn:'Mail in',Pages:'Pages',Webhooks:'Webhooks',Ours:'Ours'};
+const OUT_SHORT={App:'App',LLM:'LLM',Mail:'Mail',Pages:'Pages',Export:'Export',Chat:'Chat'};
+const ST_LBL={Synced:'Synced, versioned',Derived:'Derived',Born:'Born here',Secret:'Secret store'};
+
+const CONNECTED=['EDC','CTMS','CTgov','File'];
+R.forEach(r=>{
+  const p=[];
+  if(r.in.some(s=>CONNECTED.includes(s))) p.push('Parse');
+  if(r.st==='Derived') p.push('Metrics');
+  if(r.out.includes('LLM')) p.push('Agents');
+  if(r.out.includes('Mail')) p.push('Approve');
+  if(r.ret && r.ret!=='—') p.push('Purge');
+  r.procs=p;
+  r.stores=r.in.some(x=>CONNECTED.includes(x))?['Landing',r.st]:[r.st];
+});
+
+const scopeCode=()=>view==='pilot'?'P':'B';
+function scopeItems(){return R.filter(r=>r.sc===scopeCode())}
+function items(){return scen?R.filter(r=>SCBY[scen].items.has(r.id)):scopeItems()}
+function touches(r,key){const [t,id]=key.split(':');
+  if(t==='in')return r.in.includes(id); if(t==='st')return r.stores.includes(id);
+  if(t==='pr')return r.procs.includes(id); return r.out.includes(id)}
+function edgeItems(e,U){
+  if(e.only && e.only!==view) return [];
+  if(e.id==='w-geo') return U.some(r=>r.id==='site.geo')?[BYID.site]:[];
+  if(e.id==='w-chat') return (scen?U:R).filter(r=>CHAT.includes(r.id));
+  return U.filter(e.f);
+}
+
+// ---------- Views ----------
+const VIEWS={
+ pilot:{
+  title:'The pilot dataset',
+  what:[
+   'The first real Sponsor data (milestone M2). Two connected platforms, the <b>EDC</b> and the <b>CTMS</b>, read through their APIs or the Sponsor’s exports, plus one per-study file from the referral tool. Everything else is born on our platform or entered by the Sponsor.',
+   'Subject data stays inside the ADR 0001 list: no pilot Scenario needs a new Subject field. Referral data arrives as counts only. Pick a Scenario to see only the data it needs.'
+  ],
+  subs:[['Supabase','Database','EU'],['Vercel','Hosting','fra1, Frankfurt'],['Email provider','Outbound mail, inbound address','EU, provider not chosen'],['Anthropic (Claude API)','Prime and Agents','SCCs, zero data retention'],['Geocoding provider','Site address to coordinates (EN6)','Not chosen']],
+  qs:[
+   ['Subjects','Prime reads <b>Subject-level records</b> through its tools, so pseudonymized health data reaches Anthropic (zero retention, every read audited). Is that enough, or do we restrict Prime to counts?'],
+   ['Free text','<b>Site Messages</b> are stored as received with no redaction; the Triage agent only flags possible patient information. What should happen to a flagged message?'],
+   ['Free text','<b>CTMS Site issue descriptions</b>: keep the free text, or keep the category only?'],
+   ['Mail','Reports reach Sites with figures per Site only, never Subject IDs. Can a Report show a <b>small count</b> (such as 1 screen fail) to the Site that produced it?'],
+   ['Landing','Raw files are <b>deleted after parsing</b> (manifest and checksum only). How do we debug a failed parse without them, and is a short holding window acceptable?'],
+   ['Referrals','Can the referral tool export <b>counts per Site, week and stage</b>, so no per-candidate data reaches us?'],
+   ['Geocoding','May Site addresses be sent to a <b>geocoding provider</b>, and which one?'],
+   ['Retention','Adopt three more retention classes (<b>Study ops, Engagement, Audit</b>) next to Subjects, Site mail and People? Can Audit be purged on a rolling period, given Part 11 expects it kept as long as the records it covers?'],
+   ['History','Synced records keep <b>one row per version</b> so Evidence can point at what an Agent read. Does version history extend what we must purge or export?'],
+  ],
+  changes:null
+ },
+ beyond:{
+  title:'What later Scenarios add',
+  what:[
+   'Scenarios below the pilot cut reuse most pilot data. Without a Scenario picked, this view shows only the <b>data items they add</b>. Pick a Scenario to see all the data it needs, with items already in the pilot marked.',
+   'The main topics are three new <b>Subject fields</b> that would widen ADR 0001, <b>open and click tracking</b> of Site Contacts, and a new output surface in <b>Teams and Slack</b>.'
+  ],
+  subs:[['Microsoft Teams','Prime in chat (D4)','Sponsor’s tenant'],['Slack','Prime in chat (D4)','Sponsor’s workspace'],['Email provider','Delivery and open/click webhooks','Same provider as the pilot']],
+  qs:[
+   ['Subjects','Widening ADR 0001 with <b>discontinuation reason, ICF version and screening lab dates</b>: what does each need (DPIA update, Sponsor sign-off, DPA annex)?'],
+   ['Tracking','<b>Open and click tracking</b> on mail to Site Contacts: do we need their consent or a notice, and can it be per Sponsor or per Site?'],
+   ['Chat','Teams and Slack carry Prime answers and Actions <b>outside our UI</b>. Are they the Sponsor’s own systems or our subprocessors, and may Subject counts appear there?'],
+   ['Contacts','<b>CRO and vendor contacts</b> from the CTMS: same basis as Site Contacts?'],
+   ['Files','<b>eConsent file</b> as a fallback for the ICF version, and <b>CRO cost lines</b> for the delay cost: each is a new per-study transfer to review.'],
+   ['EDC','EDC queries keep Site, form, dates and status, and <b>drop the query text</b>. Is that enough to keep them out of the health-data class?'],
+  ],
+  changes:[
+   ['Output','Teams and Slack become an output surface for Actions, saved checks and Prime answers, under the same rules as the web app.'],
+   ['Delay cost','CRO cost lines arrive as a per-study file next to the Sponsor-entered daily cost.'],
+   ['CTMS history','OP6 diffs two CTMS syncs, reading the version history already kept for every synced record.'],
+   ['Audit','OP9.1 and OP9.2 summarize the audit trail and export approvals for an inspection.'],
+   ['Not ingested','Won’t and Out Scenarios would add invoices, contracts, payment runs, campaign-tool spend, eIRB approvals, RTSM supply and eTMF documents. None is planned.'],
+  ]
+ }
+};
+
+function render(){
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===view));
+  const V=VIEWS[view], base=scopeItems(), host=document.getElementById('view');
+  const cnt=k=>base.filter(r=>r.s.includes(k)).length;
+  const srcN=new Set(base.flatMap(r=>r.in)).size;
+  const myScen=SC.filter(s=>s.sc===scopeCode());
+  host.innerHTML='';
+  host.appendChild(el(`<section class="intro">
+    <div class="what"><div class="eyebrow">${view==='pilot'?'Conversation 1':'Conversation 2'}</div><h2>${V.title}</h2>${V.what.map(p=>`<p>${p}</p>`).join('')}
+      <div class="scen" id="scen-chips">${myScen.map(s=>`<button data-sc="${s.code}" aria-pressed="false" title="Highlight the data ${esc(s.code)} needs"><code>${s.code}</code> ${esc(s.name)}</button>`).join('')}</div></div>
+    <div class="tally">
+      <div><b>${base.length}</b><span>data items${view==='beyond'?' added':''}</span></div>
+      <div><b>${srcN}</b><span>sources used</span></div>
+      <div><b>${cnt('Health')}</b><span>health (pseud.)</span></div>
+      <div><b>${cnt('PII')}</b><span>personal data (PII)</span></div>
+      <div><b>${cnt('Free')}</b><span>free text</span></div>
+      <div><b>${base.filter(r=>r.out.includes('LLM')).length}</b><span>sent to the LLM</span></div>
+    </div></section>`));
+
+  // Graph
+  host.appendChild(el(`<section><div class="sec-head"><h2>Platforms and data flows</h2><p>Each box is a system or a group of people; each line carries data. Solid blue lines are reads: data comes into our platform. Dashed orange lines are writes: data leaves it. Click a data name to jump to its row in the register.</p></div>
+    <div class="picker"><label for="scen-pick">Highlight a Scenario</label>
+      <select id="scen-pick"><option value="">All ${view==='pilot'?'pilot data':'data added beyond the pilot'}</option>${myScen.map(s=>`<option value="${s.code}">${s.code} · ${esc(s.name)}</option>`).join('')}</select>
+      <button class="clear" id="scen-clear" hidden>Clear</button></div>
+    <div class="legend"><span><span class="lg-line"></span>Read (into our platform)</span><span><span class="lg-line w"></span>Write (out of our platform)</span>
+      <span class="t-sponsor"><span class="lg-box"></span>Sponsor system</span><span class="t-public"><span class="lg-box"></span>Public source</span><span class="t-ours"><span class="lg-box"></span>Our platform</span><span class="t-proc"><span class="lg-box"></span>Subprocessor</span><span class="t-people"><span class="lg-box"></span>People</span></div>
+    <div class="gwrap"><div class="graph" id="graph"></div></div></section>`));
+
+  // Pipeline
+  const col=(h,q,arr,pref)=>`<div class="col"><div class="col-h"><h3>${h}</h3><span class="q">${q}</span></div>${arr.map(n=>{
+      const isNew=n.only==='beyond'; if(isNew && view==='pilot') return '';
+      return `<button class="node" data-key="${pref}:${n.id}" aria-pressed="false"><span class="k">${esc(n.k)}</span><span class="n">${esc(n.n)}${isNew?' <span class="badge">new</span>':''}${view==='beyond'&&n.id==='EDC'&&pref==='in'?' <span class="badge warn">wider</span>':''}</span><span class="d">${esc(n.d)}</span></button>`}).join('')}</div>`;
+  host.appendChild(el(`<section><div class="sec-head"><h2>Inside our platform</h2><p>The same data as a pipeline: where we collect it, how we process it, where we store it, where it goes. Click a box to filter the register. Dashed boxes reach Site Contacts.</p></div>
+    <div class="flow">${col('Collect','Where we read it',SOURCES,'in')}${col('Process','What touches it',PROCS,'pr')}${col('Store','How we hold it',STORES,'st')}${col('Deliver','Where it is written',OUTS,'out')}<div class="col"><div class="col-h"><h3>Who processes it</h3><span class="q">Subprocessors${view==='beyond'?' added':''}</span></div>${V.subs.map(s=>`<div class="node" style="cursor:default"><span class="k">${esc(s[2])}</span><span class="n">${esc(s[0])}</span><span class="d">${esc(s[1])}</span></div>`).join('')}</div></div>
+    <div class="audit-rail"><b>Audit trail across every step:</b> syncs, AI drafts and classifications, approvals, sends, exports, settings, purges, and every read of Subject data.</div></section>`));
+
+  // Register
+  host.appendChild(el(`<section id="register"><div class="sec-head"><h2>Data register</h2><p>One row per data item, with the Scenarios it serves. Click a row to trace it; click a Scenario code to highlight it.</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="trace" id="trace"></div>
+    <div class="filters" id="filters"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Data item</th><th>Why we collect it</th><th>What it holds</th><th>Collected from</th><th>Stored as</th><th>Retention class</th><th>Sensitivity</th><th>Goes to</th></tr></thead><tbody id="tb"></tbody></table></div></div></section>`));
+
+  const qHtml=`<div><div class="sec-head"><h2>Questions for the review</h2></div><ul class="qlist">${V.qs.map(q=>`<li><span class="tag">${esc(q[0])}</span><p>${q[1]}</p></li>`).join('')}</ul></div>`;
+  const right=V.changes?`<div><div class="sec-head"><h2>Changes to data already held</h2></div><ul class="qlist">${V.changes.map(q=>`<li><span class="tag">${esc(q[0])}</span><p>${esc(q[1])}</p></li>`).join('')}</ul></div>`
+    :`<div><div class="sec-head"><h2>Sensitivity classes</h2></div><ul class="qlist">${[
+      ['Health','Pseudonymized Subject data. Still personal data, special category (GDPR art. 9). Every read is audited.'],
+      ['Free','Text we don’t control, which may hold patient information. Classified by the Triage agent.'],
+      ['PII','Personal data of people in a professional role: Site Contacts, Sponsor users, CRAs.'],
+      ['Secret','Credentials. Never reach the LLM or any output.'],
+      ['Mixed','As sensitive as what it records: Agent runs, conversations, audit events.'],
+      ['Confidential','The Sponsor’s business data, no people in it.'],
+      ['Public','Published by someone else: ClinicalTrials.gov records.']].map(s=>`<li><span class="tag"><span class="chip c-${s[0]}">${SENS_LABEL[s[0]]}</span></span><p>${s[1]}</p></li>`).join('')}</ul></div>`;
+  host.appendChild(el(`<section class="two">${qHtml}${right}</section>`));
+
+  host.querySelectorAll('.node[data-key]').forEach(b=>b.addEventListener('click',()=>{
+    nodeF = nodeF===b.dataset.key?null:b.dataset.key; edgeF=null; sel=null; renderTable(); paint();
+  }));
+  document.getElementById('scen-pick').addEventListener('change',e=>setScenario(e.target.value||null));
+  document.getElementById('scen-clear').addEventListener('click',()=>setScenario(null));
+  host.querySelectorAll('#scen-chips button').forEach(b=>b.addEventListener('click',()=>setScenario(scen===b.dataset.sc?null:b.dataset.sc)));
+  refresh();
+}
+
+function refresh(){
+  const pick=document.getElementById('scen-pick'); pick.value=scen||'';
+  document.getElementById('scen-clear').hidden=!scen;
+  document.querySelectorAll('#scen-chips button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sc===scen));
+  renderGraph(); renderTable(); paint();
+}
+
+function setScenario(code){
+  if(code && SCBY[code].sc!==scopeCode()){ pendingScen=code; location.hash=SCBY[code].sc==='P'?'pilot':'beyond'; return; }
+  scen=code; sel=null; nodeF=null; edgeF=null; refresh();
+  if(code) openPane(code); else closePane();
+}
+
+// ---------- Scenario pane ----------
+const pane=document.createElement('aside');
+pane.id='pane';pane.className='pane';pane.hidden=true;pane.setAttribute('role','dialog');pane.setAttribute('aria-labelledby','pane-title');
+document.body.appendChild(pane);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!pane.hidden)closePane()});
+function closePane(){pane.hidden=true;document.body.classList.remove('pane-open')}
+function itemBtn(id){const r=BYID[id];if(!r)return '';const nw=r.sc==='B';return `<button class="ib${nw?' new':''}" data-item="${id}" title="${esc(r.nm)}${nw?' (added beyond the pilot)':''}">${id}</button>`}
+function openPane(code){
+  const s=SCBY[code], d=SD[code]||{}, its=R.filter(r=>s.items.has(r.id));
+  const sens=SENS_ORDER.map(k=>[k,its.filter(r=>r.s.includes(k)).length]).filter(x=>x[1]);
+  const leaves=[];
+  if(its.some(r=>r.out.includes('LLM'))) leaves.push(['Claude API','subprocessor, SCCs, zero data retention']);
+  if(its.some(r=>r.out.includes('Mail'))) leaves.push(['Email provider, then Site Contacts','approved mail only; Subject data as counts']);
+  if(its.some(r=>r.out.includes('Pages'))) leaves.push(['Request pages','seen by Site Contacts']);
+  if(its.some(r=>r.id==='site.geo')) leaves.push(['Geocoding provider','Site address; provider not chosen']);
+  if(view==='beyond'&&its.some(r=>CHAT.includes(r.id))) leaves.push(['Teams and Slack','if the Sponsor uses Prime in chat (D4)']);
+  if(its.some(r=>r.out.includes('Export'))) leaves.push(['Exports','downloaded by the study team; audited']);
+  const health=its.filter(r=>r.s.includes('Health')), widen=its.filter(r=>r.widen), added=its.filter(r=>r.sc==='B');
+  const rows=d.rows?d.rows.map(x=>`<tr><td>${esc(x.what)}<br>${x.items.map(itemBtn).join('')}</td><td>${esc(x.src)}</td></tr>`).join('')
+    :its.map(r=>`<tr><td>${esc(r.nm)}<br>${itemBtn(r.id)}</td><td>${r.in.map(x=>SRC_SHORT[x]).join(', ')}${r.st==='Derived'?' (derived)':''}</td></tr>`).join('');
+  pane.innerHTML=`<div class="ph"><div><div class="scope"><span class="chip ${s.sc==='P'?'in':'out'}">${s.sc==='P'?'Pilot':'Beyond the pilot'}</span>${d.rank?`<span class="eyebrow">Rank ${d.rank}</span>`:''}</div><code>${code}</code><h2 id="pane-title">${esc(d.title||s.name)}</h2></div><button class="x" aria-label="Close" id="pane-x">×</button></div>
+   ${DESC[code]?`<section class="desc"><p>${esc(DESC[code][0])}</p><div class="ex"><span class="eyebrow">Example, illustrative</span><p>${esc(DESC[code][1])}</p></div></section>`:''}
+   <section><h3>Scenario</h3><dl>
+     <dt>Started by</dt><dd>${esc({Ask:'A user asks Prime',Agent:'An Agent raises it',Both:'A user or an Agent',UI:'A user in the app',Site:'A Site’s mail or click'}[d.trigger]||d.trigger||'')}</dd>
+     <dt>Analysis</dt><dd>${esc(d.analysis||'')}</dd><dt>Delivered as</dt><dd>${esc(d.tech||'')}</dd>
+     <dt>Value · size</dt><dd>${esc(d.value||'–')} · ${esc(d.size||'–')}</dd><dt>Features</dt><dd>${esc(d.features||'')}</dd></dl></section>
+   ${widen.length?`<div class="warn"><b>Widens ADR 0001:</b> ${widen.map(r=>esc(r.nm.toLowerCase())).join(', ')}. These Subject fields are outside today’s pseudonymized list.</div>`:''}
+   <section><h3>Data it needs</h3><table class="ptbl"><tbody>${rows}</tbody></table>
+     ${d.output?`<p style="margin-top:8px"><b>Output:</b> ${esc(d.output)}</p>`:''}
+     ${d.newsrc?`<p style="margin-top:6px"><b>New sources:</b> ${esc(d.newsrc)}</p>`:''}
+     ${s.sc==='B'&&added.length?`<p class="muted" style="margin-top:6px">Red codes are items added beyond the pilot; the rest are already held for the pilot.</p>`:''}</section>
+   <section><h3>Sensitivity</h3><div class="sens">${sens.map(([k,n])=>`<span class="chip c-${k}">${SENS_LABEL[k]} · ${n}</span>`).join('')}</div>
+     ${health.length?`<p style="margin-top:8px">Reads pseudonymized Subject data (${health.map(r=>r.id).join(', ')}): every read, by a user or by Prime, is audited.</p>`:''}</section>
+   <section><h3>Leaves our platform to</h3>${leaves.length?`<ul class="lv">${leaves.map(l=>`<li><b>${esc(l[0])}</b> <span>· ${esc(l[1])}</span></li>`).join('')}</ul>`:'<p class="muted">Nothing: stays in the web app.</p>'}</section>
+   ${d.notes?`<section><h3>Notes</h3>${d.notes.map(n=>`<p>${esc(code)} ${esc(n)}</p>`).join('')}</section>`:''}
+   <p class="muted">From docs/scenarios.md and docs/data-model.md.</p>`;
+  pane.hidden=false; document.body.classList.add('pane-open');
+  document.getElementById('pane-x').addEventListener('click',closePane);
+  pane.querySelectorAll('button[data-item]').forEach(b=>b.addEventListener('click',()=>{if(window.innerWidth<1280)closePane();goToRow(b.dataset.item)}));
+  pane.scrollTop=0; document.getElementById('pane-x').focus({preventScroll:true});
+}
+
+function curve(e){const [x1,y1,x2,y2]=e.p;
+  if(e.o==='v'){const my=(y1+y2)/2;return `M${x1} ${y1} C${x1} ${my},${x2} ${my},${x2} ${y2}`}
+  const mx=(x1+x2)/2;return `M${x1} ${y1} C${mx} ${y1},${mx} ${y2},${x2} ${y2}`}
+
+function renderGraph(){
+  const G=document.getElementById('graph'), U=items();
+  const live={};GE.forEach(e=>live[e.id]=edgeItems(e,U));
+  const touched=new Set(['CT']);GE.forEach(e=>{if(live[e.id].length){touched.add(e.from);touched.add(e.to)}});
+  let svg=`<svg width="1180" height="960" viewBox="0 0 1180 960" aria-hidden="true"><defs>
+    <marker id="ar-read" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--read)"/></marker>
+    <marker id="ar-write" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--write)"/></marker></defs>`;
+  let labs='';
+  GE.forEach(e=>{
+    if(e.only && e.only!==view) return;
+    const its=live[e.id], on=its.length>0;
+    svg+=`<path class="e ${e.k}${on?'':' off'}${on&&scen?' hot':''}" d="${curve(e)}" marker-end="url(#ar-${e.k})"/>`;
+    if(!on) return;
+    const tf=e.pos==='above'?'translate(-50%,calc(-100% - 3px))':e.pos==='below'?'translate(-50%,3px)':'translate(-50%,-50%)';
+    const shown=its.slice(0,CAP), more=its.length-shown.length;
+    const fromN=GNBY[e.from].nm, toN=GNBY[e.to].nm;
+    labs+=`<div class="elab k-${e.k}" style="left:${e.l[0]}px;top:${e.l[1]}px;transform:${tf}">
+      <div class="eh"><span class="kt">${e.k==='read'?'READ':'WRITE'}</span><span>${esc(fromN)} → ${esc(toN)}${e.hint?' · '+esc(e.hint):''}</span></div>
+      <div class="ei">${shown.map(r=>`<button data-item="${r.id}" class="${view==='beyond'&&r.sc==='P'?'was':''}" title="${esc(r.id)}${view==='beyond'&&r.sc==='P'?' (already in the pilot)':''}">${esc(r.nm)}</button>`).join('')}${more>0?`<button class="more" data-edge="${e.id}">+${more} more</button>`:''}</div></div>`;
+  });
+  svg+='</svg>';
+  const nodes=GN.filter(n=>!n.only||n.only===view).map(n=>`<div class="gnode t-${n.t}${touched.has(n.id)?'':' dim'}" style="left:${n.x}px;top:${n.y}px;width:${n.w}px;min-height:${n.h}px">
+    <span class="ty">${esc(n.ty)}</span><span class="nm">${esc(n.nm)}</span><span class="sb">${esc(n.sb)}</span>${n.inner?`<ul>${n.inner.map(i=>`<li>${esc(i[0])}<span>${esc(i[1])}</span></li>`).join('')}</ul>`:''}</div>`).join('');
+  G.innerHTML=svg+nodes+labs;
+  G.querySelectorAll('button[data-item]').forEach(b=>b.addEventListener('click',()=>goToRow(b.dataset.item)));
+  G.querySelectorAll('button[data-edge]').forEach(b=>b.addEventListener('click',()=>{edgeF=b.dataset.edge;nodeF=null;sel=null;renderTable();paint();document.getElementById('register').scrollIntoView({behavior:'smooth',block:'start'})}));
+}
+
+function goToRow(id){
+  let tr=document.querySelector(`tr.item[data-id="${CSS.escape(id)}"]`);
+  if(!tr){SENS_ORDER.forEach(s=>sensOn[s]=true);nodeF=null;edgeF=null;renderTable();tr=document.querySelector(`tr.item[data-id="${CSS.escape(id)}"]`)}
+  if(!tr){const r=BYID[id];const t=document.getElementById('trace');
+    t.innerHTML=`<b><code>${esc(id)}</code></b><span>${esc(r.nm)} is ${r.sc==='P'?'pilot data: its row is on the Pilot tab.':'added beyond the pilot: its row is on the Beyond tab.'}</span>`;
+    t.scrollIntoView({behavior:'smooth',block:'center'});return}
+  sel=id; document.querySelectorAll('tr.item').forEach(x=>x.classList.toggle('sel',x.dataset.id===sel)); paint();
+  tr.scrollIntoView({behavior:'smooth',block:'center'});
+  tr.classList.remove('flash'); void tr.offsetWidth; tr.classList.add('flash');
+}
+
+function edgeLabel(id){const e=GE.find(x=>x.id===id);return `${GNBY[e.from].nm} → ${GNBY[e.to].nm}`}
+
+function renderTable(){
+  const its=scopeItems(), U=items();
+  const f=document.getElementById('filters');
+  f.innerHTML=`<span class="lbl">Sensitivity</span>`+SENS_ORDER.filter(s=>its.some(r=>r.s.includes(s))).map(s=>`<button class="chip c-${s}" data-s="${s}" aria-pressed="${sensOn[s]}">${SENS_LABEL[s]} <span class="ct">${its.filter(r=>r.s.includes(s)).length}</span></button>`).join('')
+    +(nodeF?` <span class="nodefilter">Only items touching <b>${esc(LBL[nodeF])}</b><button aria-label="Clear box filter" data-clr="node">×</button></span>`:'')
+    +(edgeF?` <span class="nodefilter">Only items on <b>${esc(edgeLabel(edgeF))}</b><button aria-label="Clear line filter" data-clr="edge">×</button></span>`:'');
+  f.querySelectorAll('button.chip').forEach(b=>b.addEventListener('click',()=>{sensOn[b.dataset.s]=!sensOn[b.dataset.s];renderTable();paint()}));
+  f.querySelectorAll('button[data-clr]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.clr;if(c==='scen'){setScenario(null);return}if(c==='node')nodeF=null;else edgeF=null;renderTable();paint()}));
+  const eSet=edgeF?new Set(edgeItems(GE.find(x=>x.id===edgeF),U).map(r=>r.id)):null;
+  const rows=its.filter(r=>r.s.some(s=>sensOn[s]) && (!nodeF||touches(r,nodeF)) && (!eSet||eSet.has(r.id)));
+  const tb=document.getElementById('tb'); let html='', last='';
+  rows.forEach(r=>{
+    if(r.cat!==last){html+=`<tr class="grp"><td colspan="8">${esc(r.cat)}</td></tr>`;last=r.cat}
+    const codes=SCN[r.id]||[], mine=codes.filter(c=>SCBY[c].sc==='P'), later=codes.filter(c=>SCBY[c].sc==='B');
+    const ordered=view==='pilot'?[...mine,...later]:[...later,...mine];
+    const why=ordered.map(c=>`<button class="sc${SCBY[c].sc===scopeCode()?'':' later'}${c===scen?' on':''}" data-sc="${c}" title="${esc(SCBY[c].name)}${SCBY[c].sc==='P'?' (pilot)':' (later)'}">${c}</button>`).join('')+(WHY_EXTRA[r.id]?`<small>${esc(WHY_EXTRA[r.id])}</small>`:'');
+    html+=`<tr class="item${sel===r.id?' sel':''}" data-id="${r.id}" tabindex="0">
+      <td class="id"><code>${r.id}</code><span class="nm">${esc(r.nm)}</span>${view==='beyond'&&r.sc==='P'?'<span class="inpilot">in pilot</span>':''}</td>
+      <td class="why">${why}</td>
+      <td class="fields">${esc(r.f)}${r.widen?'<span class="note flagtxt">Widens ADR 0001</span>':''}${r.note?`<span class="note">${esc(r.note)}</span>`:''}</td>
+      <td>${r.st==='Derived'&&r.in.join()==='Ours'?'<span class="src">Derived</span>':r.in.map(s=>`<span class="src">${SRC_SHORT[s]}</span>`).join('')}</td>
+      <td class="st">${ST_LBL[r.st]}${r.stores.includes('Landing')?'<small>via transient landing</small>':''}</td>
+      <td class="st">${esc(r.ret)}${r.s.includes('Health')?'<small>read-audited</small>':''}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:4px">${r.s.map(s=>`<span class="chip c-${s}">${SENS_LABEL[s]}</span>`).join('')}</div></td>
+      <td>${r.out.map(o=>`<span class="out">${OUT_SHORT[o]}</span>`).join('')}</td></tr>`;
+  });
+  tb.innerHTML=html||`<tr><td colspan="8" class="empty">No items match these filters.</td></tr>`;
+  tb.querySelectorAll('button.sc').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const c=b.dataset.sc;openPane(c)}));
+  tb.querySelectorAll('tr.item').forEach(tr=>{
+    const go=()=>{sel=sel===tr.dataset.id?null:tr.dataset.id;tb.querySelectorAll('tr.item').forEach(x=>x.classList.toggle('sel',x.dataset.id===sel));paint()};
+    tr.addEventListener('click',go); tr.addEventListener('keydown',e=>{if(e.target!==tr)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+  });
+}
+
+function paint(){
+  const r=sel?R.find(x=>x.id===sel):null, U=items();
+  document.querySelectorAll('.node[data-key]').forEach(n=>{
+    const k=n.dataset.key;
+    n.classList.toggle('off',!U.some(x=>touches(x,k)));
+    n.classList.toggle('on',!!r&&touches(r,k));
+    n.classList.toggle('pick',nodeF===k);
+    n.setAttribute('aria-pressed',nodeF===k);
+  });
+  const t=document.getElementById('trace');
+  if(!r){t.innerHTML=`<span class="muted">No item selected. Click a row to see where it comes from, what processes it, where it is stored and where it goes.</span>`;return}
+  const part=(arr,map)=>arr.map(x=>map[x]||x).join(' + ');
+  const PN={};PROCS.forEach(p=>PN[p.id]=p.n);const SN={};STORES.forEach(p=>SN[p.id]=p.n);const ON={};OUTS.forEach(p=>ON[p.id]=p.n);const IN={};SOURCES.forEach(p=>IN[p.id]=p.n);
+  t.innerHTML=`<b><code>${r.id}</code></b><span class="path">${esc(r.st==='Derived'&&r.in.join()==='Ours'?'Computed by us':part(r.in,IN))} <i>→</i> ${esc(part(r.procs.filter(p=>p!=='Purge'),PN)||'Written directly')} <i>→</i> ${esc(part(r.stores,SN))} <i>→</i> ${esc(part(r.out,ON))}</span>${r.ret&&r.ret!=='—'?`<span class="muted">Purged on the Sponsor’s ${esc(r.ret)} period</span>`:''}<button id="untrace">Clear</button>`;
+  document.getElementById('untrace').addEventListener('click',()=>{sel=null;document.querySelectorAll('tr.item.sel').forEach(x=>x.classList.remove('sel'));paint()});
+}
+
+function route(){const h=(location.hash||'').slice(1);view=h==='beyond'?'beyond':'pilot';sel=null;nodeF=null;edgeF=null;
+  scen=(pendingScen&&SCBY[pendingScen].sc===scopeCode())?pendingScen:null;pendingScen=null;render();
+  if(scen)openPane(scen);else closePane()}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{if(location.hash!=='#'+t.dataset.view){location.hash=t.dataset.view}else route()}));
+window.addEventListener('hashchange',route);
+route();
+})();
+</script>
