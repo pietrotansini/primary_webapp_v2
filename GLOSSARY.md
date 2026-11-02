@@ -32,6 +32,18 @@ _Avoid_: patient record, participant, enrollee
 A task assigned to one person on the Sponsor side, with a deadline and an escalation path, such as sending a Site a Newsletter or answering a Site's question. Agents propose some Actions, choosing an owner that anyone can change, and a Site's mail starts others.
 _Avoid_: task, recommendation, to-do, engagement email
 
+**Email Action**:
+An Action whose approval sends a drafted mail, such as a Newsletter or a request to an eCOA vendor. It is done when the mail goes out, or, if the mail carries a Request, when the Site Response arrives.
+_Avoid_: send action, email task
+
+**Manual Action**:
+An Action that a person carries out in some other system or in the world, such as updating the CTMS or ordering devices, and closes with a note on the outcome.
+_Avoid_: offline action, external action, changes action
+
+**In-app Action**:
+An Action whose approval changes something the platform itself holds, such as a Newsletter's recipients or a Campaign's schedule. It never changes what the Sponsor's own systems hold.
+_Avoid_: apply action, update action
+
 **Report**:
 A set of information and insights about a Site or Study, such as screening against plan this month. It reaches a Site inside a mail.
 _Avoid_: summary, dashboard, digest

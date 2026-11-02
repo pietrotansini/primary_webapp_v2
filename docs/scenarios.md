@@ -59,7 +59,7 @@ and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 | EN4.1 | Diagnose a lagging Site: screen fails on a lab inclusion criterion | In | Agent | EDC screen-fail reasons and lab result dates, Site Messages | API/File, Ours | rule, LLM | Agent run | B4, A9 | H | M | `ITEMS` nwu, nwu-lab; `ENG_INS` nwu |
 | EN4.2 | Diagnose a lagging Site: staff turnover cut referrals (escalate to the CRO) | In | Agent | CTMS Site staff, referral log | API/File, File | trend, LLM | Agent run, send | B4, B5, A9 | M | M | `ITEMS` charite |
 | EN4.3 | Diagnose a lagging Site: activated, no first patient | In | Agent | CTMS activation date, EDC | API/File | rule, benchmark | Agent run | B4, B9, A9 | H | S | `ITEMS` houston; `ENG_INS` hou |
-| EN4.4 | Diagnose a lagging Site: candidates drop at consent | In | Agent | EDC screening and consent dates | API/File | rule, LLM | Agent run | B4, B6 | M | M | `ITEMS` barcelona; `ENG_INS` bcn |
+| EN4.4 | Diagnose a lagging Site: candidates drop at consent | In | Agent | EDC screening and consent dates | API/File | rule, LLM | Agent run, send | B4, B6 | M | M | `ITEMS` barcelona; `ENG_INS` bcn |
 | EN4.5 | Diagnose a lagging Site: few referrals reach screening | In | Agent | referral log, EDC | File, API/File | benchmark | Agent run | B4, B5, B9 | M | M | `ENG_INS` phx |
 | EN4.6 | Diagnose a lagging Site: few referred candidates are eligible | In | Agent | referral pre-screen answers, EDC | File, API/File | benchmark | Agent run | B4, B5, B9 | M | M | `ENG_INS` mil |
 | EN4.7 | Diagnose a lagging Site: early withdrawals | In | Agent | EDC discontinuations | API/File | rule | Agent run | B4 | M | S | `ENG_INS` lyo |
@@ -106,7 +106,7 @@ and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 | OP5.2 | EDC data-entry lag against visits | In | Ask | EDC visit and CRF timestamps | API/File | metric | Q&A | B8 | L | M | `PRIME` edc |
 | OP5.3 | Overdue monitoring visit reports | In | Ask | CTMS visit and report dates | API/File | rule | Q&A | B8 | L | S | `PRIME_MORE` |
 | OP6 | What changed in CTMS since the last sync | In | Ask | CTMS snapshots | Ours | lookup | Q&A | A3, A2 | L | S | `PRIME` ctms |
-| OP7 | Upcoming visit load against Site resources (devices, coordinator hours) | In | Agent | EDC next visit dates, Site Messages | API/File, Ours | rule | Agent run | B10 | L | M | `ITEMS` nwu-tab; Site page upcoming visits |
+| OP7 | Upcoming visit load against Site resources (devices, coordinator hours) | In | Agent | EDC next visit dates, Site Messages | API/File, Ours | rule | Agent run, send | B10 | L | M | `ITEMS` nwu-tab; Site page upcoming visits |
 | OP8 | Tune an Agent: instructions, runs, memory | In | UI | Agent config and runs | Ours | none | none | A9 | M | M | Agent pages |
 | OP9.1 | What Prime did this week | In | Ask | Audit Trail, Agent runs | Ours | LLM | Q&A | A5, A9, D1 | M | S | `PAGE_CHAT` activity.week |
 | OP9.2 | Export approvals for an inspection | In | UI | Audit Trail | Ours | none | export | A5 | M | S | `PAGE_CHAT` activity.inspect |
