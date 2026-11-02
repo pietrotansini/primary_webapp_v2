@@ -685,7 +685,7 @@ function openPane(code){
   const rows=d.rows?d.rows.map(x=>`<tr><td>${esc(x.what)}<br>${x.items.map(itemBtn).join('')}</td><td>${esc(x.src)}</td></tr>`).join('')
     :its.map(r=>`<tr><td>${esc(r.nm)}<br>${itemBtn(r.id)}</td><td>${r.in.map(x=>SRC_SHORT[x]).join(', ')}${r.st==='Derived'?' (derived)':''}</td></tr>`).join('');
   pane.innerHTML=`<div class="ph"><div><div class="eyebrow">${s.sc==='P'?'Pilot':'Beyond the pilot'}${d.rank?' · rank '+d.rank:''}</div><code>${code}</code><h2 id="pane-title">${esc(d.title||s.name)}</h2></div><button class="x" aria-label="Close" id="pane-x">×</button></div>
-   ${DESC[code]?`<section class="desc"><p>${esc(DESC[code][0])}</p><div class="ex"><span class="eyebrow">Example from the demo</span><p>${esc(DESC[code][1])}</p></div></section>`:''}
+   ${DESC[code]?`<section class="desc"><p>${esc(DESC[code][0])}</p><div class="ex"><span class="eyebrow">Example, illustrative</span><p>${esc(DESC[code][1])}</p></div></section>`:''}
    <section><h3>Scenario</h3><dl>
      <dt>Started by</dt><dd>${esc({Ask:'A user asks Prime',Agent:'An Agent raises it',Both:'A user or an Agent',UI:'A user in the app',Site:'A Site’s mail or click'}[d.trigger]||d.trigger||'')}</dd>
      <dt>Analysis</dt><dd>${esc(d.analysis||'')}</dd><dt>Delivered as</dt><dd>${esc(d.tech||'')}</dd>
