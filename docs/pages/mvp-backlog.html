@@ -1,0 +1,458 @@
+<title>Control Tower MVP Backlog</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, three sections (scenarios to rank, backlog table, tentative architecture). */
+:root {
+  --bg: #f6f6f8; --surface: #ffffff; --fg: #0a0a0a; --muted: #5d6470; --line: #e2e4ea;
+  --accent: #003358; --accent-soft: #e3ebf3; --accent-fg: #ffffff;
+  --ai: #5b3fa8; --ai-soft: #ece7f8; --warn: #9a5b00; --warn-soft: #fbefd9;
+  --ok: #1d6b40; --ok-soft: #e1f2e8;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1218; --surface: #171b23; --fg: #e8eaee; --muted: #9aa2b1; --line: #2a303b;
+  --accent: #8fb8de; --accent-soft: #1d2b3b; --accent-fg: #0b1622;
+  --ai: #b9a4f0; --ai-soft: #2a2340; --warn: #f0b860; --warn-soft: #3a2c14; --ok: #7fd3a2; --ok-soft: #173326; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1218; --surface: #171b23; --fg: #e8eaee; --muted: #9aa2b1; --line: #2a303b;
+  --accent: #8fb8de; --accent-soft: #1d2b3b; --accent-fg: #0b1622;
+  --ai: #b9a4f0; --ai-soft: #2a2340; --warn: #f0b860; --warn-soft: #3a2c14; --ok: #7fd3a2; --ok-soft: #173326; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 36px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 26px; font-weight: 600; margin: 4px 0 6px; letter-spacing: -.01em; text-wrap: balance; }
+h2 { font-size: 18px; font-weight: 600; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 70ch; margin: 0; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.status { font-family: var(--mono); font-size: 12px; border: 1px solid var(--warn); color: var(--warn); background: var(--warn-soft); padding: 4px 10px; border-radius: 999px; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; }
+nav a { font-size: 13px; color: var(--accent); text-decoration: none; border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; }
+nav a:hover { border-color: var(--accent); }
+section { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0; max-width: 70ch; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Scenarios: one sortable table; in Rank view rows carry the shared order and the pilot cut line. */
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.sync { font-family: var(--mono); }
+.btn { font-size: 13px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.io { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 13px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 8px 12px; }
+.io.err { background: var(--warn-soft); color: var(--warn); }
+.io textarea { flex: 1 1 100%; min-height: 160px; font-family: var(--mono); font-size: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.chip { font: inherit; font-size: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); padding: 2px 10px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.pilot { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; font-size: 13px; }
+.pilot b { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.pilot .refs { margin: 0; }
+@media (max-width: 560px) { .pilot { grid-template-columns: minmax(0, 1fr); } }
+table.sct { min-width: 1180px; }
+.sct td { font-size: 13px; }
+.sct td.rk { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 500; text-align: right; white-space: nowrap; }
+.sct tr.below td.rk { color: var(--muted); font-weight: 400; }
+.sct tr.below td:not(.mvc) { color: var(--muted); }
+.sct tr.below td .t { color: var(--fg); font-weight: 400; }
+.sct td .t { font-weight: 500; }
+.sct td .demo { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.sct tr[draggable="true"] td.rk { cursor: grab; }
+.sct tr.drag { opacity: .35; }
+.sct tr.over td { box-shadow: inset 0 2px 0 var(--accent); }
+.sct tr.cut td { background: var(--warn-soft); color: var(--warn); font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; border-block: 1px dashed var(--warn); }
+.refs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.ref { font-family: var(--mono); font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.av-Ours { background: var(--ok-soft); color: var(--ok); }
+.av-Public, .av-APIFile { background: var(--accent-soft); color: var(--accent); }
+.av-File { background: var(--warn-soft); color: var(--warn); }
+.av-Docs { background: var(--ai-soft); color: var(--ai); }
+.st { font-size: 12px; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.st-In { background: var(--ok-soft); color: var(--ok); }
+.st-Wont { color: var(--muted); border: 1px solid var(--line); }
+.st-Out { color: var(--muted); border: 1px dashed var(--line); }
+.vH { font-weight: 600; }
+.mv { display: flex; gap: 4px; }
+.mv button { min-width: 28px; height: 28px; padding: 0 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap; }
+.mv button:hover { color: var(--accent); border-color: var(--accent); }
+.sct tr.cut .mv button { background: var(--surface); }
+
+/* Backlog table */
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; }
+th, td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+th button { all: unset; cursor: pointer; }
+th button:focus-visible { outline: 2px solid var(--accent); }
+th[aria-sort] button { color: var(--accent); }
+td.id, td.sz { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .n { color: var(--muted); font-size: 12.5px; }
+.pill { font-size: 12px; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.p-Must { background: var(--ok-soft); color: var(--ok); }
+.p-Should { background: var(--accent-soft); color: var(--accent); }
+.p-Could { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.p-Wont { background: transparent; color: var(--muted); text-decoration: line-through; }
+.p-Candidate { background: transparent; color: var(--ai); border: 1px dashed var(--ai); }
+.decided { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.decided div { border-left: 2px solid var(--line); padding-left: 10px; font-size: 13px; }
+.decided b { display: block; font-size: 12px; font-family: var(--mono); color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Architecture */
+.arch { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .arch { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .arch { grid-template-columns: minmax(0, 1fr); } }
+.lane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.lane > .eyebrow { padding: 0 2px; }
+.node { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font-size: 13px; }
+.node b { display: block; font-size: 13.5px; font-weight: 600; }
+.node span { color: var(--muted); }
+.node.ai { border-color: var(--ai); }
+.node.ext { background: transparent; border-style: dashed; }
+.node.open::after { content: "open"; float: right; font-family: var(--mono); font-size: 10px; color: var(--warn); margin-top: -2px; }
+.flows { margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 3px; max-width: 80ch; }
+.flows li::marker { font-family: var(--mono); color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Recruitment Control Tower · docs/scenarios.md · docs/mvp-backlog.md</div>
+      <h1>MVP backlog</h1>
+      <p class="lede">A site-engagement CRM for biotech Sponsors. The pilot proves three things in order: engagement out (Campaigns and Newsletters), insights back (Site Responses and Messages), and enrollment per Site.</p>
+    </div>
+    <span class="status">v0 · provisional</span>
+  </header>
+  <nav aria-label="Sections"><a href="#scenarios">Scenarios</a><a href="#backlog">Backlog</a><a href="#architecture">Architecture</a></nav>
+
+  <section id="scenarios" aria-labelledby="h-sc">
+    <div class="sec-head">
+      <h2 id="h-sc">Scenarios</h2>
+      <div class="toolbar"><span class="sync" id="sync">Rank saved on this device only</span><button class="btn" type="button" id="export">Export rank</button><button class="btn" type="button" id="import">Import rank</button><input type="file" id="importFile" accept=".md,.json,.txt,text/markdown,application/json,text/plain" hidden><button class="btn" type="button" id="reset">Reset rank</button></div>
+    </div>
+    <div class="io" id="io" hidden><span id="ioMsg" role="status"></span><button class="btn" type="button" id="undo" hidden>Undo import</button><textarea id="ioText" readonly hidden aria-label="Exported rank as Markdown"></textarea></div>
+    <p class="hint">Every need the demos show, from <span class="ref">docs/scenarios.md</span>. Rank them and move the cut line: the Scenarios above it are what the pilot supports first, and the features they need come first in the backlog. Everyone who opens this page sees the same rank. Once it is reviewed, use Export rank and commit the file as <span class="ref">docs/scenario-rank.md</span>. Import rank loads that file back. Value, Size and Avail. are first drafts.</p>
+    <div class="pilot" id="pilot" aria-live="polite"></div>
+    <div class="filters" id="filters">Show
+      <button class="chip" type="button" data-st="In" aria-pressed="true">In scope</button>
+      <button class="chip" type="button" data-st="Won't" aria-pressed="true">Won't</button>
+      <button class="chip" type="button" data-st="Out" aria-pressed="true">Out (TMF)</button>
+      <span id="view"></span>
+    </div>
+    <div class="box"><table class="sct" id="sct"></table></div>
+  </section>
+
+  <section id="backlog" aria-labelledby="h-bl">
+    <div class="sec-head"><h2 id="h-bl">Backlog</h2><p class="hint">Ordered by the first pilot Scenario each feature serves (CEO rank, 2026-11-01). Sizes are FE / BE (S–XL). Click a column to sort.</p></div>
+    <div class="box"><table id="bl"></table></div>
+    <div class="decided">
+      <div><b>Decided · insights</b>Rules flag Sites, then an Agent diagnoses and drafts the Action with Evidence it actually fetched. No confidence, days saved or cost impact.</div>
+      <div><b>Decided · milestones</b>M1 is a demo on sample data. M2 is the first real Sponsor data, gated by the compliance pack.</div>
+      <div><b>Decided · compliance</b>We are processor. Pseudonymized Subject records only. Part 11-shaped audit, not validated. Magic-link sign-in.</div>
+      <div><b>Pilot limits</b>One Sponsor, several Studies. The platform sends approved mail itself. No write-back into EDC, CTMS, eTMF or payments.</div>
+    </div>
+  </section>
+
+  <section id="architecture" aria-labelledby="h-ar">
+    <div class="sec-head"><h2 id="h-ar">Tentative architecture</h2><p class="hint">A starting point for “Backend architecture and stack” (#8), not a decision. Boxes marked open are still being chosen.</p></div>
+    <div class="arch">
+      <div class="lane"><span class="eyebrow">Surfaces</span>
+        <div class="node"><b>Web app</b><span>Next.js + React, from the prototype. Vercel fra1.</span></div>
+        <div class="node"><b>Teams and Slack bots</b><span>Existing primary_teams Surfaces.</span></div>
+        <div class="node"><b>Hosted Request pages</b><span>Acknowledge and short-form links in mails to Sites.</span></div>
+      </div>
+      <div class="lane"><span class="eyebrow">Backend</span>
+        <div class="node"><b>App API</b><span>Next.js server routes: Actions, Campaigns, approvals, Site pages. Writes the audit log.</span></div>
+        <div class="node ai open"><b>Prime + Agent runtime</b><span>primary_teams (LangGraph). Prime orchestrates; Enrollment, Triage, Newsletter and Engagement agents run with read tools on our DB.</span></div>
+        <div class="node"><b>Metrics and rules</b><span>Deterministic per-Site metrics and fixed rules after each sync raise flags.</span></div>
+      </div>
+      <div class="lane"><span class="eyebrow">Data</span>
+        <div class="node"><b>Postgres (Supabase EU)</b><span>Studies, Sites, Contacts, Subjects, Actions, Campaigns, Responses, Messages, Agent memory and runs.</span></div>
+        <div class="node"><b>Audit log</b><span>Append-only, with before/after values and export.</span></div>
+        <div class="node"><b>Auth</b><span>Magic link; SSO later.</span></div>
+      </div>
+      <div class="lane"><span class="eyebrow">Ingestion and outside</span>
+        <div class="node open"><b>Connector workers</b><span>Agentic connectors crystallized into replayable pipelines. EDC and CTMS first, read-only.</span></div>
+        <div class="node ext open"><b>Email provider (EU)</b><span>Outbound sends, inbound address for Site Messages, delivery events.</span></div>
+        <div class="node ext ai"><b>Claude API</b><span>Disclosed subprocessor, zero data retention.</span></div>
+      </div>
+    </div>
+    <ol class="flows">
+      <li>Connector sync writes Study data, then metrics and rules run, then flagged Sites go to the Agents, which write proposed Actions.</li>
+      <li>A person approves an Action or a whole Campaign in the web app, and the email provider sends it.</li>
+      <li>Site clicks and replies come back through Request pages and the inbound address; the Triage agent classifies them and extracts asks.</li>
+      <li>Prime answers questions in the web app and Teams from stored results and read tools; it never starts a scan.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+const BL = [
+  ["B2", "Enrollment per Site", "Must", "M", "M", "M1", "First: EN0 (1); Ingestion approach; enrollment forecasting fog"],
+  ["D1", "Ask Prime (Q&A, no writes)", "Must", "M", "M", "M1", "First: EN0 (1); Backend architecture and stack"],
+  ["C6", "Site Responses and Site Messages (Triage agent)", "Must", "M", "L", "M1", "First: EN3 (2)"],
+  ["B5", "Referral and pre-screening data (funnel top)", "Must", "–", "–", "M1", "First: EN3 (2); Ingestion approach (referral tool is a per-study file)"],
+  ["B9", "Site benchmarks (study median, peer Sites)", "Must", "–", "–", "M1", "First: EN3 (2)"],
+  ["B11", "Enrollment forecast and cost of delay", "Must", "–", "–", "M1", "First: EN10 (3); Enrollment forecasting fog"],
+  ["D5", "Competing trials", "Must", "S", "M", "M1", "First: EN6 (4); External signals fog"],
+  ["C1", "Actions workspace", "Must", "M", "M", "M1", "First: EG7 (5); Pilot form of the write-back flows"],
+  ["A6", "Outbound and inbound email", "Must", "S", "L", "M1", "First: EG7 (5); Backend architecture and stack (provider choice)"],
+  ["A10", "Study documents as a source Prime reads (protocol, Site reference manual)", "Must", "–", "–", "M1", "First: EG7 (5)"],
+  ["C4", "Campaigns and Newsletters", "Must", "L", "L", "M1", "First: EG8 (6); Pilot form of the prototype's write-back flows; data model"],
+  ["B4", "Enrollment agent", "Must", "M", "M", "M1", "First: EN2.1 (8); Enrollment forecasting fog"],
+  ["A9", "Agent runtime: rules, runs, memory, Evidence", "Must", "M", "L", "M1", "First: EN2.1 (8); Backend architecture and stack"],
+  ["B3", "Site page (lite)", "Must", "M", "M", "M1", "First: EG5 (9); Data model"],
+  ["A1", "Sign-in (magic link) and Sponsor team", "Must", "S", "M", "M1", "Prerequisite; Roles and permissions fog"],
+  ["A2", "Study, Site and Site Contact master data (from CTMS)", "Must", "S", "M", "M1", "Prerequisite; Agentic platform connectors prototype"],
+  ["A3", "Agentic connectors and data sync", "Must", "S", "XL", "M1", "Prerequisite; Agentic platform connectors prototype; ingestion approach"],
+  ["A4", "Prime (front and orchestrator)", "Must", "S", "L", "M1", "Prerequisite; Backend architecture and stack"],
+  ["A5", "Audit Trail (Part 11-shaped)", "Must", "S", "M", "M1", "Prerequisite"],
+  ["A7", "Retention and purge", "Must", "S", "S", "M2", "Prerequisite"],
+  ["A8", "M2 compliance pack (DPA, subprocessors, review pack)", "Must", "–", "–", "M2", "Prerequisite; Non-feature gate: documents, no code"],
+  ["C7", "Site engagement score (Engagement agent)", "Should", "S", "M", "M1", "First: EG1 (26); Engagement score fog"],
+  ["C5", "Campaign performance", "Should", "M", "M", "M1", "First: EG12 (33)"],
+  ["B1", "Homepage", "Should", "M", "S", "M1", "First: OP1 (36)"],
+  ["D2", "Prime chat panel", "Should", "M", "S", "M1", "None"],
+  ["D4", "Teams and Slack", "Should", "S", "M / S", "M1", "None; Backend architecture and stack"],
+  ["D3", "AI Studio", "Could", "M", "S", "later", "First: EG14 (35)"],
+  ["B6", "eConsent status", "Candidate", "–", "–", "–", "First: EN2.3 (12); Also EN4.4, EG3"],
+  ["B7", "Action outcome tracking (metric before and after)", "Candidate", "–", "–", "–", "First: EN9 (25)"],
+  ["C8", "Campaign attribution to randomizations", "Candidate", "–", "–", "–", "First: EG13 (34)"],
+  ["C9", "Leadership updates", "Candidate", "–", "–", "–", "First: OP2 (37)"],
+  ["B8", "Data-quality and monitoring metrics (queries, entry lag, visit reports)", "Candidate", "–", "–", "–", "First: OP4 (42); Also OP5.1 to OP5.3"],
+  ["B10", "Visit load and Site resources", "Candidate", "–", "–", "–", "First: OP7 (47)"],
+  ["C2", "Budget agent", "Won't", "–", "–", "–", ""],
+  ["C3", "Regulatory agent", "Won't", "–", "–", "–", ""]
+];
+/* SC and BL are generated from docs/scenarios.md and docs/mvp-backlog.md by scripts/build_backlog_page.py. */
+const SC = [{"id": "EN0", "t": "Enrollment by Site report", "st": "In", "tr": "Ask", "data": "CTMS, EDC randomizations", "av": ["API/File"], "an": "metric", "te": "Q&A, report", "f": ["B2", "D1"], "v": "M", "sz": "S", "demo": "ARCHIVE_SEED h4"}, {"id": "EN1", "t": "Why a Study is behind plan, by Site and funnel stage", "st": "In", "tr": "Ask", "data": "CTMS plan, EDC, referral log", "av": ["API/File", "File"], "an": "metric, benchmark", "te": "Q&A", "f": ["B2", "B5", "B9", "D1"], "v": "H", "sz": "M", "demo": "PAGE_CHAT studies.why"}, {"id": "EN2.1", "t": "Sites at risk against plan, across Studies (can be saved as a weekly check)", "st": "In", "tr": "Both", "data": "CTMS plan, EDC", "av": ["API/File"], "an": "metric, rule", "te": "Agent run, Q&A", "f": ["B2", "B4", "A9"], "v": "H", "sz": "S", "demo": "PAGE_CHAT prime.atrisk"}, {"id": "EN2.2", "t": "Rank Sites by enrollment gap in each Study", "st": "In", "tr": "Ask", "data": "CTMS plan, EDC", "av": ["API/File"], "an": "metric", "te": "Q&A", "f": ["B2", "D1"], "v": "M", "sz": "S", "demo": "PAGE_CHAT sites.rank"}, {"id": "EN2.3", "t": "Compare each Site with the study median: referral, screening, consent conversion", "st": "In", "tr": "Ask", "data": "EDC, referral log, eConsent", "av": ["API/File", "File"], "an": "benchmark", "te": "Q&A", "f": ["B5", "B6", "B9"], "v": "M", "sz": "M", "demo": "PAGE_CHAT sites.median"}, {"id": "EN3", "t": "Recruitment blockers at one Site: where candidates drop out between referral and randomization, and why", "st": "In", "tr": "Ask", "data": "EDC screening log, referral log, Site Messages", "av": ["API/File", "File", "Ours"], "an": "metric, benchmark, LLM", "te": "Q&A", "f": ["B5", "B9", "C6", "D1"], "v": "H", "sz": "M", "demo": "siteChat blockers"}, {"id": "EN4.1", "t": "Diagnose a lagging Site: screen fails on a lab inclusion criterion", "st": "In", "tr": "Agent", "data": "EDC screen-fail reasons and lab result dates, Site Messages", "av": ["API/File", "Ours"], "an": "rule, LLM", "te": "Agent run", "f": ["B4", "A9"], "v": "H", "sz": "M", "demo": "ITEMS nwu, nwu-lab; ENG_INS nwu"}, {"id": "EN4.2", "t": "Diagnose a lagging Site: staff turnover cut referrals (escalate to the CRO)", "st": "In", "tr": "Agent", "data": "CTMS Site staff, referral log", "av": ["API/File", "File"], "an": "trend, LLM", "te": "Agent run, send", "f": ["B4", "B5", "A9"], "v": "M", "sz": "M", "demo": "ITEMS charite"}, {"id": "EN4.3", "t": "Diagnose a lagging Site: activated, no first patient", "st": "In", "tr": "Agent", "data": "CTMS activation date, EDC", "av": ["API/File"], "an": "rule, benchmark", "te": "Agent run", "f": ["B4", "B9", "A9"], "v": "H", "sz": "S", "demo": "ITEMS houston; ENG_INS hou"}, {"id": "EN4.4", "t": "Diagnose a lagging Site: candidates drop at consent", "st": "In", "tr": "Agent", "data": "eConsent, EDC, participant feedback", "av": ["File"], "an": "rule, LLM", "te": "Agent run", "f": ["B4", "B6"], "v": "M", "sz": "M", "demo": "ITEMS barcelona; ENG_INS bcn"}, {"id": "EN4.5", "t": "Diagnose a lagging Site: few referrals reach screening", "st": "In", "tr": "Agent", "data": "referral log, EDC", "av": ["File", "API/File"], "an": "benchmark", "te": "Agent run", "f": ["B4", "B5", "B9"], "v": "M", "sz": "M", "demo": "ENG_INS phx"}, {"id": "EN4.6", "t": "Diagnose a lagging Site: few referred candidates are eligible", "st": "In", "tr": "Agent", "data": "referral pre-screen answers, EDC", "av": ["File", "API/File"], "an": "benchmark", "te": "Agent run", "f": ["B4", "B5", "B9"], "v": "M", "sz": "M", "demo": "ENG_INS mil"}, {"id": "EN4.7", "t": "Diagnose a lagging Site: early withdrawals", "st": "In", "tr": "Agent", "data": "EDC discontinuations", "av": ["API/File"], "an": "rule", "te": "Agent run", "f": ["B4"], "v": "M", "sz": "S", "demo": "ENG_INS lyo"}, {"id": "EN4.8", "t": "Diagnose a lagging Site: stopped screening for N weeks", "st": "In", "tr": "Agent", "data": "EDC screening dates", "av": ["API/File"], "an": "rule", "te": "Agent run", "f": ["B4"], "v": "H", "sz": "S", "demo": "ENG_INS cha"}, {"id": "EN5", "t": "Sites that can take more patients", "st": "In", "tr": "Ask", "data": "CTMS plan, EDC, screening capacity from Site Responses", "av": ["API/File", "Ours"], "an": "metric", "te": "Q&A", "f": ["B2", "B9", "C6"], "v": "M", "sz": "S", "demo": "PAGE_CHAT studies.capacity"}, {"id": "EN6", "t": "Competing trials near a Site, with talking points for the PIs", "st": "In", "tr": "Agent", "data": "ClinicalTrials.gov, referral log", "av": ["Public", "File"], "an": "rule, LLM", "te": "Agent run, send", "f": ["D5"], "v": "L", "sz": "M", "demo": "ITEMS nash; BS_COMP"}, {"id": "EN7.1", "t": "Shift paid-referral budget between Sites", "st": "Won't", "tr": "Agent", "data": "campaign tool spend, EDC", "av": ["File"], "an": "metric", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "ITEMS budget"}, {"id": "EN7.2", "t": "Tighten the pre-screen questions on a referral form", "st": "Won't", "tr": "Agent", "data": "referral form, EDC", "av": ["File"], "an": "benchmark", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "ITEMS campaign"}, {"id": "EN8", "t": "Draft a recovery plan for at-risk Sites", "st": "In", "tr": "Ask", "data": "stored diagnoses", "av": ["Ours"], "an": "LLM", "te": "Q&A, Action drafts", "f": ["B4", "C1", "D1"], "v": "M", "sz": "S", "demo": "PAGE_CHAT sites.plan"}, {"id": "EN9", "t": "Did an Action work? Compare the metric before and after", "st": "In", "tr": "Agent", "data": "metric snapshots, Actions", "av": ["Ours"], "an": "trend", "te": "Agent run, schedule", "f": ["B7", "A9"], "v": "H", "sz": "M", "demo": "follow-ups on every ITEMS entry"}, {"id": "EN10", "t": "Forecast last-patient-in and the cost of delay", "st": "In", "tr": "Both", "data": "CTMS plan, EDC, CRO cost lines", "av": ["API/File", "File"], "an": "forecast", "te": "report", "f": ["B11"], "v": "M", "sz": "L", "demo": "STUDIES, costOf"}, {"id": "EG1", "t": "Re-engage quiet Sites", "st": "In", "tr": "Both", "data": "Site Messages, Site Responses, EDC", "av": ["Ours", "API/File"], "an": "metric, rule", "te": "Agent run, send", "f": ["C7", "C1", "A6"], "v": "H", "sz": "S", "demo": "ENG_CHAT quiet"}, {"id": "EG2", "t": "Thank the top-recruiting Sites and share what works", "st": "In", "tr": "Both", "data": "EDC randomizations, CTMS plan", "av": ["API/File"], "an": "rule", "te": "Agent run, send", "f": ["B2", "C4", "A6"], "v": "M", "sz": "S", "demo": "ENG_CHAT thanks; ENG_INS atl, grp"}, {"id": "EG3", "t": "Protocol reminder with a deadline, such as re-consent to a new version", "st": "In", "tr": "Both", "data": "eConsent, CTMS protocol versions", "av": ["File", "API/File"], "an": "lookup", "te": "send, schedule", "f": ["B6", "C4", "A6"], "v": "M", "sz": "M", "demo": "ENG_CHAT reconsent; PRIME_MORE"}, {"id": "EG4", "t": "Repeated Site questions turned into a clarification or FAQ", "st": "In", "tr": "Agent", "data": "Site Messages, approved guidance (SRM, protocol)", "av": ["Ours", "Docs"], "an": "LLM", "te": "Agent run (Triage), send", "f": ["C6", "A10"], "v": "H", "sz": "M", "demo": "ENG_INS q1, q2, q3"}, {"id": "EG5", "t": "Brief for the next Site meeting", "st": "In", "tr": "Ask", "data": "CTMS issues and visits, EDC, Site Messages, Actions", "av": ["API/File", "Ours"], "an": "LLM", "te": "Q&A", "f": ["B3", "D1"], "v": "H", "sz": "S", "demo": "siteChat brief; makeBriefs"}, {"id": "EG6", "t": "Turn a Site's open issues into CRA follow-up Actions", "st": "In", "tr": "Ask", "data": "CTMS issue log, last visit report", "av": ["API/File"], "an": "LLM", "te": "Q&A, Action drafts", "f": ["C1", "D1"], "v": "M", "sz": "S", "demo": "siteChat cra"}, {"id": "EG7", "t": "Draft a one-off communication to a Site", "st": "In", "tr": "Ask", "data": "Site findings, protocol", "av": ["Ours", "Docs"], "an": "LLM", "te": "Action draft, send", "f": ["C1", "A6", "A10"], "v": "M", "sz": "S", "demo": "siteChat comm"}, {"id": "EG8", "t": "Plan the monthly Newsletter Campaign with per-Site Reports", "st": "In", "tr": "Ask", "data": "EDC, CTMS, Site Responses", "av": ["API/File", "Ours"], "an": "metric, LLM", "te": "Agent run (Newsletter), schedule", "f": ["C4"], "v": "H", "sz": "L", "demo": "ENG_CAMPS, ENG_BLOCKS"}, {"id": "EG9", "t": "Bulk-approve a Campaign, preview it as a Site", "st": "In", "tr": "UI", "data": "Campaign drafts", "av": ["Ours"], "an": "none", "te": "send, schedule", "f": ["C4", "A6"], "v": "H", "sz": "M", "demo": "Campaign calendar"}, {"id": "EG10", "t": "A Site acknowledges a Request or answers its form", "st": "In", "tr": "Site", "data": "Request clicks and forms", "av": ["Ours"], "an": "lookup", "te": "inbound", "f": ["C6"], "v": "H", "sz": "M", "demo": "Campaign performance"}, {"id": "EG11", "t": "A Site replies by email: classified, asks become Actions", "st": "In", "tr": "Site", "data": "inbound Site Messages", "av": ["Ours"], "an": "LLM", "te": "inbound, Agent run (Triage)", "f": ["C6", "A6"], "v": "H", "sz": "M", "demo": "ENG_READ site emails"}, {"id": "EG12", "t": "Campaign performance", "st": "In", "tr": "UI", "data": "sends, Site Responses, EDC", "av": ["Ours", "API/File"], "an": "metric", "te": "report", "f": ["C5"], "v": "M", "sz": "M", "demo": "ENG_PERF"}, {"id": "EG13", "t": "Which Campaigns led to new randomizations", "st": "In", "tr": "Ask", "data": "sends, EDC randomizations", "av": ["Ours", "API/File"], "an": "attribution", "te": "Q&A", "f": ["C8"], "v": "M", "sz": "L", "demo": "PAGE_CHAT sites.drove"}, {"id": "EG14", "t": "Automate weekly Site check-ins", "st": "In", "tr": "Ask", "data": "Agent instructions", "av": ["Ours"], "an": "LLM", "te": "schedule", "f": ["D3"], "v": "L", "sz": "M", "demo": "PAGE_CHAT studio.auto"}, {"id": "OP1", "t": "What needs my attention today", "st": "In", "tr": "Both", "data": "Actions, Agent runs, Campaigns", "av": ["Ours"], "an": "lookup", "te": "Q&A, report", "f": ["B1", "D1"], "v": "H", "sz": "S", "demo": "PAGE_CHAT prime.today"}, {"id": "OP2", "t": "Weekly update for study leadership", "st": "In", "tr": "Ask", "data": "Audit Trail, CTMS, EDC", "av": ["Ours", "API/File"], "an": "LLM", "te": "Q&A, schedule, send", "f": ["C9"], "v": "M", "sz": "M", "demo": "PAGE_CHAT prime.weekly"}, {"id": "OP3.1", "t": "Rank open Actions by priority and impact", "st": "In", "tr": "Ask", "data": "Actions", "av": ["Ours"], "an": "lookup", "te": "Q&A", "f": ["C1"], "v": "L", "sz": "S", "demo": "PAGE_CHAT inbox.triage"}, {"id": "OP3.2", "t": "Assign owners to unowned Actions", "st": "In", "tr": "Ask", "data": "Actions, Study team", "av": ["Ours"], "an": "LLM", "te": "Q&A", "f": ["C1", "A1"], "v": "L", "sz": "S", "demo": "PAGE_CHAT inbox.owners"}, {"id": "OP3.3", "t": "Reassign and chase overdue Actions", "st": "In", "tr": "UI", "data": "Actions", "av": ["Ours"], "an": "rule", "te": "report", "f": ["C1"], "v": "M", "sz": "S", "demo": "page journey s14"}, {"id": "OP3.4", "t": "Reject a proposal with a reason, so the Agent learns", "st": "In", "tr": "UI", "data": "Actions, Agent memory", "av": ["Ours"], "an": "none", "te": "Agent run", "f": ["A9", "C1"], "v": "H", "sz": "S", "demo": "page journey s5"}, {"id": "OP4", "t": "Sites that need a monitoring visit this month", "st": "In", "tr": "Ask", "data": "CTMS visits, EDC queries, enrollment", "av": ["API/File"], "an": "rule", "te": "Q&A", "f": ["B8"], "v": "M", "sz": "M", "demo": "PAGE_CHAT sites.visits"}, {"id": "OP5.1", "t": "Data queries open for more than 30 days, by Site", "st": "In", "tr": "Ask", "data": "EDC queries", "av": ["API/File"], "an": "metric", "te": "Q&A", "f": ["B8"], "v": "M", "sz": "S", "demo": "ARCHIVE_SEED h3; PRIME_MORE"}, {"id": "OP5.2", "t": "EDC data-entry lag against visits", "st": "In", "tr": "Ask", "data": "EDC visit and CRF timestamps", "av": ["API/File"], "an": "metric", "te": "Q&A", "f": ["B8"], "v": "L", "sz": "M", "demo": "PRIME edc"}, {"id": "OP5.3", "t": "Overdue monitoring visit reports", "st": "In", "tr": "Ask", "data": "CTMS visit and report dates", "av": ["API/File"], "an": "rule", "te": "Q&A", "f": ["B8"], "v": "L", "sz": "S", "demo": "PRIME_MORE"}, {"id": "OP6", "t": "What changed in CTMS since the last sync", "st": "In", "tr": "Ask", "data": "CTMS snapshots", "av": ["Ours"], "an": "lookup", "te": "Q&A", "f": ["A3", "A2"], "v": "L", "sz": "S", "demo": "PRIME ctms"}, {"id": "OP7", "t": "Upcoming visit load against Site resources (devices, coordinator hours)", "st": "In", "tr": "Agent", "data": "EDC next visit dates, Site Messages", "av": ["API/File", "Ours"], "an": "rule", "te": "Agent run", "f": ["B10"], "v": "L", "sz": "M", "demo": "ITEMS nwu-tab; Site page upcoming visits"}, {"id": "OP8", "t": "Tune an Agent: instructions, runs, memory", "st": "In", "tr": "UI", "data": "Agent config and runs", "av": ["Ours"], "an": "none", "te": "none", "f": ["A9"], "v": "M", "sz": "M", "demo": "Agent pages"}, {"id": "OP9.1", "t": "What Prime did this week", "st": "In", "tr": "Ask", "data": "Audit Trail, Agent runs", "av": ["Ours"], "an": "LLM", "te": "Q&A", "f": ["A5", "A9", "D1"], "v": "M", "sz": "S", "demo": "PAGE_CHAT activity.week"}, {"id": "OP9.2", "t": "Export approvals for an inspection", "st": "In", "tr": "UI", "data": "Audit Trail", "av": ["Ours"], "an": "none", "te": "export", "f": ["A5"], "v": "M", "sz": "S", "demo": "PAGE_CHAT activity.inspect"}, {"id": "OP9.3", "t": "Which connections need attention", "st": "In", "tr": "Both", "data": "sync runs", "av": ["Ours"], "an": "rule", "te": "report", "f": ["A3"], "v": "M", "sz": "S", "demo": "PAGE_CHAT systems.health"}, {"id": "OP10", "t": "Keep Site Contacts current from the delegation log", "st": "Won't", "tr": "Agent", "data": "eTMF delegation log, CTMS contacts", "av": ["Docs", "API/File"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "ITEMS nwu-ctms"}, {"id": "BU1", "t": "Release verified invoices to Sites unpaid for 90+ days", "st": "Won't", "tr": "Agent", "data": "invoices, Site contracts, EDC visits", "av": ["File", "API/File"], "an": "rule", "te": "write-back", "f": ["C2"], "v": "", "sz": "", "demo": "ITEMS inv-pay"}, {"id": "BU2", "t": "Ask a Site to re-bill visits that don't match the contract", "st": "Won't", "tr": "Agent", "data": "invoices, contract rates, EDC visit durations", "av": ["File", "Docs", "API/File"], "an": "rule, LLM", "te": "send", "f": ["C2"], "v": "", "sz": "", "demo": "ITEMS inv-hop"}, {"id": "BU3", "t": "Hold lab lines until their results are in the EDC", "st": "Won't", "tr": "Agent", "data": "invoices, EDC lab results", "av": ["File", "API/File"], "an": "rule", "te": "write-back", "f": ["C2"], "v": "", "sz": "", "demo": "ITEMS inv-lab"}, {"id": "BU4", "t": "Reject a duplicate invoice", "st": "Won't", "tr": "Agent", "data": "invoices", "av": ["File"], "an": "rule", "te": "write-back", "f": ["C2"], "v": "", "sz": "", "demo": "ITEMS inv-dup"}, {"id": "BU5", "t": "Escalate months of unpaid Site invoices to Finance", "st": "Won't", "tr": "Agent", "data": "payment runs, CTMS", "av": ["File"], "an": "rule", "te": "send", "f": ["C2"], "v": "", "sz": "", "demo": "ITEMS rapay"}, {"id": "BU6", "t": "Reconcile a CRO invoice against its purchase order", "st": "Won't", "tr": "Ask", "data": "CRO invoice, PO, CTMS visits", "av": ["File", "Docs"], "an": "rule, LLM", "te": "Q&A", "f": ["C2"], "v": "", "sz": "", "demo": "PRIME invoice"}, {"id": "BU7", "t": "Tell Sites when they will be paid", "st": "Won't", "tr": "Ask", "data": "invoices, payment runs", "av": ["File"], "an": "lookup", "te": "send", "f": ["C2"], "v": "", "sz": "", "demo": "PAGE_CHAT budget.paystatus"}, {"id": "BU8", "t": "Find invoice lines that don't match the contract or the EDC", "st": "Won't", "tr": "Ask", "data": "invoices, contracts, EDC", "av": ["File", "Docs", "API/File"], "an": "rule", "te": "Q&A", "f": ["C2"], "v": "", "sz": "", "demo": "PAGE_CHAT budget.mismatch"}, {"id": "RG1", "t": "Summarize new regulator and IRB guidance that affects my Studies", "st": "Won't", "tr": "Both", "data": "regulator and IRB websites", "av": ["Public"], "an": "LLM", "te": "Agent run", "f": ["C3"], "v": "", "sz": "", "demo": "PAGE_CHAT reg.impact; REG_ALERTS"}, {"id": "RG2", "t": "IRB approvals expiring in the next 60 days", "st": "Won't", "tr": "Ask", "data": "eIRB, CTMS", "av": ["File", "API/File"], "an": "rule", "te": "Q&A", "f": ["C3"], "v": "", "sz": "", "demo": "PAGE_CHAT reg.irb; PRIME_MORE"}, {"id": "RG3", "t": "Investigational product expiring at Site depots", "st": "Won't", "tr": "Ask", "data": "RTSM/IRT, CTMS", "av": ["File"], "an": "rule", "te": "Q&A", "f": [], "v": "", "sz": "", "demo": "PRIME_MORE"}, {"id": "TM1", "t": "Set up a Study's filing plan from its first Upload", "st": "Out", "tr": "Ask", "data": "Upload, TMF Reference Model", "av": ["Docs"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams S1 Setup"}, {"id": "TM2", "t": "Ingest a Sponsor's own TMF folder tree", "st": "Out", "tr": "Ask", "data": "SharePoint TMF", "av": ["Docs"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams S2 Ingest"}, {"id": "TM3", "t": "File a document that needs a new folder", "st": "Out", "tr": "Ask", "data": "Upload, filing plan", "av": ["Docs"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams S3"}, {"id": "TM4", "t": "File an Upload that has no Study code", "st": "Out", "tr": "Ask", "data": "Upload", "av": ["Docs"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams S4"}, {"id": "TM5", "t": "Correct a misfiled document", "st": "Out", "tr": "Ask", "data": "filed document", "av": ["Docs"], "an": "LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams S5 Change"}, {"id": "TM6", "t": "QC filed documents and track TMF Completeness", "st": "Out", "tr": "UI", "data": "eTMF", "av": ["Docs"], "an": "rule", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "primary_teams QC tab"}, {"id": "TM7", "t": "Where a Study's documents are, such as its monitoring visits", "st": "Out", "tr": "Ask", "data": "eTMF, SharePoint TMF", "av": ["Docs"], "an": "lookup", "te": "Q&A", "f": [], "v": "", "sz": "", "demo": "primary_teams visits Script"}, {"id": "TM8", "t": "Answer from a filed document with citations, such as a protocol's eligibility criteria", "st": "Out", "tr": "Ask", "data": "filed documents", "av": ["Docs"], "an": "LLM", "te": "Q&A", "f": [], "v": "", "sz": "", "demo": "primary_teams protocol Script"}, {"id": "TM9", "t": "File an IRB approval to the eTMF after a GCP completeness check", "st": "Out", "tr": "Ask", "data": "eIRB, eTMF", "av": ["Docs"], "an": "rule, LLM", "te": "write-back", "f": [], "v": "", "sz": "", "demo": "PRIME irb"}];
+const CUT = "cut";
+const DEFAULT = [CUT].concat(SC.map(s => s.id));
+const byId = Object.fromEntries(SC.map(s => [s.id, s]));
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const AV = { Ours: 0, Public: 1, "API/File": 2, Docs: 2, File: 3 };
+const SRANK = { st: { In: 0, "Won't": 1, Out: 2 }, v: { H: 0, M: 1, L: 2 }, sz: { S: 0, M: 1, L: 2, XL: 3 } };
+const SCOLS = [["rk","Rank"],["id","ID"],["t","Scenario"],["st","Status"],["tr","Trigger"],["data","Data"],["av","Avail."],["an","Analysis"],["te","Tech"],["f","Features"],["v","Value"],["sz","Size"]];
+
+let order = DEFAULT.slice(), ref = null, ssort = { k: null, dir: 1 };
+const show = { In: true, "Won't": true, Out: true };
+function clean(ids) {
+  const known = new Set(DEFAULT);
+  const out = (Array.isArray(ids) ? ids : []).filter((x, i, a) => known.has(x) && a.indexOf(x) === i);
+  for (const id of DEFAULT) if (!out.includes(id)) out.push(id);
+  return out;
+}
+try { const l = JSON.parse(localStorage.getItem("ct-scenarios") || "null"); if (l) order = clean(l); } catch (e) {}
+
+function ranks() {
+  const r = {}; let n = 0, above = true;
+  for (const id of order) { if (id === CUT) { above = false; continue; } r[id] = { n: ++n, above }; }
+  return r;
+}
+function sval(s, k, R) {
+  if (k === "rk") return R[s.id].n;
+  if (k === "av") return Math.max(-1, ...s.av.map(a => AV[a] ?? 0));
+  if (k === "st" || k === "v" || k === "sz") return SRANK[k][s[k]] ?? 9;
+  if (k === "f") return s.f.join(",") || "~";
+  return s[k] || "~";
+}
+const cmp = (x, y) => typeof x === "number" ? x - y : String(x).localeCompare(String(y), "en", { numeric: true });
+
+function renderPilot(R) {
+  const pilot = SC.filter(s => R[s.id].above);
+  const feats = [...new Set(pilot.flatMap(s => s.f))].sort(cmp);
+  const avs = [...new Set(pilot.flatMap(s => s.av))].sort((a, b) => (AV[a] ?? 0) - (AV[b] ?? 0));
+  $("#pilot").innerHTML = pilot.length
+    ? `<b>Above the cut</b><div>${pilot.length} Scenario${pilot.length === 1 ? "" : "s"}: ${pilot.map(s => esc(s.id)).join(", ")}</div>
+       <b>Features needed</b><div class="refs">${feats.map(f => `<span class="ref">${esc(f)}</span>`).join("") || "None"}</div>
+       <b>Data needed</b><div class="refs">${avs.map(a => `<span class="ref av-${a.replace("/", "")}">${esc(a)}</span>`).join("")}</div>`
+    : `<b>Above the cut</b><div>No Scenarios yet. Use “Move above cut” on a row, or drag it above the cut line, to mark what the pilot supports first.</div>`;
+}
+function rowHtml(s, R, ranked) {
+  const r = R[s.id];
+  const mv = ranked ? `<td class="mvc"><div class="mv"><button type="button" data-up="${s.id}" aria-label="Move ${s.id} up">↑</button><button type="button" data-down="${s.id}" aria-label="Move ${s.id} down">↓</button><button type="button" data-cut="${s.id}">${r.above ? "Move below cut" : "Move above cut"}</button></div></td>` : "";
+  return `<tr class="${r.above ? "" : "below"}" ${ranked ? `draggable="true"` : ""} data-id="${s.id}">
+    <td class="rk">${r.n}</td><td class="id">${esc(s.id)}</td>
+    <td><div class="t">${esc(s.t)}</div>${s.demo ? `<div class="demo">${esc(s.demo)}</div>` : ""}</td>
+    <td><span class="st st-${s.st.replace("'", "")}">${esc(s.st)}</span></td>
+    <td>${esc(s.tr)}</td><td>${esc(s.data)}</td>
+    <td><div class="refs">${s.av.map(a => `<span class="ref av-${a.replace("/", "")}">${esc(a)}</span>`).join("")}</div></td>
+    <td>${esc(s.an)}</td><td>${esc(s.te)}</td>
+    <td><div class="refs">${s.f.map(f => `<span class="ref">${esc(f)}</span>`).join("")}</div></td>
+    <td class="sz ${s.v === "H" ? "vH" : ""}">${esc(s.v || "–")}</td><td class="sz">${esc(s.sz || "–")}</td>${mv}</tr>`;
+}
+function renderSc() {
+  const R = ranks(), ranked = !ssort.k;
+  renderPilot(R);
+  const head = `<thead><tr>${SCOLS.map(([k, l]) => `<th${ssort.k === k ? ` aria-sort="${ssort.dir > 0 ? "ascending" : "descending"}"` : ""}><button type="button" data-sk="${k}">${l}${ssort.k === k ? (ssort.dir > 0 ? " ↑" : " ↓") : ""}</button></th>`).join("")}${ranked ? "<th>Move</th>" : ""}</tr></thead>`;
+  let body;
+  if (ranked) {
+    body = order.map(id => {
+      if (id === CUT) return `<tr class="cut" draggable="true" data-id="${CUT}"><td colspan="12">Pilot cut line · Scenarios above it are what the pilot supports first</td><td class="mvc"><div class="mv"><button type="button" data-up="${CUT}" aria-label="Move the cut line up">↑</button><button type="button" data-down="${CUT}" aria-label="Move the cut line down">↓</button></div></td></tr>`;
+      const s = byId[id]; return show[s.st] ? rowHtml(s, R, true) : "";
+    }).join("");
+  } else {
+    body = SC.filter(s => show[s.st]).slice().sort((a, b) => cmp(sval(a, ssort.k, R), sval(b, ssort.k, R)) * ssort.dir || cmp(a.id, b.id)).map(s => rowHtml(s, R, false)).join("");
+  }
+  $("#sct").innerHTML = head + "<tbody>" + body + "</tbody>";
+  $("#view").textContent = ranked ? "Rank view: drag rows or use the buttons." : "Sorted view: click the column again to reverse, a third time to go back to the rank.";
+}
+
+let saving = Promise.resolve();
+function commit(next) {
+  order = next; renderSc();
+  try { localStorage.setItem("ct-scenarios", JSON.stringify(order)); } catch (e) {}
+  if (ref) {
+    const ids = order.slice();
+    saving = saving.then(() => ref.set({ ids, at: Date.now() }))
+      .then(() => { $("#sync").textContent = "Shared rank saved"; })
+      .catch(() => { $("#sync").textContent = "Couldn't save the shared rank. You may only have view access."; });
+  }
+}
+const visible = id => id === CUT || show[byId[id].st];
+function step(id, dir) {
+  let j = order.indexOf(id) + dir;
+  while (j >= 0 && j < order.length && !visible(order[j])) j += dir;
+  if (j < 0 || j >= order.length) return;
+  const next = order.slice(); next.splice(order.indexOf(id), 1); next.splice(j, 0, id); commit(next);
+}
+function moveTo(id, target) {
+  if (id === target) return;
+  const from = order.indexOf(id), to = order.indexOf(target);
+  const next = order.slice(); next.splice(from, 1); next.splice(next.indexOf(target) + (from < to ? 1 : 0), 0, id); commit(next);
+}
+function toggleCut(id) {
+  const next = order.filter(x => x !== id), c = next.indexOf(CUT), above = order.indexOf(id) < order.indexOf(CUT);
+  next.splice(above ? c + 1 : c, 0, id); commit(next);
+}
+
+const sct = $("#sct"); let dragId = null;
+sct.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.sk) { const k = b.dataset.sk; ssort = ssort.k === k ? (ssort.dir > 0 ? { k, dir: -1 } : { k: null, dir: 1 }) : { k, dir: 1 }; renderSc(); return; }
+  if (b.dataset.up) { step(b.dataset.up, -1); sct.querySelector(`[data-up="${b.dataset.up}"]`)?.focus(); }
+  if (b.dataset.down) { step(b.dataset.down, 1); sct.querySelector(`[data-down="${b.dataset.down}"]`)?.focus(); }
+  if (b.dataset.cut) { toggleCut(b.dataset.cut); sct.querySelector(`[data-cut="${b.dataset.cut}"]`)?.focus(); }
+});
+sct.addEventListener("dragstart", e => { const tr = e.target.closest("tr[draggable]"); if (!tr) return; dragId = tr.dataset.id; tr.classList.add("drag"); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", dragId); } catch (_) {} });
+sct.addEventListener("dragover", e => { const tr = e.target.closest("tbody tr"); if (!tr || dragId === null) return; e.preventDefault();
+  sct.querySelectorAll(".over").forEach(x => x.classList.remove("over")); tr.classList.add("over"); });
+sct.addEventListener("drop", e => { const tr = e.target.closest("tbody tr"); if (!tr || dragId === null) return; e.preventDefault();
+  const id = dragId; dragId = null; moveTo(id, tr.dataset.id); });
+sct.addEventListener("dragend", () => { dragId = null; renderSc(); });
+
+$("#filters").addEventListener("click", e => { const b = e.target.closest("[data-st]"); if (!b) return;
+  show[b.dataset.st] = !show[b.dataset.st]; b.setAttribute("aria-pressed", show[b.dataset.st]); renderSc(); });
+$("#reset").addEventListener("click", () => commit(DEFAULT.slice()));
+
+/* ---------- Export / import: the rank as a Markdown file to commit as docs/scenario-rank.md ---------- */
+const PAGE_URL = "https://claude.ai/artifact/72GRvezZz11h4AF5hBQ4vH";
+const RANK_FILE = "scenario-rank.md";
+const cell = s => String(s ?? "").replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
+let undoOrder = null;
+function note(msg, { err = false, undo = false, text = null } = {}) {
+  $("#io").hidden = false; $("#io").classList.toggle("err", err);
+  $("#ioMsg").textContent = msg;
+  $("#undo").hidden = !undo;
+  $("#ioText").hidden = text === null;
+  if (text !== null) { $("#ioText").value = text; $("#ioText").focus(); $("#ioText").select(); }
+}
+function rankMarkdown() {
+  const R = ranks(), today = new Date().toISOString().slice(0, 10);
+  const pilot = order.filter(id => id !== CUT && R[id].above);
+  const feats = [...new Set(pilot.flatMap(id => byId[id].f))].sort(cmp);
+  const lines = [
+    "# Scenario rank: Recruitment Control Tower", "",
+    `Exported from the [Control Tower MVP Backlog](${PAGE_URL}) page on ${today}. The order of the table is the rank;`,
+    "the `CUT` row is the pilot cut line, and the Scenarios above it are what the pilot supports first.",
+    "To restore this rank on the page, use \"Import rank\" with this file. Scenario details live in `docs/scenarios.md`.", "",
+    `**Above the cut:** ${pilot.length} Scenario${pilot.length === 1 ? "" : "s"}${pilot.length ? ` (${pilot.join(", ")})` : ""}.`, "",
+    `**Features needed:** ${feats.length ? feats.join(", ") : "none"}.`, "",
+    "| Rank | ID | Scenario | Status | Value | Size | Features |",
+    "|---|---|---|---|---|---|---|"
+  ];
+  for (const id of order) {
+    if (id === CUT) { lines.push("| | CUT | **Pilot cut line** | | | | |"); continue; }
+    const s = byId[id];
+    lines.push(`| ${R[id].n} | ${id} | ${cell(s.t)} | ${cell(s.st)} | ${cell(s.v || "–")} | ${cell(s.sz || "–")} | ${cell(s.f.join(", "))} |`);
+  }
+  return lines.join("\n") + "\n";
+}
+function parseRank(text) {
+  const t = text.trim();
+  if (t.startsWith("[") || t.startsWith("{")) {
+    const j = JSON.parse(t); const ids = Array.isArray(j) ? j : j.ids;
+    if (!Array.isArray(ids)) throw new Error("The JSON has no list of IDs.");
+    return ids.map(x => String(x) === "CUT" ? CUT : String(x));
+  }
+  const ids = [];
+  for (const line of t.split(/\r?\n/)) {
+    const m = line.match(/^\s*\|[^|]*\|\s*`?([A-Za-z0-9.]+)`?\s*\|/);
+    if (!m) continue;
+    const id = m[1] === "CUT" ? CUT : m[1];
+    if (id === CUT || byId[id]) ids.push(id);
+  }
+  return ids;
+}
+$("#export").addEventListener("click", async () => {
+  const md = rankMarkdown();
+  const downloads = await window.claude?.use?.("downloads").catch(() => null);
+  if (downloads) {
+    try { await downloads.save({ filename: RANK_FILE, data: md }); note(`Saved ${RANK_FILE}. Commit it as docs/${RANK_FILE}.`); return; }
+    catch (e) { if (e?.code === "declined") { note("Export cancelled."); return; } if (e?.code === "rate_limited") { note("A save prompt is already open.", { err: true }); return; } }
+  }
+  note(`Downloads aren't available here. Copy this into docs/${RANK_FILE}:`, { text: md });
+});
+$("#import").addEventListener("click", () => { $("#importFile").value = ""; $("#importFile").click(); });
+$("#importFile").addEventListener("change", async e => {
+  const file = e.target.files?.[0]; if (!file) return;
+  let ids;
+  try { ids = parseRank(await file.text()); }
+  catch (err) { note(`Couldn't read ${file.name}: ${err.message}`, { err: true }); return; }
+  const known = ids.filter((x, i, a) => (x === CUT || byId[x]) && a.indexOf(x) === i);
+  if (!known.some(x => x !== CUT)) { note(`No Scenario IDs found in ${file.name}. Use a file made with "Export rank".`, { err: true }); return; }
+  const missing = DEFAULT.filter(id => !known.includes(id) && id !== CUT);
+  undoOrder = order.slice();
+  if (!known.includes(CUT)) known.unshift(CUT);
+  ssort = { k: null, dir: 1 };
+  commit(clean(known));
+  note(`Imported ${known.length - 1} Scenarios from ${file.name}` + (missing.length ? `; ${missing.length} not in the file were put at the end (${missing.join(", ")}).` : "."), { undo: true });
+});
+$("#undo").addEventListener("click", () => { if (!undoOrder) return; commit(undoOrder); undoOrder = null; note("Import undone."); });
+
+(async () => {
+  const db = await window.claude?.use?.("db").catch(() => null);
+  if (!db) return;
+  ref = db.doc("board/scenarios");
+  $("#sync").textContent = "Loading shared rank…";
+  const timer = setTimeout(() => { $("#sync").textContent = "Shared rank didn't load. Changes stay on this device."; }, 10000);
+  ref.onSnapshot(snap => {
+    clearTimeout(timer);
+    if (snap.exists) { const ids = clean(snap.data().ids); if (ids.join() !== order.join() && dragId === null) { order = ids; renderSc(); } }
+    $("#sync").textContent = "Shared rank · live";
+  }, () => { clearTimeout(timer); $("#sync").textContent = "Shared rank unavailable. Changes stay on this device."; });
+})();
+
+/* ---------- Backlog table ---------- */
+const COLS = [["id","#"],["t","Feature"],["p","MoSCoW"],["fe","FE"],["be","BE"],["m","Milestone"]];
+const RANK = { p: { Must: 0, Should: 1, Could: 2, Candidate: 3, "Won't": 4 }, sz: { S: 0, M: 1, L: 2, XL: 3, "–": 9 }, m: { M1: 0, M2: 1, later: 2, "–": 3 } };
+let sort = { k: null, dir: 1 };
+const rows = BL.map((r, i) => ({ i, id: r[0], t: r[1], p: r[2], fe: r[3], be: r[4], m: r[5], n: r[6] }));
+function val(r, k) { if (k === "p") return RANK.p[r.p]; if (k === "fe" || k === "be") return RANK.sz[r[k]]; if (k === "m") return RANK.m[r.m]; return r[k]; }
+function renderBl() {
+  const rs = rows.slice().sort((a, b) => { if (!sort.k) return a.i - b.i; const x = val(a, sort.k), y = val(b, sort.k); return (x < y ? -1 : x > y ? 1 : a.i - b.i) * sort.dir; });
+  $("#bl").innerHTML = `<thead><tr>${COLS.map(([k, l]) => `<th${sort.k === k ? ` aria-sort="${sort.dir > 0 ? "ascending" : "descending"}"` : ""}><button type="button" data-k="${k}">${l}${sort.k === k ? (sort.dir > 0 ? " ↑" : " ↓") : ""}</button></th>`).join("")}</tr></thead><tbody>` +
+    rs.map(r => `<tr><td class="id">${r.id}</td><td>${esc(r.t)}${r.n ? `<div class="n">${esc(r.n)}</div>` : ""}</td>
+      <td><span class="pill p-${r.p.replace("'", "")}">${r.p}</span></td><td class="sz">${r.fe}</td><td class="sz">${r.be}</td><td class="sz">${r.m}</td></tr>`).join("") + "</tbody>";
+}
+$("#bl").addEventListener("click", e => { const b = e.target.closest("[data-k]"); if (!b) return;
+  const k = b.dataset.k; sort = sort.k === k ? (sort.dir > 0 ? { k, dir: -1 } : { k: null, dir: 1 }) : { k, dir: 1 }; renderBl(); });
+
+renderSc(); renderBl();
+</script>
