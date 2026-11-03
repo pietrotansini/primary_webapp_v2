@@ -72,7 +72,7 @@ flowchart LR
 | Outbound IP | Private subnets, NAT gateway with an Elastic IP | One static IP per Stack for Sponsors who allowlist their platforms. |
 | Secrets | AWS Secrets Manager, KMS keys per account | Platform credentials for Recipes, bot secrets, the magic-link signing key. |
 | Sign-in | App-owned magic links, mailed through SES | Users live in our DB; SSO is added when a Sponsor asks (roles fog). |
-| Mail | Amazon SES, out and in, on a per-Sponsor subdomain | DKIM and SPF on the subdomain; inbound Site Messages land in S3 and become a worker job. SES inbound runs only in some regions: where the Stack's region lacks it, receiving sits in the nearest supported region of the same geography (to verify per Sponsor). |
+| Mail | Amazon SES, out and in, on a per-Sponsor subdomain | DKIM and SPF on the subdomain; inbound Site Messages land in S3 and become a worker job. SES inbound runs only in some regions: where the Stack's region lacks it, receiving sits in the nearest supported region of the same geography. eu-central-1 and us-east-1 both receive; each new account needs SES production access before mailing Site Contacts. |
 | Teams and Slack | A Teams app and a Slack app per Sponsor | Each points at its Stack's `api`. Provisioning registers them; Sponsor IT installs them as line-of-business apps. |
 | Logs | CloudWatch in the Stack's account | Logs never leave the account (they may carry Subject IDs). Only metrics and alarms go to Primary's on-call. |
 
@@ -99,5 +99,7 @@ Python `api`.
 
 ## Not decided here
 
-- Cost per Stack and the Bedrock quota each Stack needs: ticketed as "Cost and Bedrock quotas per Sponsor Stack".
+- What polls the jobs table and fires schedules while the worker is scaled to 0 (`api`, or one small worker always
+  on). Cost per Stack and Bedrock quotas are researched in `research/stack-cost-bedrock-quotas.md` on branch
+  `research/stack-cost-bedrock-quotas` ("Cost and Bedrock quotas per Sponsor Stack", #35).
 - SSO: in the roles fog.
