@@ -105,3 +105,7 @@ _Avoid_: data class, retention policy, bucket
 **Evidence**:
 The records and figures an Agent read to support a proposed Action, each with the system it came from and when it was last synced.
 _Avoid_: sources, proof, rationale
+
+**Stack**:
+One Sponsor's own copy of the whole platform, kept apart from every other Sponsor's and run in the region that Sponsor chooses. Each Sponsor has a staging Stack, which works on the Sponsor's sandboxes and gets every release first, and a prod Stack, which holds its real data. Primary runs its own Dev and Demo Stacks.
+_Avoid_: instance, tenant, environment, deployment

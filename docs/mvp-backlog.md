@@ -45,8 +45,10 @@ The Milestone column is provisional until "Finalize MVP feature backlog".
 
 - **GDPR role:** the Sponsor is controller, we are processor. A DPA and a subprocessor list (with regions) are signed
   before real data arrives.
-- **Residency:** EU by default wherever it costs nothing extra (Supabase EU, Vercel fra1, an EU email provider);
-  not a go-live gate. Anthropic stays as a disclosed subprocessor (SCCs, zero data retention).
+- **Residency:** each Sponsor's Stack runs in the region that Sponsor chooses, in its own AWS account; model calls go
+  through Bedrock in the same geography, so AWS is the one infrastructure and AI subprocessor (revised by "Backend
+  architecture and stack", #8; it was "EU by default, Anthropic as a disclosed subprocessor"). See "Deployment
+  architecture (decided)".
 - **Subject data:** pseudonymized Subject records only, with minimal fields: EDC subject ID, Site, status and status dates
   (screened, consented, randomized, discontinued/completed), screen-fail reason category, next visit date. All
   other fields are dropped at ingestion. See `docs/adr/0001-store-pseudonymized-subject-records.md`.
@@ -188,6 +190,31 @@ Decided in [Data ingestion approach for the pilot](https://github.com/pietrotans
   the TopBar, stale markers on figures, sync time on Evidence). No vendor catalog, no credentials modal: access goes
   through the per-Recipe access request (#28).
 
+## Deployment architecture (decided)
+
+Decided in [Backend architecture and stack](https://github.com/pietrotansini/primary_webapp_v2/issues/8); the full
+note is `docs/architecture.md`, the hard-to-reverse part `docs/adr/0005-a-stack-per-sponsor-in-its-own-aws-account.md`.
+
+- **A Stack per Sponsor:** each Sponsor gets a staging Stack (its sandboxes, M1, releases first) and a prod Stack
+  (real data, M2), each a whole copy of the platform in its own AWS account, in the Sponsor's region. Nothing
+  holding Sponsor data is shared; Primary staff have accounts inside each Stack. Primary's Dev and Demo are Stacks
+  too; the `primary_teams` Demo on Vercel runs until the new Demo replaces it.
+- **Inside a Stack (all AWS):** ECS Fargate with `web` (Next.js), `api` (Prime chat, Teams and Slack endpoints, app
+  API) and `worker` (syncs with headed Chromium, rules, Agent runs, mail), behind one load balancer; RDS Postgres
+  with pgvector (prod Multi-AZ, 35-day PITR); a Postgres jobs table enqueued in the same transaction as its cause;
+  NAT with a static IP; Secrets Manager; SES out and in on a per-Sponsor subdomain; app-owned magic links.
+- **AI through Bedrock only**, on the geographic inference profile: Prime, Agents, the connector agent and
+  embeddings. No Anthropic API, Voyage or Jev in Sponsor Stacks; Recipe repair is fallback locators, then Claude,
+  then a person.
+- **Prime hands Agent work to the worker** as a job and answers at once; results post back to the Surface.
+- **Visible browser** for MFA and Recipe learning is the worker's own Chromium, live in the Connectors page.
+- **Teams and Slack:** one app per Sponsor, pointing at its Stack.
+- **Fleet:** Terraform / OpenTofu modules for the account and the Stack, built before the pilot; a Primary build
+  account (images, state, deploy role, no Sponsor data) rolls releases to staging, then prod on approval; engineers
+  get time-limited audited roles; logs stay in the account, only metrics go to on-call.
+- **Code boundary:** all backend work in Python, grown from `primary_teams`; Next.js is UI plus thin reads and
+  writes; Python owns the migrations. Monorepo or two repos is left to the build plan.
+
 ## Scenarios drive the order
 
 The backlog is ordered by the Scenarios it serves: `docs/scenarios.md` lists every Scenario from the demos (In, Won't,
@@ -233,31 +260,33 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | # | Feature | MoSCoW | FE | BE | Milestone | First Scenario | Most likely moved by |
 |---|---|---|---|---|---|---|---|
 | B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Enrollment forecasting fog; pilot Sponsor's EDC (dependency) |
-| D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | Backend architecture and stack |
+| D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | |
 | C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | 2 EN3 | |
 | B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Uploaded file aggregated in memory to counts (decided in "Data ingestion"); which referral tool the Sponsor uses |
 | B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
 | B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
 | D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
 | C1 | Actions workspace (Email, Manual and In-app Actions) | Must | M | M | M1 | 5 EG7 | |
-| A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | Backend architecture and stack (provider choice) |
+| A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | SES inbound region support for the pilot Sponsor's region |
 | A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
 | C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | |
 | B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
-| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
+| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Cost and Bedrock quotas per Sponsor Stack |
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | |
 | A3 | Agentic connectors and data sync (Recipes) | Must | M (was S) | XL | M1 | prerequisite | Pilot Sponsor's EDC and CTMS (dependency) |
-| A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
+| A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Move from Vercel and the Anthropic API to the Stack and Bedrock |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
 | A8 | M2 compliance pack (DPA, subprocessors, review pack) | Must | | | M2 | prerequisite | Non-feature gate: documents, no code |
+| A11 | Sponsor Stack provisioning (Terraform / OpenTofu) | Must (new) | | L | M1 | prerequisite | Cost and Bedrock quotas per Sponsor Stack |
+| A12 | Release pipeline and fleet operations | Must (new) | | M | M1 (M2: prod access controls) | prerequisite | |
 | C7 | Site engagement score (Engagement agent) | Should (was Must) | S | M | M1 | 26 EG1 | Engagement score fog |
 | C5 | Campaign performance | Should (was Must) | M | M | M1 | 33 EG12 | |
 | B1 | Homepage | Should (was Must) | M | S | M1 | 36 OP1 | |
 | D2 | Prime chat panel | Should (was Must) | M | S | M1 | none | |
-| D4 | Teams and Slack | Should (was Teams Must, Slack Should) | S | M / S | M1 | none | Backend architecture and stack |
+| D4 | Teams and Slack | Should (was Teams Must, Slack Should) | S | M / S | M1 | none | One app per Sponsor, registered by provisioning (A11) |
 | D3 | AI Studio | Could | M | S | later | 35 EG14 | |
 | B6 | eConsent status | *candidate* | | | | 12 EN2.3 | Also EN4.4, EG3 |
 | B7 | Action outcome tracking (metric before and after) | *candidate* | | | | 25 EN9 | |
@@ -278,8 +307,10 @@ Assumptions the sizes rest on:
   snapshots with receipts) and `castor_api_connector` (Castor API export).
 - **A4 / D1 / D2 / D4** reuse the `primary_teams` agent (LangGraph, Knowledge Base, Teams and Slack Surfaces
   already working); the web app becomes one more Surface. The work is grounding it on our DB instead of mock
-  Study Data, plus new tools. Where it is deployed and how many agents run (not limited to Vercel, Supabase or
-  Next.js) is open in "Backend architecture and stack".
+  Study Data, plus new tools, and moving it from Vercel, Supabase, the Anthropic API and Voyage onto the Stack
+  (Fargate `api`, RDS, Bedrock), decided in "Backend architecture and stack" (#8).
+- **A11 / A12** are new from "Backend architecture and stack": one Stack per Sponsor (staging and prod) only works
+  if creating and upgrading one is a script, so provisioning and the release pipeline are Musts before M1.
 - **A9** is the shared machinery every Agent uses (rules over metrics, run scheduling on sync and events, Agent
   pages, memory, Evidence validation, dedupe); building it once is what lets **B4** drop from BE L to M and keeps
   C4, C6 and C7's Agents small.
@@ -315,7 +346,8 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **Sponsor admin:** one admin flag on the Sponsor team (Connectors, file uploads, Recipe approval), decided in
   "Data ingestion approach for the pilot" (#7); finer roles stay in the roles fog.
 - **Backend:** reads users, roles and study membership; writes sessions and team assignments.
-  No AI. External: an email provider for magic links; an IdP only if a Sponsor asks for SSO. Simulated: everything.
+  No AI. External: SES for magic links (app-owned, users in our DB; decided in "Backend architecture and stack",
+  #8); an IdP only if a Sponsor asks for SSO. Simulated: everything.
 - **Source:** `views/Sidebar.tsx`, `TEAM`, `DEF_ASG`, `who()` in `logic.ts`.
 
 ### A2. Study and site master data
@@ -351,7 +383,9 @@ one sponsor with several studies, the platform **sends the approved email itself
   Chromium (not Obscura: no visible mode for MFA hand-off, no downloads, always presents as Chrome). Claude
   learns Recipes. Repair runs in tiers: fallback locators, then a fast decision model (Jev) choosing among the
   page's controls with Subject IDs redacted, then Claude, then a person; the step's post-condition judges every
-  tier. Pilot starts Claude-only; Jev is added once its US data terms are agreed and failures are recorded.
+  tier. Pilot starts Claude-only. **Revised by "Backend architecture and stack" (#8):** Sponsor Stacks call
+  models only through Bedrock, so Jev is out of the repair tiers there (fallback locators, then Claude, then a
+  person); the live browser for MFA is the worker's own headed Chromium streamed into the Connectors page.
 - **Decided ("Least-privilege access a Sponsor admin can set up per platform", #28):** for each Recipe and
   platform we send the Sponsor's admin one access request generated from the Recipe's approved mapping: a
   dedicated non-human account, read-only role, named Studies and Sites, no blinded or hidden data. Field hiding
@@ -400,6 +434,10 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **v0:** Must · FE S · BE L. Prime is the existing `primary_teams` agent, grounded on our DB.
 - **Frontend:** no screen of its own; powers Ask Prime, the Prime chat panel, New action drafting, revising an
   action with context, newsletter section rewrites and AI Studio. Each call has an offline fallback.
+- **Decided ("Backend architecture and stack", #8):** Prime runs in the Stack's Fargate `api` service, calls Claude
+  through Bedrock (geo profile), keeps checkpoints and the Knowledge Base in the Stack's RDS (embeddings from a
+  Bedrock model), answers short questions inline and hands Agent work to the worker as a job whose result posts
+  back to the Surface.
 - **Backend:** one server route (`app/api/complete/route.ts`) relays raw prompts to the Claude API. Today every
   prompt is built in the browser with **hard-coded study context** (e.g. "study DIA-2043, 17 sites incl.
   Northwestern…"). Once real: prompts are assembled server-side from our DB (grounding), with tool use over our
@@ -430,7 +468,10 @@ one sponsor with several studies, the platform **sends the approved email itself
   signed-in user ("Thanks, Marie").
 - **Backend:** sends approved emails from a sponsor-recognised identity, schedules sends (site-local time),
   records delivery, bounces, opens/acknowledgement clicks and replies against the action or campaign.
-  External: an email provider, and probably the sponsor's mail domain. Simulated: sending is a state change.
+  External: Amazon SES in the Stack's account, out and in, on a per-Sponsor subdomain (DKIM, SPF); inbound Site
+  Messages land in S3 and become a worker job ("Backend architecture and stack", #8). Where the Stack's region has
+  no SES receiving, inbound sits in the nearest supported region of the same geography. Simulated: sending is a
+  state change.
 - **Source:** `approve()` in `logic.ts`; Actions and Engagements.
 
 ### A7. Retention and purge (new, from the compliance bar)
@@ -448,7 +489,9 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 - **v0:** Must · no code · M2 gate. DPA template (processor, SCCs), subprocessor list with regions, filled standard
   security questionnaire (CAIQ-lite / SIG Lite), data-flow and architecture note. EU regions chosen by default
-  where they cost nothing extra. SOC 2 / ISO 27001 and a pen test are deferred.
+  where they cost nothing extra. SOC 2 / ISO 27001 and a pen test are deferred. The architecture note is
+  `docs/architecture.md`; the subprocessor list is AWS (infrastructure and Bedrock) plus Microsoft and Slack for
+  the bots.
 
 ### A9. Agent runtime (new, from "How Prime generates insights")
 
@@ -459,8 +502,26 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **Backend:** per-Site metric computation and rule evaluation after each sync; event triggers (Site Message,
   Campaign drafted/sent); runs an Agent per flag with read tools on our DB; validates Evidence against the run's
   tool reads; dedupes one open proposal per Site and rule with a rejection cool-down; stores run summaries,
-  diagnosis lines and memory. Every run and AI call is audited (A5). Deployment and orchestration: "Backend
-  architecture and stack".
+  diagnosis lines and memory. Every run and AI call is audited (A5).
+- **Decided ("Backend architecture and stack", #8):** Agent runs are jobs in the Stack's Postgres jobs table,
+  enqueued in the same transaction as the sync commit or event that caused them and claimed by the Fargate worker
+  (scales 0 to N on queue depth); schedules live in the DB. Parallelism per Stack is capped by its Bedrock quota.
+
+### A11. Sponsor Stack provisioning (new, from "Backend architecture and stack")
+
+- **v0:** Must · BE L · M1.
+- **Backend:** Terraform / OpenTofu modules: one creates an AWS account in Primary's Organization (KMS, IAM
+  Identity Center roles, Bedrock quota requests), one creates a Stack in it (VPC, NAT with Elastic IP, ECS Fargate
+  `web`, `api`, `worker`, load balancer, RDS, S3, Secrets Manager, SES domain and receiving, DNS), plus the Teams
+  and Slack app registrations. Used first for Primary's Dev, then the pilot Sponsor's staging Stack.
+
+### A12. Release pipeline and fleet operations (new, from "Backend architecture and stack")
+
+- **v0:** Must · BE M · M1, prod access controls M2.
+- **Backend:** a Primary build account (ECR, Terraform state, GitHub Actions deploy role, no Sponsor data); one image
+  set per release, rolled to every staging Stack, then each prod on a manual approval; migrations that tolerate
+  Stacks on different versions; metrics and alarms out to on-call, logs kept in each account; time-limited audited
+  engineer access with a break-glass DB role.
 
 ---
 
