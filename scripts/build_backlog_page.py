@@ -83,7 +83,7 @@ def backlog():
         out = []
         for r in rows:
             first = plain(r.get("First Scenario", ""))
-            moved = plain(r.get("Most likely moved by", ""))
+            moved = plain(r.get("Dependencies and risks", "") or r.get("Most likely moved by", ""))
             rank = re.match(r"(\d+) (\S+)$", first)
             first = f"First: {rank[2]} ({rank[1]})" if rank else first.capitalize()
             note = "; ".join(x for x in (first, moved) if x)

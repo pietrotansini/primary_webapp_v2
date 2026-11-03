@@ -4,14 +4,17 @@ Living backlog for the pilot-ready MVP. Charted on the wayfinder map
 [Wayfinder: Recruitment Control Tower MVP backlog](https://github.com/pietrotansini/primary_webapp_v2/issues/2).
 Every ticket resolution on that map updates this file.
 
-**Status: v0 (provisional).** Priorities and sizes from "Draft MVP backlog v0"
-([#10](https://github.com/pietrotansini/primary_webapp_v2/issues/10)), on top of the candidate list from
-[Inventory the prototype's features and their backend needs](https://github.com/pietrotansini/primary_webapp_v2/issues/3).
-MoSCoW values were then re-cut by the pilot Scenario rank from "Pick the pilot's first Scenarios"
-([#18](https://github.com/pietrotansini/primary_webapp_v2/issues/18)).
-Everything below is provisional until "Finalize MVP feature backlog". Terms follow `GLOSSARY.md`.
+**Status: v1 (final).** Signed off in "Finalize MVP feature backlog"
+([#11](https://github.com/pietrotansini/primary_webapp_v2/issues/11)) on 2026-11-03, as the CTO view of
+pilot-ready. It started from the candidate list in
+[Inventory the prototype's features and their backend needs](https://github.com/pietrotansini/primary_webapp_v2/issues/3),
+took priorities and sizes from "Draft MVP backlog v0" ([#10](https://github.com/pietrotansini/primary_webapp_v2/issues/10)),
+was re-cut by the pilot Scenario rank from "Pick the pilot's first Scenarios"
+([#18](https://github.com/pietrotansini/primary_webapp_v2/issues/18)) and reconciled with every decision on the map.
+Sizes are T-shirt estimates (S, M, L, XL) and still move as the build plan finds out more. One open item: the
+engagement score formula (C7, a Should) is decided when C7 is built. Terms follow `GLOSSARY.md`.
 
-## Product framing (v0)
+## Product framing
 
 The MVP is a **site-engagement CRM for biotech Sponsors**. The pilot proves, in this order:
 
@@ -39,7 +42,9 @@ Decided in [Compliance and security bar for the pilot](https://github.com/pietro
 - **M2, real-data pilot:** the first real Sponsor data. Its entry gate is the compliance bar below (A7, A8 and the
   M2 parts of A1, A5); everything tagged M1 must also be in place.
 
-The Milestone column is provisional until "Finalize MVP feature backlog".
+**Pilot-ready** (decided in "Finalize MVP feature backlog", #11): every Must is done. The Musts tagged M1 make the
+demo; all Musts, with A8 signed, make the real-data pilot. Shoulds may land during the pilot; Could and Won't items
+are outside it.
 
 ## Compliance bar for M2 (decided)
 
@@ -125,7 +130,7 @@ No write-back into EDC / CTMS / eTMF / payment systems, with no exceptions.
   - Audit Trail "Export to eTMF": a download (PDF / CSV, OP9.2) that the user files themselves.
   - Connectors: every connector is labelled "Read only"; the eTMF and Payments tiles stay, shown as "Not in pilot".
 - **Later:** closing the loop on an Action's outcome (metric before and after against its expected impact) is
-  B7, in the fog; the MVP keeps the expected impact and the outcome note so that data exists.
+  B7, a Could (#11); the MVP keeps the expected impact and the outcome note so that data exists.
 
 ## Data inventory and data model (decided)
 
@@ -215,13 +220,43 @@ note is `docs/architecture.md`, the hard-to-reverse part `docs/adr/0005-a-stack-
 - **Code boundary:** all backend work in Python, grown from `primary_teams`; Next.js is UI plus thin reads and
   writes; Python owns the migrations. Monorepo or two repos is left to the build plan.
 
+## Last decisions before the build (decided)
+
+Decided in "Finalize MVP feature backlog" ([#11](https://github.com/pietrotansini/primary_webapp_v2/issues/11)):
+
+- **Enrollment forecast (B11):** a per-Site run-rate, no statistical model. Each active Site's randomizations over
+  the last 8 weeks are projected forward until it reaches its Site target; Sites not yet active start at their
+  planned activation date at the study median rate. Forecast LPI is the day the Study target is reached; delay is
+  forecast LPI minus planned LPI; cost of delay is delay times the Sponsor's daily cost. The page shows the method and
+  its as-of date. **Expected pace** per Site comes from `site.plan` (CTMS, else the Sponsor's file, else the straight
+  line from target and activation date).
+- **Competing trials (D5):** ClinicalTrials.gov is the only external source. A weekly sync pulls trials recruiting for
+  the Study's condition; a rule flags a Site when a trial with the same condition and an overlapping phase or
+  eligibility has a location within 50 km (a setting); the **Enrollment agent** judges the overlap and drafts an
+  Email Action with talking points to the PI. No fifth Agent.
+- **Starting rules** (our config, tuned during the pilot): Enrollment agent: P1 below 60% of expected
+  randomizations to date, P2 below 90%; P2 activated 45 days ago with no Subject screened; P2 no screening for 4
+  weeks at an active Site; P3 competing trial within the radius. Triage agent: no rules; it classifies every Site
+  Message and Site Response, turns asks into Actions and flags possible patient information. Engagement agent
+  (Should): a Site that left its last 2 Requests unanswered or sent nothing for 30 days.
+- **Newsletter Reports (C4):** three kinds, each a personal block the Newsletter agent fills per Site: the Site's
+  enrollment against plan this month (own counts); each funnel stage against the study median (only over at least 5
+  Sites); the Site's open Requests and asks.
+- **Notifications:** email to the Action owner on assignment, on a new P1 proposed for them and when their Action
+  goes overdue, plus in-app counts. No digest. Teams and Slack alerts come with D4.
+- **Users and roles (A1):** the Sponsor team, one Sponsor admin flag and Primary staff as an internal role. Study
+  membership is set by the Sponsor admin; every member sees the Studies they are on, Subject-level data included,
+  each read audited. SSO is Won't until a Sponsor asks.
+- **Worker always on (A9):** each prod Stack keeps one small worker task running (about +$70 a month); it polls the
+  jobs table, fires schedules and publishes queue depth, and more tasks scale out from it.
+- **Left in the fog:** the engagement score formula (C7).
+
 ## Scenarios drive the order
 
 The backlog is ordered by the Scenarios it serves: `docs/scenarios.md` lists every Scenario from the demos (In, Won't,
 Out) with the data, analysis and features each needs, and the
 [Control Tower MVP Backlog](https://claude.ai/artifact/72GRvezZz11h4AF5hBQ4vH) page ranks them with a pilot cut line.
-A feature's priority follows the highest-ranked Scenario that needs it. Rows marked *candidate* were added because a
-Scenario needs them; they have no priority or size yet.
+A feature's priority follows the highest-ranked Scenario that needs it.
 
 ### Pilot Scenarios (decided)
 
@@ -246,54 +281,54 @@ Value, Size and Avail. in `docs/scenarios.md` are unchanged.
 
 Applying the rule:
 
-- **Promoted to Must:** A10, B5, B9, B11 (were candidates; sizes still open) and D5 (was Could).
+- **Promoted to Must:** A10, B5, B9, B11 (were candidates; sized in #11) and D5 (was Could).
 - **Moved to Should:** C7, C5, B1, D2 and D4, needed only by Scenarios below the cut (first: EG1, EG12, OP1, none, none).
 - **Must as prerequisites:** A1, A2, A3, A4, A5, A7 and A8 serve every Scenario (sign-in, data, Prime, audit, going live)
   and stay Must whatever the rank.
-- **EN10 and EN6 pull in open fog:** B11 waits on "Enrollment forecasting" and D5 on "External signals", so both
-  need a decision before they can be sized.
+- **EN10 and EN6 pulled in fog:** "Enrollment forecasting" and "External signals" were settled in #11 (see "Last
+  decisions before the build").
 
-## Priorities and sizes (provisional)
+## Priorities and sizes (final)
 
 Ordered by the first Scenario each feature serves in the pilot rank; prerequisites next, then everything below the cut.
 
-| # | Feature | MoSCoW | FE | BE | Milestone | First Scenario | Most likely moved by |
+| # | Feature | MoSCoW | FE | BE | Milestone | First Scenario | Dependencies and risks |
 |---|---|---|---|---|---|---|---|
-| B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Enrollment forecasting fog; pilot Sponsor's EDC (dependency) |
+| B2 | Enrollment per Site | Must | M | M | M1 | 1 EN0 | Pilot Sponsor's EDC (dependency) |
 | D1 | Ask Prime (Q&A, no writes) | Must | M | M | M1 | 1 EN0 | |
 | C6 | Site Responses and Site Messages (Triage agent) | Must | M | L | M1 | 2 EN3 | |
-| B5 | Referral and pre-screening data (funnel top) | Must (was *candidate*) | | | M1 | 2 EN3 | Uploaded file aggregated in memory to counts (decided in "Data ingestion"); which referral tool the Sponsor uses |
-| B9 | Site benchmarks (study median, peer Sites) | Must (was *candidate*) | | | M1 | 2 EN3 | |
-| B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
-| D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
+| B5 | Referral and pre-screening data (funnel top) | Must | S | M | M1 | 2 EN3 | Which referral tool the Sponsor uses |
+| B9 | Site benchmarks (study median, peer Sites) | Must | S | S | M1 | 2 EN3 | |
+| B11 | Enrollment forecast and cost of delay | Must | S | M | M1 | 3 EN10 | Per-Site plans in the CTMS, else the Sponsor's file |
+| D5 | Competing trials | Must | S | M | M1 | 4 EN6 | NCT number confirmed in Study setup |
 | C1 | Actions workspace (Email, Manual and In-app Actions) | Must | M | M | M1 | 5 EG7 | |
 | A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | SES production access per new account (AWS answers within 96 h); inbound works in eu-central-1 and us-east-1 |
-| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
+| A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must | S | S | M1 | 5 EG7 | |
 | C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | |
-| B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
-| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | What polls the jobs table while the worker is at 0 tasks |
+| B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Starting thresholds tuned in the pilot |
+| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Bedrock quota of a new account |
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | |
-| A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
+| A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | |
-| A3 | Agentic connectors and data sync (Recipes) | Must | M (was S) | XL | M1 | prerequisite | Pilot Sponsor's EDC and CTMS (dependency) |
+| A3 | Agentic connectors and data sync (Recipes) | Must | M | XL | M1 | prerequisite | Pilot Sponsor's EDC and CTMS (dependency) |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Move from Vercel and the Anthropic API to the Stack and Bedrock |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
 | A8 | M2 compliance pack (DPA, subprocessors, review pack) | Must | | | M2 | prerequisite | Non-feature gate: documents, no code |
-| A11 | Sponsor Stack provisioning (Terraform / OpenTofu) | Must (new) | | L | M1 | prerequisite | |
-| A12 | Release pipeline and fleet operations | Must (new) | | M | M1 (M2: prod access controls) | prerequisite | |
-| C7 | Site engagement score (Engagement agent) | Should (was Must) | S | M | M1 | 26 EG1 | Engagement score fog |
-| C5 | Campaign performance | Should (was Must) | M | M | M1 | 33 EG12 | |
-| B1 | Homepage | Should (was Must) | M | S | M1 | 36 OP1 | |
-| D2 | Prime chat panel | Should (was Must) | M | S | M1 | none | |
-| D4 | Teams and Slack | Should (was Teams Must, Slack Should) | S | M / S | M1 | none | One app per Sponsor, registered by provisioning (A11) |
+| A11 | Sponsor Stack provisioning (Terraform / OpenTofu) | Must | | L | M1 | prerequisite | SES production access and Bedrock quota raises |
+| A12 | Release pipeline and fleet operations | Must | | M | M1 (M2: prod access controls) | prerequisite | |
+| C7 | Site engagement score (Engagement agent) | Should | S | M | M1 | 26 EG1 | Score formula still open (fog) |
+| C5 | Campaign performance | Should | M | M | M1 | 33 EG12 | |
+| B1 | Homepage | Should | M | S | M1 | 36 OP1 | |
+| D2 | Prime chat panel | Should | M | S | M1 | none | |
+| D4 | Teams and Slack | Should | S | M / S | M1 | none | One app per Sponsor, registered by provisioning (A11) |
+| B7 | Action outcome tracking (metric before and after) | Could | S | M | later | 25 EN9 | |
 | D3 | AI Studio | Could | M | S | later | 35 EG14 | |
-| B6 | eConsent status | *candidate* | | | | 12 EN2.3 | Also EN4.4, EG3 |
-| B7 | Action outcome tracking (metric before and after) | *candidate* | | | | 25 EN9 | |
-| C8 | Campaign attribution to randomizations | *candidate* | | | | 34 EG13 | |
-| C9 | Leadership updates | *candidate* | | | | 37 OP2 | |
-| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | *candidate* | | | | 42 OP4 | Also OP5.1 to OP5.3 |
-| B10 | Visit load and Site resources | *candidate* | | | | 47 OP7 | |
+| C9 | Leadership updates | Could | S | S | later | 37 OP2 | |
+| B6 | eConsent status | Won't | | | | 12 EN2.3 | Consent dates come from the EDC; no eConsent source |
+| C8 | Campaign attribution to randomizations | Won't | | | | 34 EG13 | |
+| B8 | Data-quality and monitoring metrics (queries, entry lag, visit reports) | Won't | | | | 42 OP4 | Also OP5.1 to OP5.3 |
+| B10 | Visit load and Site resources | Won't | | | | 47 OP7 | |
 | C2 | Budget agent | Won't | | | | | |
 | C3 | Regulatory agent | Won't | | | | | |
 
@@ -317,6 +352,10 @@ Assumptions the sizes rest on:
 - **A6** sends from a platform domain through an email provider and receives Site Messages at an inbound
   address; no mailbox access. Requests (acknowledge, short form) are links to pages we host.
 - **B2** uses connector data only: site-reported form figures never count as enrollment data.
+- **B11, D5** are small because the forecast is a run-rate and the competing-trial check is a distance rule plus
+  the Enrollment agent's existing run; a statistical forecast or more registries would make each L.
+- **A10** reuses the `primary_teams` Knowledge Base (upload, chunking, pgvector); **B9** is a derived metric over
+  data B2 and B5 already hold.
 - **C1** escalation in the pilot is only an overdue flag; the assignee approving an Email Action is what
   sends it, with no second approver. Email, Manual and In-app Actions: see "Actions and the write-back flows".
 
@@ -338,13 +377,16 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A1. Sign-in, users and study team
 
-- **v0:** Must · FE S · BE M · M1. Sponsor ClinOps sign in with an email magic link (SSO optional, later);
+- **Scope:** Must · FE S · BE M · M1. Sponsor ClinOps sign in with an email magic link (SSO optional, later);
   CRAs and the study team are assignees. We own session security and offboarding.
 - **Frontend:** none. The user is hard-coded as "Marie Curious, Clinical Operations" (Sidebar). The study team
   (`TEAM`: ClinOps, CRAs, Study Manager, Clinical Finance) appears as assignees in Actions and the team view.
   Needs a sign-in page, a user menu, and real people in every assignee picker.
 - **Sponsor admin:** one admin flag on the Sponsor team (Connectors, file uploads, Recipe approval), decided in
-  "Data ingestion approach for the pilot" (#7); finer roles stay in the roles fog.
+  "Data ingestion approach for the pilot" (#7).
+- **Decided ("Finalize MVP feature backlog", #11):** the only roles are Sponsor team member, Sponsor admin and
+  Primary staff (internal). The Sponsor admin sets Study membership; a member sees every Study they are on,
+  Subject-level data included, each read audited (A5). SSO is Won't until a Sponsor asks.
 - **Backend:** reads users, roles and study membership; writes sessions and team assignments.
   No AI. External: SES for magic links (app-owned, users in our DB; decided in "Backend architecture and stack",
   #8); an IdP only if a Sponsor asks for SSO. Simulated: everything.
@@ -352,7 +394,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A2. Study and site master data
 
-- **v0:** Must · FE S · BE M. Sites and Site Contacts are synced read-only from the CTMS; the CTMS owns them.
+- **Scope:** Must · FE S · BE M. Sites and Site Contacts are synced read-only from the CTMS; the CTMS owns them.
   Newsletter recipients are a local overlay on top (C4).
 - **Decided ("High-level data model", #9):** every synced record is versioned (ADR 0004); one Site per Study with
   the institution as a text attribute; Site Contacts per Site, so a PI on two Studies is two Site Contacts with one
@@ -369,7 +411,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A3. Connectors and data sync
 
-- **v0:** Must · FE S · BE XL. Agentic connectors crystallized into ingestion pipelines; EDC and CTMS first.
+- **Scope:** Must · FE S · BE XL. Agentic connectors crystallized into ingestion pipelines; EDC and CTMS first.
   Every connector is read-only; eTMF and Payments tiles are shown as "Not in pilot".
 - **Decided ("Agentic platform connectors that crystallize into ingestion pipelines", #14):** each connector is a
   versioned **Recipe** per platform, tenant and Study (fetch steps, a field-mapping allowlist per feed, checks),
@@ -393,8 +435,8 @@ one sponsor with several studies, the platform **sends the approved email itself
   study-build change (Rave, Clinical One, Castor; Vault EDC has none, so we read Retrieve Subjects only). The
   parse-time drop (ADR 0001) stays on every platform, with an alert on an unexpected field.
 - **Decided ("Gates for putting a repaired Recipe live without a person", #29):** in the pilot **no new Recipe
-  version goes live without people**; auto-promotion of locator-only repairs is fog, revisited with recorded
-  repairs. Fallback locators already in an approved Recipe run unattended (no new version), audited, and the
+  version goes live without people**; auto-promotion of locator-only repairs is out of scope for this backlog (after the pilot, judged on recorded
+  repairs). Fallback locators already in an approved Recipe run unattended (no new version), audited, and the
   reviewer is told. A proposal reaches review only if its dry-run passes the checks and matches the last good
   snapshot's shape with nothing lost (same feeds and fields, every Site and Subject still present, no monotonic
   value going back); otherwise the agent retries once. Approval in order: Primary's **Connector reviewer** (rota,
@@ -431,7 +473,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A4. Prime AI service
 
-- **v0:** Must · FE S · BE L. Prime is the existing `primary_teams` agent, grounded on our DB.
+- **Scope:** Must · FE S · BE L. Prime is the existing `primary_teams` agent, grounded on our DB.
 - **Frontend:** no screen of its own; powers Ask Prime, the Prime chat panel, New action drafting, revising an
   action with context, newsletter section rewrites and AI Studio. Each call has an offline fallback.
 - **Decided ("Backend architecture and stack", #8):** Prime runs in the Stack's Fargate `api` service, calls Claude
@@ -448,7 +490,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A5. Audit Trail
 
-- **v0:** Must · FE S · BE M · M1, Subject-read logging M2. Part 11-shaped, not validated: append-only,
+- **Scope:** Must · FE S · BE M · M1, Subject-read logging M2. Part 11-shaped, not validated: append-only,
   timestamped, attributable, before/after values, readable export; approvals carry signature meaning
   ("Approved for sending"), no re-authentication. Covers sign-ins, approvals/rejections, sends, AI drafts and
   classifications, syncs, settings and permission changes, exports, and every read of Subject-level data,
@@ -463,7 +505,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A6. Outbound email
 
-- **v0:** Must · FE S · BE L. Platform domain + email provider out; inbound address for Site Messages; hosted Request pages.
+- **Scope:** Must · FE S · BE L. Platform domain + email provider out; inbound address for Site Messages; hosted Request pages.
 - **Frontend:** "Approve & send" on email actions, "Approve & schedule" on site engagements; sender is the
   signed-in user ("Thanks, Marie").
 - **Backend:** sends approved emails from a sponsor-recognised identity, schedules sends (site-local time),
@@ -478,7 +520,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A7. Retention and purge (new, from the compliance bar)
 
-- **v0:** Must · FE S · BE S · M2.
+- **Scope:** Must · FE S · BE S · M2.
 - **Frontend:** a settings page where the Sponsor sets a retention period per Retention class: Subjects, Site mail
   (Site Messages and Site Responses), People (Sponsor users and Site Contacts), Study ops, Engagement; no defaults.
   Audit has no period ("High-level data model", #9).
@@ -489,7 +531,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A8. M2 compliance pack (new, from the compliance bar)
 
-- **v0:** Must · no code · M2 gate. DPA template (processor, SCCs), subprocessor list with regions, filled standard
+- **Scope:** Must · no code · M2 gate. DPA template (processor, SCCs), subprocessor list with regions, filled standard
   security questionnaire (CAIQ-lite / SIG Lite), data-flow and architecture note. EU regions chosen by default
   where they cost nothing extra. SOC 2 / ISO 27001 and a pen test are deferred. The architecture note is
   `docs/architecture.md`; the subprocessor list is AWS (infrastructure and Bedrock) plus Microsoft and Slack for
@@ -497,7 +539,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A9. Agent runtime (new, from "How Prime generates insights")
 
-- **v0:** Must · FE M · BE L · M1.
+- **Scope:** Must · FE M · BE L · M1.
 - **Frontend:** one page per Agent (instructions, memory with delete, last/next run, run summaries, open
   proposals), replacing the prototype's bespoke Enrollment/Budget/Regulatory pages; "proposed by <Agent>" and
   Evidence links on every Action.
@@ -514,12 +556,22 @@ one sponsor with several studies, the platform **sends the approved email itself
   `max_tokens` is reserved per call; cache reads don't count). About 3 runs in parallel at 200k tokens/min already
   covers a night of ~25 runs. Calls go through `bedrock-runtime` with the `eu.`/`us.` profile (`bedrock-mantle`
   has no geographic profile for Sonnet/Haiku 5.5). Expected AI spend for a pilot Sponsor's prod is ~$230/month
-  ($66–1,120) with prompt caching, ~$515 without. **Open:** a worker at 0 tasks leaves nothing to poll the jobs
-  table, fire schedules or publish queue depth; either `api` does it or one small worker stays on (+$62–83/month).
+  ($66–1,120) with prompt caching, ~$515 without. **Decided (#11):** one small worker task stays on in each prod
+  Stack (+$62–83/month); it polls the jobs table, fires schedules and publishes queue depth.
+- **Starting rules (#11):** see "Last decisions before the build"; rules and thresholds are our config.
+
+### A10. Study documents as a source (new, from the Scenarios)
+
+- **Scope:** Must · FE S · BE S · M1. The Sponsor uploads the protocol, the Site reference manual and approved FAQs
+  per Study; Prime and the Agents read them through a search tool and cite the passage. Needed by EG7 (and EG4).
+- **Frontend:** a Documents list in Study setup: upload, version, replace.
+- **Backend:** stores the file and its text chunks with embeddings (`study.document`, pgvector), reusing the
+  `primary_teams` Knowledge Base; a read tool for Prime and the Agents. AI: embeddings through Bedrock. Retention
+  class Study ops.
 
 ### A11. Sponsor Stack provisioning (new, from "Backend architecture and stack")
 
-- **v0:** Must · BE L · M1.
+- **Scope:** Must · BE L · M1.
 - **Backend:** Terraform / OpenTofu modules: one creates an AWS account in Primary's Organization (KMS, IAM
   Identity Center roles, Bedrock quota requests), one creates a Stack in it (VPC, NAT with Elastic IP, ECS Fargate
   `web`, `api`, `worker`, load balancer, RDS, S3, Secrets Manager, SES domain and receiving, DNS), plus the Teams
@@ -533,7 +585,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### A12. Release pipeline and fleet operations (new, from "Backend architecture and stack")
 
-- **v0:** Must · BE M · M1, prod access controls M2.
+- **Scope:** Must · BE M · M1, prod access controls M2.
 - **Backend:** a Primary build account (ECR, Terraform state, GitHub Actions deploy role, no Sponsor data); one image
   set per release, rolled to every staging Stack, then each prod on a manual approval; migrations that tolerate
   Stacks on different versions; metrics and alarms out to on-call, logs kept in each account; time-limited audited
@@ -545,8 +597,8 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B1. Homepage
 
-- **v0:** Must · FE M · BE S. Actions waiting, next Campaigns, enrollment by Study.
-- **Pilot rank:** Should. First needed by OP1 (rank 36), below the cut.
+- **Scope:** Should · FE M · BE S · M1. Actions waiting, next Campaigns, enrollment by Study, what Prime did. First
+  needed by OP1 (rank 36), below the cut.
 - **Frontend:** "Clinical Operations Agent" landing: Actions waiting for you (with cost impact if approved),
   Enrollment by study, Next site engagements, What Prime did in the last 7 days, suggested tasks
   ("Summarize what needs my attention", "Find sites at risk across all studies", "Draft my weekly update for
@@ -557,7 +609,9 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B2. Enrollment analytics (studies, sites list, patient funnel)
 
-- **v0:** Must · FE M · BE M. Enrollment per Site from connector data only; fake funnel ratios dropped.
+- **Scope:** Must · FE M · BE M · M1. Enrollment per Site from connector data only; fake funnel ratios dropped.
+  Status uses expected pace from `site.plan` (On track ≥ 90%, Watch ≥ 60%, else At risk); the funnel top comes
+  from B5, the median comparison from B9, the forecast from B11.
 - **Frontend:** Enrollment page lists active trials (enrolled vs target, planned vs baseline LPI, status note).
   Sites List ranks sites by enrollment gap with status (On track / Watch / At risk), bottleneck
   (Referral / Screening / Consent / Activation / Retention) and a one-line diagnosis. Patients Recruitment
@@ -577,7 +631,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B3. Site detail
 
-- **v0:** Must (lite) · FE M · BE M. Contacts, engagement timeline (Actions, Campaigns, Site Responses, Site Messages), enrollment vs plan, engagement score, meeting briefs (EG5) saved here with dated history, Copy and Download, never written to CTMS. EDC queries, invoices, documents, training: Won't.
+- **Scope:** Must (lite) · FE M · BE M · M1. Contacts, engagement timeline (Actions, Campaigns, Site Responses, Site Messages), enrollment vs plan, engagement score, meeting briefs (EG5) saved here with dated history, Copy and Download, never written to CTMS. EDC queries, invoices, documents, training: Won't.
 - **Frontend:** one site's operational view: enrollment and funnel, recruitment blockers, Prime highlights and
   Prime news (e.g. competing trials), open EDC queries, missing CRF pages, pending invoices / payments,
   protocol version and re-consent status, required documents and their version history, training, site team
@@ -591,9 +645,12 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### B4. Enrollment agent
 
-- **v0:** Must · FE M · BE M (was L; the shared parts moved to A9). After each sync, rules over B2 metrics flag
+- **Scope:** Must · FE M · BE M · M1 (the shared parts are in A9). After each sync, rules over B2 metrics flag
   Sites behind expected pace; the Agent diagnoses with read tools and proposes Actions with Evidence, a rule-set
-  priority and an owner it picks. Instructions editable, memory from rejections, rules are our config.
+  priority and an owner it picks. Instructions editable, memory from rejections, rules are our config. It also
+  judges competing trials (D5) and drafts the PI talking points.
+- **Starting rules (#11):** P1 below 60% of expected randomizations to date, P2 below 90%; P2 activated 45 days with
+  no Subject screened; P2 no screening for 4 weeks; P3 competing trial within the radius.
 - **Frontend:** agent page with instructions (free text), triggers (when → then rules, e.g. "Site below 60% of
   expected enrollment → flag at risk and diagnose"), data sources it reads, memory ("learned" items, from
   dismissals or added context), last/next scan, Daily Brief, Key insights, Action items / open proposals.
@@ -605,13 +662,49 @@ one sponsor with several studies, the platform **sends the approved email itself
   `AGENT_INSTR`, `AGENT_RULES`, `AGENT_SOURCES`, `AGENT_MEMORY`, all `ITEMS` are pre-written.
 - **Source:** `views/EnrollmentView.tsx`, `ITEMS`, `AGENT_*` in `logic.ts`.
 
+### B5. Referral and pre-screening data (new, from the Scenarios)
+
+- **Scope:** Must · FE S · BE M · M1. The funnel top (referred, pre-screened, handed to the Site, pre-screen fails by
+  question) per Site and week, from the referral tool's file. Needed by EN3.
+- **Frontend:** upload on the Connectors page (our referral template); funnel stages above screening on B2 and the
+  Site page.
+- **Backend:** parses the file in memory, keeps only the allowlisted columns, writes counts (`referral.funnel`,
+  `referral.prescreen_fails`); a failed parse quarantines the cut-down file (see "Data ingestion"). No AI.
+  External: the Sponsor's referral tool, by export file.
+
+### B9. Site benchmarks (new, from the Scenarios)
+
+- **Scope:** Must · FE S · BE S · M1. Study median and peer percentiles per funnel stage and conversion, recomputed
+  after each sync; shown only over at least 5 Sites. Needed by EN3; the Newsletter's median Report uses it.
+- **Backend:** derived `metric.benchmark` snapshots from B2 and B5. No AI.
+
+### B11. Enrollment forecast and cost of delay (new, from the Scenarios)
+
+- **Scope:** Must · FE S · BE M · M1. Per-Site 8-week run-rate projected to the Site target; Sites not yet active
+  start at their planned activation at the study median rate; forecast LPI, delay against planned LPI and cost of
+  delay (delay × the Sponsor's daily cost). Needed by EN10.
+- **Frontend:** forecast LPI, delay and cost on the Study card and Enrollment page, with the method and as-of date;
+  daily cost of delay in Study settings.
+- **Backend:** derived `metric.forecast` snapshot per sync; reads `study.plan`, `site.plan`, `subject.milestones`,
+  `site`, `study.delay_cost`. No AI.
+
+### Below the cut: Could and Won't (decided in #11)
+
+- **B7 Action outcome tracking:** Could · FE S · BE M. The metric before and after each closed Action against its
+  expected impact (EN9); the MVP already stores expected impact and the outcome note.
+- **B6 eConsent status:** Won't. Consent dates come from the EDC; no eConsent source.
+- **B8 Data-quality and monitoring metrics:** Won't (OP4, OP5.1 to OP5.3).
+- **B10 Visit load and Site resources:** Won't (OP7).
+
 ---
 
 ## C. Act on it
 
 ### C1. Actions workspace
 
-- **v0:** Must · FE M · BE M. An Action is a task for one Sponsor-side person with a deadline; started by an Agent or by a Site Message; the proposing Agent picks the owner, anyone can change it; fields are priority (from the rule), one-line impact and Evidence, no cost impact, confidence or days saved; overdue is only flagged; the assignee approving an Email Action sends it. Three kinds (Email, Manual, In-app) and their statuses: see "Actions and the write-back flows"; Manual Actions close with an outcome note.
+- **Scope:** Must · FE M · BE M · M1. An Action is a task for one Sponsor-side person with a deadline; started by an Agent or by a Site Message; the proposing Agent picks the owner, anyone can change it; fields are priority (from the rule), one-line impact and Evidence, no cost impact, confidence or days saved; overdue is only flagged; the assignee approving an Email Action sends it. Three kinds (Email, Manual, In-app) and their statuses: see "Actions and the write-back flows"; Manual Actions close with an outcome note.
+- **Notifications (#11):** email to the owner on assignment, on a new P1 proposed for them and when their Action goes
+  overdue; in-app counts; no digest.
 - **Frontend:** inbox of proposed actions with priority (P1–P3), study, sites, kind, confidence, filters and
   status groups (open / approved / closed / rejected). Each action shows what was observed, why, sources,
   expected impact, days saved and **cost impact** (days × study daily cost), then either an email draft
@@ -629,7 +722,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C2. Budget agent (site invoices and payments)
 
-- **v0:** Won't.
+- **Scope:** Won't.
 - **Frontend:** agent page (instructions, triggers, data sources, memory, last/next run like B4), invoice status
   by site (paid to date, oldest unpaid age, enrollment risk, invoices with held lines and reasons), findings
   (over-billed visit time, lab billed with no EDC result, duplicate invoice), an Invoice Reconciliation Brief,
@@ -644,7 +737,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C3. Regulatory agent
 
-- **v0:** Won't.
+- **Scope:** Won't.
 - **Frontend:** agent page (instructions, triggers, memory), list of monitored websites with "Add a website to
   monitor", new alerts from FDA / EMA / ICH / MHRA / IRBs with type, date, impact (High/Medium/Low), affected
   studies, a plain-language summary and Prime's study-specific note; "draft an action" from an alert.
@@ -656,7 +749,9 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C4. Site engagements (newsletters and campaigns)
 
-- **v0:** Must · FE L · BE L. The core. Newsletters bundle Reports, Requests (acknowledge, short form) and reminders per Site; a Campaign is a scheduled set of Actions on the calendar, bulk-approved with per-Site overrides. Recipients are the CTMS Site Contacts plus a local overlay (add / remove, flagged "not in CTMS").
+- **Scope:** Must · FE L · BE L. The core. Newsletters bundle Reports, Requests (acknowledge, short form) and reminders per Site; a Campaign is a scheduled set of Actions on the calendar, bulk-approved with per-Site overrides. Recipients are the CTMS Site Contacts plus a local overlay (add / remove, flagged "not in CTMS"). M1.
+- **Reports (#11):** three kinds, each a personal block the Newsletter agent fills per Site: enrollment against plan
+  this month (own counts), each funnel stage against the study median (at least 5 Sites), open Requests and asks.
 - **Frontend:** dashboard with an upcoming campaign ("Approve the November newsletter?"), a calendar of sent,
   draft and planned campaigns, and a builder: templates (monthly newsletter, recruitment push, site spotlight,
   protocol notice, blank), drag-to-reorder blocks that are **shared** (same for all sites) or **personal**
@@ -672,8 +767,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C5. Engagement performance
 
-- **v0:** Must · FE M · BE M.
-- **Pilot rank:** Should. First needed by EG12 (rank 33), below the cut.
+- **Scope:** Should · FE M · BE M · M1. First needed by EG12 (rank 33), below the cut.
 - **Frontend:** per campaign (Analytics → Engagements): delivered, read and confirmed, responses, questions raised,
   actions requested and their status per site, site metric changes after the campaign, "what we learned", and
   "New patients at 30 days". Campaign list with filters.
@@ -684,7 +778,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C6. Site Responses and Site Messages (new in v0)
 
-- **v0:** Must · FE M · BE L.
+- **Scope:** Must · FE M · BE L · M1.
 - **Frontend:** per Site and per Campaign: Site Responses to each Request (acknowledged, form answers) and an
   inbox of Site Messages (free-text mail, linked to the thread it answers or unsolicited), each with Prime's
   classification (question, commitment, blocker, acknowledgement, out of office) and a "turn into Action" link.
@@ -696,11 +790,18 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### C7. Site engagement score (new in v0)
 
-- **v0:** Must · FE S · BE M.
-- **Pilot rank:** Should. First needed by EG1 (rank 26), below the cut.
+- **Scope:** Should · FE S · BE M · M1. First needed by EG1 (rank 26), below the cut. Engagement agent rule: a Site
+  that left its last 2 Requests unanswered or sent nothing for 30 days.
 - **Frontend:** a score per Site on the Sites list and Site page, trend over time, ranked with enrollment.
-- **Backend:** computed from Site Responses, Site Messages and Action outcomes (formula still open).
+- **Backend:** computed from Site Responses, Site Messages and Action outcomes (formula left in the fog, decided when
+  C7 is built).
   Writes score snapshots. No external system.
+
+### C8, C9 (decided in #11)
+
+- **C9 Leadership updates:** Could · FE S · BE S. A weekly update Prime drafts from stored run summaries and
+  metrics, as a download or an Email Action to a Sponsor person (OP2).
+- **C8 Campaign attribution to randomizations:** Won't (EG13).
 
 ---
 
@@ -708,7 +809,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D1. Ask Prime (task runner)
 
-- **v0:** Must · FE M · BE M. Q&A over our data; no write tasks; may draft Actions (see "Actions and the write-back flows").
+- **Scope:** Must · FE M · BE M · M1. Q&A over our data; no write tasks; may draft Actions (see "Actions and the write-back flows").
 - **Frontend:** a prompt bar plus suggested tasks (e.g. "Pull data from CTMS", "Check last data entry in the
   EDC", "Reconcile invoice against last purchase order", "Archive last IRB approval in the eTMF",
   "Prepare meeting brief for each site", and more in `PRIME_MORE`). Running a task shows the **plan** (steps
@@ -724,8 +825,8 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D2. Prime chat panel (per page)
 
-- **v0:** Must · FE M · BE S.
-- **Pilot rank:** Should. No Scenario needs it; Ask Prime (D1) and Site page briefs cover the pilot Scenarios.
+- **Scope:** Should · FE M · BE S · M1. No Scenario needs it; Ask Prime (D1) and Site page briefs cover the pilot
+  Scenarios.
 - **Frontend:** a side panel on every page with page-specific suggested tasks (`PAGE_CHAT`: Homepage, Actions,
   Enrollment, Budget, Regulatory, Patients Recruitment, Sites List, Engagements Performance, AI Studio,
   Audit Trail, Connectors), a free-text box, a structured answer card with a follow-up refinement, and a
@@ -736,7 +837,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D3. AI Studio (beta)
 
-- **v0:** Could · FE M · BE S.
+- **Scope:** Could · FE M · BE S · later.
 - **Frontend:** generate a slide summary or a short explainer-video script from study data for a chosen audience
   and length, with scenes and total duration; Prime chat offers "Draft an automation for weekly site check-ins".
 - **Backend:** reads study and site data; writes generated outputs. AI: content generation.
@@ -745,8 +846,8 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D4. Prime in Slack / Teams
 
-- **v0:** Teams Must, Slack Should · FE S · BE M / S. Same agent as Ask Prime; already runs on both in `primary_teams`.
-- **Pilot rank:** Should, Teams and Slack alike. No Scenario needs it; cheap to add since `primary_teams` already runs on both.
+- **Scope:** Should, Teams and Slack alike · FE S · BE M / S · M1. Same agent as Ask Prime; already runs on both in
+  `primary_teams`. No Scenario needs it; cheap to add. Carries the Action alerts once it is in.
 - **Frontend:** "Add to Teams / Slack" in the sidebar; once added, "Prime in Teams & Slack". Nothing else is designed.
 - **Backend:** a Slack app / Teams bot that relays questions to Prime and posts approvals or alerts.
   External: Slack and Microsoft Teams APIs. Simulated: a flag.
@@ -754,13 +855,15 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 ### D5. External signals: competing trials
 
-- **v0:** Could · FE S · BE M.
-- **Pilot rank:** Must, M1. Needed by EN6 (rank 4); waits on the "External signals" fog for sources and matching.
+- **Scope:** Must · FE S · BE M · M1. Needed by EN6 (rank 4). ClinicalTrials.gov only, weekly; a Site is flagged when
+  a recruiting trial with the same condition and an overlapping phase or eligibility has a location within 50 km (a
+  setting); the Enrollment agent judges the overlap and drafts an Email Action with talking points to the PI (#11).
 - **Frontend:** appears inside other features, not as its own page: the NASH-3301 study note and action about
   "2 new NASH studies recruiting the same F2–F3 patients" (ClinicalTrials.gov), and competing trials per site in
   Site detail (`BS_COMP`).
-- **Backend:** reads ClinicalTrials.gov (by condition, location, eligibility), matches to our sites;
-  writes signals that agents use. AI: overlap judgment. External: ClinicalTrials.gov API. Simulated: hard-coded.
+- **Backend:** reads ClinicalTrials.gov (by condition, location, eligibility) weekly into `trial.external` and
+  `trial.external_site`; the distance rule writes `trial.match` flags for the Enrollment agent. AI: overlap judgment
+  and talking points. External: ClinicalTrials.gov API. Simulated: hard-coded.
 - **Source:** `STUDIES[0].note`, `ITEMS` (`nash`), `BS_COMP`.
 
 ---
@@ -781,6 +884,7 @@ Facts the later tickets will need to decide on; not decisions.
   capability on its own (A4), and every AI feature depends on it.
 - **Derived numbers.** Funnel top (referred, pre-screened), expected per-site pace, forecast completion and
   cost-of-delay are computed from fixed ratios or constants today; real values need source data or a model.
+  *Decided: funnel top from the referral file (B5), pace from `site.plan`, run-rate forecast (B11).*
 - **Agents share one pattern.** Enrollment, Budget and Regulatory agents all have instructions, triggers,
   data sources, memory, last/next run and proposals into Actions. *Decided: one shared Agent runtime (A9),
   one Agent per Capability.*

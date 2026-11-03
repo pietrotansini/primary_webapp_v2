@@ -153,7 +153,10 @@ and committed as `docs/scenario-rank.md`, which "Import rank" loads back.
 - **EN4.1** needs lab result dates against the screening window. Those are outside the pseudonymized Subject fields
   set in `docs/adr/0001-store-pseudonymized-subject-records.md` (status dates and a screen-fail reason category
   only), so supporting it as shown means widening that list or diagnosing from reason counts alone.
-- **EN10** waits on the "Enrollment forecasting" fog on the map; the demo's forecast and cost of delay are fixed numbers.
+- **EN10** uses a per-Site 8-week run-rate forecast and the Sponsor's daily cost of delay (B11, decided in
+  "Finalize MVP feature backlog", #11); the demo's forecast and cost of delay are fixed numbers.
+- **EN6** reads ClinicalTrials.gov only: a 50 km distance and condition rule flags a Site, the Enrollment agent judges
+  the overlap and drafts talking points to the PI (D5, #11).
 - **OP3.1** cannot rank by days saved or cost impact: "How Prime generates insights" dropped those fields. Ranking is
   by priority and expected impact text.
 - **EG4, EG7** need Study documents (protocol, Site reference manual) as a source Prime can read: candidate A10.
