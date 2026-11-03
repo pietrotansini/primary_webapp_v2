@@ -267,11 +267,11 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B11 | Enrollment forecast and cost of delay | Must (was *candidate*) | | | M1 | 3 EN10 | Enrollment forecasting fog; cost of delay entered by the Sponsor (data inventory) |
 | D5 | Competing trials | Must (was Could) | S | M | M1 (was later) | 4 EN6 | External signals fog |
 | C1 | Actions workspace (Email, Manual and In-app Actions) | Must | M | M | M1 | 5 EG7 | |
-| A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | SES inbound region support for the pilot Sponsor's region |
+| A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | SES production access per new account (AWS answers within 96 h); inbound works in eu-central-1 and us-east-1 |
 | A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
 | C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | |
 | B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
-| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Cost and Bedrock quotas per Sponsor Stack |
+| A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | What polls the jobs table while the worker is at 0 tasks |
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | |
@@ -280,7 +280,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
 | A8 | M2 compliance pack (DPA, subprocessors, review pack) | Must | | | M2 | prerequisite | Non-feature gate: documents, no code |
-| A11 | Sponsor Stack provisioning (Terraform / OpenTofu) | Must (new) | | L | M1 | prerequisite | Cost and Bedrock quotas per Sponsor Stack |
+| A11 | Sponsor Stack provisioning (Terraform / OpenTofu) | Must (new) | | L | M1 | prerequisite | |
 | A12 | Release pipeline and fleet operations | Must (new) | | M | M1 (M2: prod access controls) | prerequisite | |
 | C7 | Site engagement score (Engagement agent) | Should (was Must) | S | M | M1 | 26 EG1 | Engagement score fog |
 | C5 | Campaign performance | Should (was Must) | M | M | M1 | 33 EG12 | |
@@ -470,8 +470,10 @@ one sponsor with several studies, the platform **sends the approved email itself
   records delivery, bounces, opens/acknowledgement clicks and replies against the action or campaign.
   External: Amazon SES in the Stack's account, out and in, on a per-Sponsor subdomain (DKIM, SPF); inbound Site
   Messages land in S3 and become a worker job ("Backend architecture and stack", #8). Where the Stack's region has
-  no SES receiving, inbound sits in the nearest supported region of the same geography. Simulated: sending is a
-  state change.
+  no SES receiving, inbound sits in the nearest supported region of the same geography; SES receives in 22 regions
+  incl. eu-central-1 and us-east-1 (not Zurich, Spain, Hyderabad, Malaysia, Calgary, UAE, GovCloud), per the research ("Cost and Bedrock quotas per Sponsor Stack", #35; `research/stack-cost-bedrock-quotas.md` on branch `research/stack-cost-bedrock-quotas`).
+  Every new account starts in the SES sandbox (verified recipients, 200 mails a day) until production access is
+  granted, so A11 requests it before M1 mails Site Contacts. Simulated: sending is a state change.
 - **Source:** `approve()` in `logic.ts`; Actions and Engagements.
 
 ### A7. Retention and purge (new, from the compliance bar)
@@ -506,6 +508,14 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **Decided ("Backend architecture and stack", #8):** Agent runs are jobs in the Stack's Postgres jobs table,
   enqueued in the same transaction as the sync commit or event that caused them and claimed by the Fargate worker
   (scales 0 to N on queue depth); schedules live in the DB. Parallelism per Stack is capped by its Bedrock quota.
+- **Researched (#35):** Bedrock's documented default for Sonnet 5.5 is 6M tokens/min per account and region (no
+  requests-per-minute quota; 700M tokens/day across models), but a new account's applied quota may be lower, so
+  Agent concurrency is a setting read from the account's real quota, with `max_tokens` kept tight (input +
+  `max_tokens` is reserved per call; cache reads don't count). About 3 runs in parallel at 200k tokens/min already
+  covers a night of ~25 runs. Calls go through `bedrock-runtime` with the `eu.`/`us.` profile (`bedrock-mantle`
+  has no geographic profile for Sonnet/Haiku 5.5). Expected AI spend for a pilot Sponsor's prod is ~$230/month
+  ($66–1,120) with prompt caching, ~$515 without. **Open:** a worker at 0 tasks leaves nothing to poll the jobs
+  table, fire schedules or publish queue depth; either `api` does it or one small worker stays on (+$62–83/month).
 
 ### A11. Sponsor Stack provisioning (new, from "Backend architecture and stack")
 
@@ -514,6 +524,12 @@ one sponsor with several studies, the platform **sends the approved email itself
   Identity Center roles, Bedrock quota requests), one creates a Stack in it (VPC, NAT with Elastic IP, ECS Fargate
   `web`, `api`, `worker`, load balancer, RDS, S3, Secrets Manager, SES domain and receiving, DNS), plus the Teams
   and Slack app registrations. Used first for Primary's Dev, then the pilot Sponsor's staging Stack.
+- **Researched (#35):** provisioning also files the SES production-access request (AWS answers within 96 h) and
+  Bedrock quota raises through a Service Quotas request template on the Organization (up to 10 per new account;
+  AWS publishes no lead time, large raises may wait for real traffic). Infrastructure per Stack, expected:
+  staging ~$198 EU / $174 US, prod ~$363 EU / $317 US a month (fixed floor ~$71 for NAT, IP and load balancer);
+  Primary's build account + Dev + Demo ~$355 EU. One Sponsor (staging + prod + AI) ~$880/month EU, range
+  $540–2,580. No free tier (shared once per Organization); Graviton Fargate ~20% cheaper; Dev and Demo can skip NAT.
 
 ### A12. Release pipeline and fleet operations (new, from "Backend architecture and stack")
 
