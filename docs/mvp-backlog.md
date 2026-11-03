@@ -237,7 +237,7 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
 | A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
-| A3 | Agentic connectors and data sync (Recipes) | Must | S | XL | M1 | prerequisite | Repair gates; pilot Sponsor's EDC and CTMS (dependency) |
+| A3 | Agentic connectors and data sync (Recipes) | Must | M (was S) | XL | M1 | prerequisite | Pilot Sponsor's EDC and CTMS (dependency) |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
 | A7 | Retention and purge | Must | S | S | M2 | prerequisite | |
@@ -301,7 +301,7 @@ one sponsor with several studies, the platform **sends the approved email itself
 - **Frontend:** none. The user is hard-coded as "Marie Curious, Clinical Operations" (Sidebar). The study team
   (`TEAM`: ClinOps, CRAs, Study Manager, Clinical Finance) appears as assignees in Actions and the team view.
   Needs a sign-in page, a user menu, and real people in every assignee picker.
-- **Sponsor admin:** one admin flag on the Sponsor team (Connectors, file uploads, Recipe review), decided in
+- **Sponsor admin:** one admin flag on the Sponsor team (Connectors, file uploads, Recipe approval), decided in
   "Data ingestion approach for the pilot" (#7); finer roles stay in the roles fog.
 - **Backend:** reads users, roles and study membership; writes sessions and team assignments.
   No AI. External: an email provider for magic links; an IdP only if a Sponsor asks for SSO. Simulated: everything.
@@ -329,9 +329,9 @@ one sponsor with several studies, the platform **sends the approved email itself
   versioned **Recipe** per platform, tenant and Study (fetch steps, a field-mapping allowlist per feed, checks),
   replayed on a schedule with no LLM. An agent learns the first Recipe and repairs a broken one; it only ever
   proposes a new Recipe version, never data. Fetch order: vendor API, then scheduled export file, then the UI.
-  Failures are classified: UI step failed → agent repairs the step (may go live without a person behind gates,
-  #29); mapped field gone → agent proposes, a person decides; contract broken → quarantined, store marked stale;
-  sign-in or MFA → a person. Primary approves Recipes; the Sponsor admin can review them. Every run, repair,
+  Failures are classified: UI step failed → agent repairs the step and proposes a new version (people approve
+  it, #29); mapped field gone → agent proposes, a person decides; contract broken → quarantined, store marked stale;
+  sign-in or MFA → a person. Every new version needs the Connector reviewer, then the Sponsor admin (#29). Every run, repair,
   dry-run and promotion is an audit event. See `docs/adr/0003-connectors-replay-recipes-agents-propose-versions.md`.
 - **Decided ("Fast decision models and the Obscura browser for the connector agent", #27):** Playwright with
   Chromium (not Obscura: no visible mode for MFA hand-off, no downloads, always presents as Chrome). Claude
@@ -344,6 +344,19 @@ one sponsor with several studies, the platform **sends the approved email itself
   at the source is required where it is cheap (Vault CTMS field-level security) and optional where it needs a
   study-build change (Rave, Clinical One, Castor; Vault EDC has none, so we read Retrieve Subjects only). The
   parse-time drop (ADR 0001) stays on every platform, with an alert on an unexpected field.
+- **Decided ("Gates for putting a repaired Recipe live without a person", #29):** in the pilot **no new Recipe
+  version goes live without people**; auto-promotion of locator-only repairs is fog, revisited with recorded
+  repairs. Fallback locators already in an approved Recipe run unattended (no new version), audited, and the
+  reviewer is told. A proposal reaches review only if its dry-run passes the checks and matches the last good
+  snapshot's shape with nothing lost (same feeds and fields, every Site and Subject still present, no monotonic
+  value going back); otherwise the agent retries once. Approval in order: Primary's **Connector reviewer** (rota,
+  1 business day), then the **Sponsor admin** (2 business days, reminder after 1); no timeout default, the feed
+  stays stale meanwhile. If an approved version's first sync fails: revert to the previous version, commit
+  nothing, mark stale, re-propose once, then a person. While stale, Agents run on the last good snapshot with
+  its date shown and recency rules suppressed for that feed. Audit events: sync run (version, times, rows per
+  feed, checks, snapshot id), failure class, repair attempt (tier, model and version, redacted input, proposed
+  diff), dry-run (checks and snapshot comparison), each approval or rejection, revert; never synced values.
+  FE S → M for the two-step approval with a readable diff for the Sponsor admin.
 - **Decided ("Data ingestion approach for the pilot" (#7)):** build UI Recipes first (runtime preference unchanged); M1 runs Recipes
   against the pilot Sponsor's sandboxes, dev work uses fixtures until then. Files arrive by upload only. Raw files
   are deleted after a good parse and kept 7 days (encrypted, audited) after a failed one; referral files are cut
@@ -351,7 +364,8 @@ one sponsor with several studies, the platform **sends the approved email itself
   now" for the Sponsor admin. See "Data ingestion (decided)".
 - **Frontend (pilot):** Connectors page, **admin-only** (Sponsor admin and Primary staff): each Recipe with source
   (API, export, UI), version, approver, last good sync, status (ok, stale, quarantined, needs a person, awaiting
-  approval) and its change history, so the Sponsor admin can review it; file upload per Study (CTMS export,
+  Primary approval, awaiting Sponsor approval) and its change history; a proposed version's diff in plain terms
+  (which step or field changed, dry-run result) with approve and reject for the Sponsor admin; file upload per Study (CTMS export,
   referral file, per-Site plan template); "sync now"; sign-in hand-off for MFA on UI Recipes; "request a
   connector". No vendor catalog and no credentials modal. ClinOps see freshness only: last sync in the TopBar,
   stale markers on figures, sync time on Evidence.

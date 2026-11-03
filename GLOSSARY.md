@@ -11,7 +11,7 @@ The biotech company that runs the Studies. Its clinical operations team are the 
 _Avoid_: customer, client, tenant
 
 **Sponsor admin**:
-A person on the Sponsor's team who looks after the platform's connections to the Sponsor's systems: reviews Recipes, grants the access they need and uploads the Sponsor's files. The rest of the clinical operations team only sees how fresh the data is.
+A person on the Sponsor's team who looks after the platform's connections to the Sponsor's systems: approves every new Recipe version after Primary's Connector reviewer, grants the access they need and uploads the Sponsor's files. The rest of the clinical operations team only sees how fresh the data is.
 _Avoid_: admin, IT, superuser
 
 **Study**:
@@ -91,8 +91,12 @@ A named worker behind Prime that carries out one Capability, such as the Enrollm
 _Avoid_: bot, assistant, worker
 
 **Recipe**:
-The crystallized form of a connector for one platform, tenant and Study: how to fetch the data (API calls, an export file or UI steps), which source fields map to which of our items (everything else is dropped), and the checks a sync must pass. It is versioned and replayed on a schedule without AI; an agent only proposes new versions, which Primary approves and the Sponsor admin can review.
+The crystallized form of a connector for one platform, tenant and Study: how to fetch the data (API calls, an export file or UI steps), which source fields map to which of our items (everything else is dropped), and the checks a sync must pass. It is versioned and replayed on a schedule without AI; an agent only proposes new versions, and in the pilot none goes live until Primary's Connector reviewer and then the Sponsor admin have approved it.
 _Avoid_: script, pipeline, recording, integration
+
+**Connector reviewer**:
+The person at Primary, on a rota, who approves or rejects each proposed Recipe version before it goes to the Sponsor admin.
+_Avoid_: approver, on-call, ops
 
 **Evidence**:
 The records and figures an Agent read to support a proposed Action, each with the system it came from and when it was last synced.
