@@ -9,5 +9,5 @@ For the real-data pilot (M2) we store a minimal pseudonymized record per Subject
 ## Consequences
 
 - Every read of Subject-level data, by a user or by Prime's tools, is written to the audit trail.
-- Subject data reaches Anthropic through Prime (zero data retention, disclosed subprocessor).
+- Subject data reaches a model through Prime only via Amazon Bedrock in the Sponsor's geography, inside the Sponsor's own Stack (amended by "Backend architecture and stack", #8, ADR 0005; it first went to the Anthropic API under zero data retention).
 - A DPA, a subprocessor list and Sponsor-set retention periods are required before real data arrives.
