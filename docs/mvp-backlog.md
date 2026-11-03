@@ -58,7 +58,9 @@ The Milestone column is provisional until "Finalize MVP feature backlog".
   permission changes, exports, and every read of Subject-level data (by users and by Prime).
 - **Prime** may read Subject-level records through its tools; each read is audited.
 - **Retention:** rolling periods set by the Sponsor at onboarding (no built-in defaults); until a period is set,
-  nothing is purged. At contract end, data is exported to the Sponsor and deleted.
+  nothing is purged. At contract end, data is exported to the Sponsor and deleted. Six Retention classes
+  ("High-level data model"): Subjects, Site mail, People, Study ops, Engagement, each with a Sponsor-set period, and
+  Audit, which has no rolling period and goes only at contract end, after the export.
 - **Sign-in:** email magic link; SSO optional.
 - **Security review pack:** filled standard questionnaire (CAIQ-lite / SIG Lite), data-flow and architecture
   note, DPA, subprocessor list; encryption in transit and at rest. SOC 2 / ISO 27001 and a pen test are deferred.
@@ -123,10 +125,11 @@ No write-back into EDC / CTMS / eTMF / payment systems, with no exceptions.
 - **Later:** closing the loop on an Action's outcome (metric before and after against its expected impact) is
   B7, in the fog; the MVP keeps the expected impact and the outcome note so that data exists.
 
-## Data inventory (tentative)
+## Data inventory and data model (decided)
 
 From [Data inventory per Scenario and a tentative data model](https://github.com/pietrotansini/primary_webapp_v2/issues/22);
-details in `docs/data-model.md`. It is the input to "Data ingestion approach for the pilot" and "High-level data model".
+details in `docs/data-model.md`, settled by "Data ingestion approach for the pilot" and
+[High-level data model](https://github.com/pietrotansini/primary_webapp_v2/issues/9).
 
 - **Sources for the pilot Scenarios:** EDC (Subjects and their milestone dates, screen-fail reasons), CTMS (Study,
   plans, Sites, Site Contacts, CRA assignments, monitoring visits, Site issues), our own platform (mail, Site
@@ -142,6 +145,14 @@ details in `docs/data-model.md`. It is the input to "Data ingestion approach for
   ICF version and screening lab dates.
 - **Model shape:** transient landing (raw files deleted after parsing), versioned synced records (Evidence and OP6
   point at a version), derived snapshots, and records born on the platform; `sponsor_id` on every row.
+- **Decided in "High-level data model" (ADR 0004):** **every** synced entity keeps one row per version, and each
+  sync run names the Recipe version it replayed. Agent runs, Prime conversations and Evidence hold pointers
+  (record, version), never copies, so Subject data lives only with Subjects. Recipes, Recipe versions and their
+  approvals live in the database. A Site is one hospital in one Study; there is no Institution entity in the MVP.
+  Site Contacts are per Site: an unsolicited Site Message from an address shared by several Sites gets a Site
+  proposed by the Triage agent, and a person confirms it. ADR 0001 stays as it is. **Site mail** carries a Site's
+  own counts at any size, peer figures only as a study median over at least 5 Sites, and never Subject IDs or CTMS
+  issue text.
 - **Sensitivity classes:** Public, Confidential, PII, Health (pseudonymized, read-audited), Free text (may hold
   patient information), Secret. Never ingested: patient identifiers, treatment arm and kit numbers.
 
@@ -231,12 +242,12 @@ Ordered by the first Scenario each feature serves in the pilot rank; prerequisit
 | C1 | Actions workspace (Email, Manual and In-app Actions) | Must | M | M | M1 | 5 EG7 | |
 | A6 | Outbound and inbound email | Must | S | L | M1 | 5 EG7 | Backend architecture and stack (provider choice) |
 | A10 | Study documents as a source Prime reads (protocol, Site reference manual) | Must (was *candidate*) | | | M1 | 5 EG7 | |
-| C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | Data model |
+| C4 | Campaigns and Newsletters (with the recipient overlay) | Must | L | L | M1 | 6 EG8 | |
 | B4 | Enrollment agent | Must | M | M | M1 | 8 EN2.1 | Enrollment forecasting fog |
 | A9 | Agent runtime: rules, runs, memory, Evidence | Must | M | L | M1 | 8 EN2.1 | Backend architecture and stack |
-| B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | Data model |
+| B3 | Site page (lite), with saved meeting briefs | Must | M | M | M1 | 9 EG5 | |
 | A1 | Sign-in (magic link) and Sponsor team | Must | S | M | M1 | prerequisite | Roles and permissions fog |
-| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | Data model (versioned synced records) |
+| A2 | Study, Site and Site Contact master data (from CTMS) | Must | S | M | M1 | prerequisite | |
 | A3 | Agentic connectors and data sync (Recipes) | Must | M (was S) | XL | M1 | prerequisite | Pilot Sponsor's EDC and CTMS (dependency) |
 | A4 | Prime (front and orchestrator) | Must | S | L | M1 | prerequisite | Backend architecture and stack |
 | A5 | Audit Trail (Part 11-shaped) | Must | S | M | M1 (M2: Subject-read audit) | prerequisite | |
@@ -311,6 +322,9 @@ one sponsor with several studies, the platform **sends the approved email itself
 
 - **v0:** Must · FE S · BE M. Sites and Site Contacts are synced read-only from the CTMS; the CTMS owns them.
   Newsletter recipients are a local overlay on top (C4).
+- **Decided ("High-level data model", #9):** every synced record is versioned (ADR 0004); one Site per Study with
+  the institution as a text attribute; Site Contacts per Site, so a PI on two Studies is two Site Contacts with one
+  email.
 - **Frontend:** study picker, study cards (phase, enrolled/target, start, planned and baseline LPI dates),
   site rows (name, location, code), site contacts (PI, coordinator, CRA), protocol versions and visit schedules,
   contract rates. All read-only in the UI.
@@ -422,10 +436,13 @@ one sponsor with several studies, the platform **sends the approved email itself
 ### A7. Retention and purge (new, from the compliance bar)
 
 - **v0:** Must · FE S · BE S · M2.
-- **Frontend:** a settings page where the Sponsor sets a retention period per data class (Site Messages and
-  Site Responses, Subject records, Sponsor users and Site Contacts); no defaults.
+- **Frontend:** a settings page where the Sponsor sets a retention period per Retention class: Subjects, Site mail
+  (Site Messages and Site Responses), People (Sponsor users and Site Contacts), Study ops, Engagement; no defaults.
+  Audit has no period ("High-level data model", #9).
 - **Backend:** a scheduled purge job applying the Sponsor's periods; nothing is purged for a class with no period
-  set; the audit trail records each purge. End-of-contract export and delete.
+  set; the audit trail records each purge. A purge deletes every version of a record; old versions age out from
+  their valid-to date; Evidence and audit events keep the pointer and show "purged on <date>" (ADR 0004).
+  End-of-contract export and delete, the only time the audit trail is deleted.
 
 ### A8. M2 compliance pack (new, from the compliance bar)
 
