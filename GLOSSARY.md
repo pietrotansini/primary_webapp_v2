@@ -98,6 +98,10 @@ _Avoid_: script, pipeline, recording, integration
 The person at Primary, on a rota, who approves or rejects each proposed Recipe version before it goes to the Sponsor admin.
 _Avoid_: approver, on-call, ops
 
+**Retention class**:
+A kind of data the Sponsor keeps for one rolling period, such as Subjects, Site mail or People. When the period runs out, the data is purged and only a note of what was there remains. The audit trail has no period: it is kept until the end of the contract.
+_Avoid_: data class, retention policy, bucket
+
 **Evidence**:
 The records and figures an Agent read to support a proposed Action, each with the system it came from and when it was last synced.
 _Avoid_: sources, proof, rationale

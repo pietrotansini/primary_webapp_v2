@@ -6,11 +6,11 @@ and a first sketch of the entities that hold it. Charted on the wayfinder map
 in "Data inventory per Scenario and a tentative data model"
 ([#22](https://github.com/pietrotansini/primary_webapp_v2/issues/22)). Terms follow `GLOSSARY.md`.
 
-**Status: tentative.** This is the starting point for
-"Data ingestion approach for the pilot" ([#7](https://github.com/pietrotansini/primary_webapp_v2/issues/7)), which
-decides how each input platform is read, and "High-level data model"
-([#9](https://github.com/pietrotansini/primary_webapp_v2/issues/9)), which refines the entities below. Nothing here
-is decided until one of those tickets says so. The ranking comes from `docs/scenario-rank.md`, the Scenario details
+**Status: decided for the pilot.** "Data ingestion approach for the pilot"
+([#7](https://github.com/pietrotansini/primary_webapp_v2/issues/7)) decided how each input platform is read, and
+"High-level data model" ([#9](https://github.com/pietrotansini/primary_webapp_v2/issues/9)) settled the entities,
+versioning, retention classes and what may reach Site mail (see "Decisions" at the end, and ADR 0004). Items below
+the pilot cut stay indicative until their Scenario is pulled above it. The ranking comes from `docs/scenario-rank.md`, the Scenario details
 from `docs/scenarios.md`.
 
 ## How sources were chosen
@@ -57,11 +57,12 @@ No item is ever written back to a source system.
 - `Derived`: recomputed from other items; snapshots kept per sync where Scenarios need trends.
 - `Transient`: read during a sync or a run and not kept.
 
-**Retention class:** the Sponsor sets a rolling period per class (A7). A7 names three classes: `Subjects`,
-`Site mail` (Site Messages and Site Responses) and `People` (Sponsor users and Site Contacts). This inventory
-proposes three more: `Study ops` (synced Study and Site data and our derived figures), `Engagement` (Actions,
-Campaigns, sent mail) and `Audit`. Whether `Audit` can be purged on a rolling period is open (Part 11 expects it to
-be kept as long as the records it covers).
+**Retention class:** six classes (decided in "High-level data model"): `Subjects`, `Site mail` (Site Messages
+and Site Responses), `People` (Sponsor users and Site Contacts), `Study ops` (synced Study and Site data and our
+derived figures), `Engagement` (Actions, Campaigns, sent mail, Agent runs, Prime conversations) and `Audit`. The
+Sponsor sets a rolling period for each of the first five (A7). `Audit` has no rolling period: Part 11 expects the
+trail to live as long as the records it covers, so it is deleted only at end of contract, after the end-of-contract
+export has handed it over.
 
 **Sensitivity:**
 
@@ -365,8 +366,11 @@ approach for the pilot").
 |---|---|---|---|---|---|---|
 | `sponsor` | name, settings, retention periods, region | all (tenancy) | Ours | App | Born | Confidential |
 | `user` | name, email, role, Studies, status | **EG7**, OP3.2, EG6 | Ours (A1) | App, LLM (names only), Mail (as sender) | Born · People | PII |
-| `connection` | system, vendor, mode (API, file), status, credentials reference | OP9.3 | Ours | App (status only) | Born; credentials in a secret store | Secret (credentials), Confidential |
-| `sync.run` | connection, start and end, status, records read and dropped, file checksum, errors | OP6, OP9.3 | Ours | App, LLM | Born · Audit | Confidential |
+| `connection` | system, vendor, mode (API, file, UI), status, credentials reference | OP9.3 | Ours | App (status only) | Born; credentials in a secret store | Secret (credentials), Confidential |
+| `recipe` | connection, platform, tenant, Study, live version, freshness | OP9.3 | Ours | App | Born · Study ops | Confidential |
+| `recipe.version` | fetch steps, field allowlist per feed, checks, fallback locators, proposed by (agent or person), dry-run result, status (proposed, approved, live, reverted, rejected) | OP9.3 | Ours | App | Born · Audit (every version and approval is audited) | Confidential |
+| `recipe.approval` | Recipe version, approver role (Connector reviewer, Sponsor admin), decision, reason, time | OP9.3 | Ours | App, Export | Born · Audit | Confidential, PII (approver) |
+| `sync.run` | Recipe version replayed, start and end, status, records read and dropped, file checksum, errors | OP6, OP9.3 | Ours | App, LLM | Born · Audit | Confidential |
 | `audit.event` | who, when, what, before and after, signature meaning | OP2, OP9.1, OP9.2; required by every Scenario | Ours | App, LLM (summaries), Export | Born · Audit, append-only | Mixed (may cite Subject IDs) |
 
 ---
@@ -375,15 +379,23 @@ approach for the pilot").
 
 ### Layers
 
+Decided in "High-level data model"; the versioning and pointer rules are ADR 0004.
+
+
 1. **Landing (Transient).** Files and API payloads as received. Parsed, filtered to the fields above, then deleted;
    only the manifest and a checksum stay on `sync.run`. Raw exports can't be kept because they hold Subject fields
    ADR 0001 says to drop at ingestion. A failed parse keeps the raw file 7 days, encrypted and readable only by
    Primary support with every access audited; referral files are cut down in memory and never land raw.
-2. **Synced records.** Our canonical copy of EDC, CTMS, CT.gov and file data, one row per version (valid from and
-   to, `sync.run` that wrote it). Evidence points at a version; OP6 diffs two syncs.
+2. **Synced records.** Our canonical copy of EDC, CTMS, CT.gov and file data. **Every** synced entity keeps one
+   row per version (valid from and to, `sync.run` that wrote it, which names the Recipe version replayed). Evidence
+   points at a version; OP6 diffs two syncs. A version that stopped being current ages out on its class's period,
+   counted from its valid-to date.
 3. **Derived.** Metrics, benchmarks, forecasts, flags, matches and Reports, recomputed after each sync and
    snapshotted.
-4. **Born.** Engagement, Agents and platform records: we are the system of record.
+4. **Born.** Engagement, Agents and platform records: we are the system of record. Agent runs and Prime
+   conversations store what they read as **pointers** (record type, ID, version), never copies, so Subject data
+   lives only in the Subjects layer. Their own text (run summaries, answers) may cite Subject IDs; it is kept under
+   `Engagement` and read-audited when it does.
 
 Every row carries `sponsor_id` (one Sponsor in the pilot, ready for more) and, where it applies, `study_id`.
 
@@ -394,7 +406,11 @@ erDiagram
     SPONSOR ||--o{ STUDY : runs
     SPONSOR ||--o{ USER : employs
     SPONSOR ||--o{ CONNECTION : has
-    CONNECTION ||--o{ SYNC_RUN : produces
+    CONNECTION ||--o{ RECIPE : runs
+    STUDY ||--o{ RECIPE : fed_by
+    RECIPE ||--o{ RECIPE_VERSION : versioned_as
+    RECIPE_VERSION ||--o{ RECIPE_APPROVAL : approved_by
+    RECIPE_VERSION ||--o{ SYNC_RUN : replayed_in
     STUDY ||--o{ STUDY_TEAM : staffed_by
     USER ||--o{ STUDY_TEAM : member_of
     STUDY ||--o{ PROTOCOL_VERSION : has
@@ -427,9 +443,11 @@ erDiagram
     SITE_MESSAGE ||--o{ ACTION : starts
 ```
 
-`SITE` belongs to one `STUDY`: an institution that recruits for two Studies is two Sites, as in the CTMS. Whether
-to add an `INSTITUTION` above it (to show one hospital across Studies) is left to the data model ticket.
-`AUDIT_EVENT` is left out of the diagram; it references any entity.
+`SITE` belongs to one `STUDY`: an institution that recruits for two Studies is two Sites, as in the CTMS, each with
+its own Newsletters, metrics and Site Contacts. The institution is a text attribute of `SITE`; there is no
+`INSTITUTION` entity in the MVP. A PI at both Sites is two `SITE_CONTACT` rows with the same email.
+`SYNC_RUN` writes every synced version (not drawn: each synced entity points at it). `AUDIT_EVENT` and `EVIDENCE`
+references to any record are left out of the diagram.
 
 ### Stored vs derived
 
@@ -445,7 +463,7 @@ to add an `INSTITUTION` above it (to show one hospital across Studies) is left t
 
 ---
 
-## Open questions
+## Decisions
 
 Answered by **Data ingestion approach for the pilot** (#7):
 
@@ -457,14 +475,26 @@ Answered by **Data ingestion approach for the pilot** (#7):
 - **Geocoding:** the CT.gov location geoPoint, else OpenStreetMap Nominatim, else a Sponsor pin.
 - **NCT number:** CTMS or a CT.gov search proposes it; the Sponsor confirms once.
 
-For **High-level data model**:
+Answered by **High-level data model** (#9):
 
-- **ADR 0001 widening:** discontinuation reason category (EN4.7), ICF version (EG3), screening lab dates (EN4.1).
-  None is needed above the cut, so ADR 0001 can stay as it is for now.
-- **Retention classes:** adopt `Study ops`, `Engagement` and `Audit` next to A7's three? Can `Audit` be purged on
-  a rolling period?
-- **Versioned synced records:** confirm one row per version for every synced entity (needed by Evidence and OP6).
-- **Site vs Institution:** one Site per Study, or an Institution above it.
-- **What reaches `Mail`:** Subject IDs never, figures per Site only. Can a Report show counts below a minimum
-  (such as 1 screen fail) to the Site that produced them?
-- **Free text from the CTMS** (`site.issue` descriptions): keep them, or keep the category only?
+- **Versioned synced records:** every synced entity (Study, Site, plans, Site Contacts, visits, issues, Subjects,
+  referral counts, CT.gov trials) keeps one row per version (ADR 0004).
+- **Site vs Institution:** one Site per Study, as in the CTMS; institution is a text attribute, no entity in the MVP.
+- **Site Contacts:** per Site, as in the CTMS. A Site Message replying to our mail is matched to its Site by thread;
+  an unsolicited one from an address that belongs to several Sites gets a Site proposed by the Triage agent, which
+  a person confirms before any Action starts.
+- **Retention classes:** six (`Subjects`, `Site mail`, `People`, `Study ops`, `Engagement`, `Audit`); the Sponsor
+  sets a rolling period for the first five; `Audit` is kept until end of contract and deleted only after the
+  end-of-contract export.
+- **Purge:** deletes every version of a record. Evidence and audit events keep the pointer (record type, ID,
+  version) and show "purged on <date>" (ADR 0004).
+- **Agent runs and Prime conversations:** tool reads stored as pointers, not payloads (ADR 0004).
+- **Recipes in the database:** Connection → Recipe → Recipe version → approvals; each sync run names the Recipe
+  version it replayed (ADR 0003).
+- **ADR 0001 widening:** not now. Discontinuation reason (EN4.7), ICF version (EG3) and screening lab dates (EN4.1)
+  each amend ADR 0001 when their Scenario is pulled above the cut.
+- **What reaches `Mail`:** Subject IDs never; figures per Site only. A Site sees its own counts at any size (it
+  already knows its Subjects); peer figures appear only as a study median over at least 5 Sites, never another
+  single Site's number.
+- **Free text from the CTMS:** `site.issue` descriptions are kept as `Free text` (Triage flags possible patient
+  information); they reach `App` and `LLM`, never `Mail`.
