@@ -127,7 +127,7 @@ at screening), so the funnel compares stage counts per period, not cohorts.
 | Randomization history per Site (run rate) | `subject.milestones` | EDC |
 | Activation dates, and planned dates for Sites not yet active | `site` | CTMS |
 | Daily cost of a delay | `study.delay_cost` | Sponsor (settings); CRO cost lines (File) later |
-| Forecast LPI, delay, cost of delay | `metric.forecast` | Derived (method: "Enrollment forecasting" fog) |
+| Forecast LPI, delay, cost of delay | `metric.forecast` | Derived (8-week run-rate per Site, #11) |
 
 Output: `App`, `LLM`, `Export`.
 
@@ -184,7 +184,7 @@ Output: `App`, `Mail`.
 | Data | Item | Source |
 |---|---|---|
 | Randomizations per Site over time | `subject.milestones` → `metric.site` | EDC |
-| Expected pace per Site | `site.plan` | CTMS, else Sponsor file (pace method: forecasting fog) |
+| Expected pace per Site | `site.plan` | CTMS, else Sponsor file, else a straight line (#11) |
 | Activation date | `site` | CTMS |
 | Rules, severities, flags | `rule`, `flag` | Ours (config), Derived |
 | Diagnosis, proposed Action, Evidence, memory | `agent.run`, `evidence`, `action`, `agent.memory` | Ours |
